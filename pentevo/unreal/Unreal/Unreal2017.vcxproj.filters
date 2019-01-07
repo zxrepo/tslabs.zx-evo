@@ -678,6 +678,7 @@
     <ClInclude Include="debugger\debug.h">
       <Filter>debugger</Filter>
     </ClInclude>
+    <ClInclude Include="debugger\consts.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

@@ -12,6 +12,7 @@
 #include "gui.h"
 #include "util.h"
 #include "leds.h"
+#include "consts.h"
 
 void out(unsigned port, u8 val);
 
@@ -108,9 +109,9 @@ void mon_fill()
 // Выход из монитора
 void mon_emul()
 {
-	for (unsigned i = 0; i < t_cpu_mgr::get_count(); i++)
+	for (unsigned i = 0; i < TCpuMgr::get_count(); i++)
 	{
-		auto& cpu = t_cpu_mgr::get_cpu(i);
+		auto& cpu = TCpuMgr::get_cpu(i);
 		cpu.dbgchk = isbrk(cpu);
 		cpu.dbgbreak = 0;
 	}
@@ -142,7 +143,7 @@ void mon_scray() { mon_scr(2); }
 
 void mon_exitsub()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	cpu.dbgchk = 1;
 	cpu.dbgbreak = 0;
 	dbgbreak = 0;
@@ -172,7 +173,7 @@ void mon_aux()
 {
 	switch (activedbg)
 	{
-	case wndbanks:
+	case dbgwnd::banks:
 		showbank = true;
 		break;
 
@@ -184,13 +185,13 @@ void mon_aux()
 
 void mon_nxt()
 {
-	activedbg = (activedbg == wndmem) ? wndbanks : dbgwnd(int(activedbg) - 1);
+	activedbg = (activedbg == dbgwnd::mem) ? dbgwnd::banks : dbgwnd(int(activedbg) - 1);
 	mon_aux();
 }
 
 void mon_prv()
 {
-	activedbg = (activedbg == wndbanks) ? wndmem : dbgwnd(int(activedbg) + 1);
+	activedbg = (activedbg == dbgwnd::banks) ? dbgwnd::mem : dbgwnd(int(activedbg) + 1);
 	mon_aux();
 }
 
@@ -214,7 +215,7 @@ constexpr auto tool_y = 12;
 
 void mon_tool()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	static u8 unref = 0xCF;
 	if (ripper) {
 		OPENFILENAME ofn = { 0 };
@@ -272,10 +273,10 @@ void mon_scrshot() { show_scrshot++; if (show_scrshot == 3) show_scrshot = 0; }
 void mon_switch_cpu()
 {
 	//    CpuMgr.CopyToPrev();
-	auto& cpu0 = t_cpu_mgr::get_cpu();
+	auto& cpu0 = TCpuMgr::get_cpu();
 	cpu0.dbgbreak = 0;
-	t_cpu_mgr::switch_cpu();
-	auto& cpu1 = t_cpu_mgr::get_cpu();
+	TCpuMgr::switch_cpu();
+	auto& cpu1 = TCpuMgr::get_cpu();
 
 	if (cpu1.trace_curs == UINT_MAX)
 		cpu1.trace_curs = cpu1.pc;

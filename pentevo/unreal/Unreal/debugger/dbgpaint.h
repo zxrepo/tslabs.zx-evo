@@ -1,16 +1,17 @@
 #pragma once
 
 #include "debug.h"
+#include "consts.h"
 
-struct menuitem final
+struct MenuItem final
 {
    const char *text;
    enum flags_t { disabled = 1, left = 2, right = 4, center = 8 } flags;
 };
 
-struct menudef final
+struct MenuDef final
 {
-   menuitem *items;
+   MenuItem *items;
    unsigned n_items;
    const char *title;
    unsigned pos;
@@ -29,5 +30,5 @@ unsigned inputhex(unsigned x, unsigned y, unsigned sz, bool hex);
 unsigned input2(unsigned x, unsigned y, unsigned val);
 unsigned input4(unsigned x, unsigned y, unsigned val);
 void debugflip();
-char handle_menu(menudef *menu);
+char handle_menu(MenuDef *menu);
 void frame(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 attr);

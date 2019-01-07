@@ -9,23 +9,23 @@
 #include "config.h"
 #include "util.h"
 
-mon_labels_t mon_labels;
+MonLabelsT mon_labels;
 
-void mon_labels_t::start_watching_labels()
+void MonLabelsT::start_watching_labels()
 {
 	char dir[FILENAME_MAX] = "\0";
 	strncat(dir, userfile, strrchr(userfile, '\\') - userfile);
 	h_new_user_labels = FindFirstChangeNotification(dir, 0, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE);
 }
 
-void mon_labels_t::stop_watching_labels()
+void MonLabelsT::stop_watching_labels()
 {
 	if (!h_new_user_labels || h_new_user_labels == INVALID_HANDLE_VALUE) return;
 	CloseHandle(h_new_user_labels);
 	h_new_user_labels = INVALID_HANDLE_VALUE;
 }
 
-void mon_labels_t::notify_user_labels()
+void MonLabelsT::notify_user_labels()
 {
 	if (h_new_user_labels == INVALID_HANDLE_VALUE) return;
 	// load labels at first check
@@ -37,24 +37,24 @@ void mon_labels_t::notify_user_labels()
 	FindNextChangeNotification(h_new_user_labels);
 }
 
-mon_labels_t::mon_labels_t()
+MonLabelsT::MonLabelsT()
 {
 	pairs = nullptr, names = nullptr, n_pairs = names_size = 0;
 	h_new_user_labels = nullptr;
 }
 
-mon_labels_t::~mon_labels_t()
+MonLabelsT::~MonLabelsT()
 {
 	free(pairs), free(names);
 	stop_watching_labels();
 }
 
-void mon_labels_t::clear_ram()
+void MonLabelsT::clear_ram()
 {
 	clear(RAM_BASE_M, MAX_RAM_PAGES * PAGE);
 }
 
-unsigned mon_labels_t::add_name(char *name)
+unsigned MonLabelsT::add_name(char *name)
 {
 	const auto len = strlen(name) + 1;
 	const auto new_size = names_size + len;
@@ -66,7 +66,7 @@ unsigned mon_labels_t::add_name(char *name)
 	return result;
 }
 
-void mon_labels_t::clear(const u8 *start, unsigned size)
+void MonLabelsT::clear(const u8 *start, unsigned size)
 {
 	unsigned dst = 0;
 	for (unsigned src = 0; src < n_pairs; src++)
@@ -82,26 +82,26 @@ void mon_labels_t::clear(const u8 *start, unsigned size)
 
 int __cdecl labels_sort_func(const void *e1, const void *e2)
 {
-	const auto *a = reinterpret_cast<const mon_label*>(e1);
-	const auto *b = reinterpret_cast<const mon_label*>(e2);
+	const auto *a = reinterpret_cast<const MonLabel*>(e1);
+	const auto *b = reinterpret_cast<const MonLabel*>(e2);
 	return a->address - b->address;
 }
 
-void mon_labels_t::sort() const
+void MonLabelsT::sort() const
 {
-	qsort(pairs, n_pairs, sizeof(mon_label), labels_sort_func);
+	qsort(pairs, n_pairs, sizeof(MonLabel), labels_sort_func);
 }
 
-void mon_labels_t::add(u8 *address, char *name)
+void MonLabelsT::add(u8 *address, char *name)
 {
 	if (n_pairs >= align_by(n_pairs, 1024))
-		pairs = static_cast<mon_label*>(realloc(pairs, sizeof(mon_label) * align_by(n_pairs + 1, 1024)));
+		pairs = static_cast<MonLabel*>(realloc(pairs, sizeof(MonLabel) * align_by(n_pairs + 1, 1024)));
 	pairs[n_pairs].address = address;
 	pairs[n_pairs].name_offs = add_name(name);
 	n_pairs++;
 }
 
-char *mon_labels_t::find(const u8 *address) const
+char *MonLabelsT::find(const u8 *address) const
 {
 	unsigned l = 0, r = n_pairs;
 	for (;;) {
@@ -112,7 +112,7 @@ char *mon_labels_t::find(const u8 *address) const
 	}
 }
 
-unsigned mon_labels_t::load(char *filename, u8 *base, unsigned size)
+unsigned MonLabelsT::load(char *filename, u8 *base, unsigned size)
 {
 	const auto in = fopen(filename, "rt");
 	if (!in)
@@ -178,7 +178,7 @@ unsigned mon_labels_t::load(char *filename, u8 *base, unsigned size)
 	return loaded;
 }
 
-unsigned mon_labels_t::alasm_chain_len(const u8 *page, unsigned offset, unsigned &end)
+unsigned MonLabelsT::alasm_chain_len(const u8 *page, unsigned offset, unsigned &end)
 {
 	unsigned count = 0;
 	for (;;) {
@@ -200,7 +200,7 @@ unsigned mon_labels_t::alasm_chain_len(const u8 *page, unsigned offset, unsigned
 	}
 }
 
-void mon_labels_t::find_alasm()
+void MonLabelsT::find_alasm()
 {
 	static const char label_chars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@$_";
 	memset(alasm_valid_char, 0, sizeof alasm_valid_char);
@@ -221,7 +221,7 @@ void mon_labels_t::find_alasm()
 }
 
 
-void mon_labels_t::import_alasm(unsigned offset, char *caption)
+void MonLabelsT::import_alasm(unsigned offset, char *caption)
 {
 	clear_ram();
 	auto base = RAM_BASE_M + offset;
@@ -247,7 +247,7 @@ void mon_labels_t::import_alasm(unsigned offset, char *caption)
 	sort();
 }
 
-void mon_labels_t::find_xas()
+void MonLabelsT::find_xas()
 {
 	char look_page_6 = 0;
 	const char *err = "XAS labels not found in bank #06";
@@ -260,7 +260,7 @@ void mon_labels_t::find_xas()
 	else sprintf(xas_errstr, "XAS labels from bank #%02X", xaspage);
 }
 
-void mon_labels_t::import_xas()
+void MonLabelsT::import_xas()
 {
 	if (!xaspage) return;
 	const unsigned base = (xaspage == 0x46) ? 0x0E * PAGE : unsigned(xaspage)*PAGE;
@@ -291,50 +291,50 @@ void mon_labels_t::import_xas()
 	MessageBox(GetForegroundWindow(), ln, xas_errstr, MB_OK | MB_ICONINFORMATION);
 }
 
-void mon_labels_t::import_menu()
+void MonLabelsT::import_menu()
 {
 	find_xas();
 	find_alasm();
 
-	menuitem items[max_alasm_ltables + 4]{};
+	MenuItem items[max_alasm_ltables + 4]{};
 	unsigned menuptr = 0;
 
 	items[menuptr].text = xas_errstr;
-	items[menuptr].flags = xaspage ? menuitem::flags_t(0) : menuitem::disabled;
+	items[menuptr].flags = xaspage ? MenuItem::flags_t(0) : MenuItem::disabled;
 	menuptr++;
 
 	char alasm_text[max_alasm_ltables][64];
 	if (!alasm_found_tables) {
 		sprintf(alasm_text[0], "No ALASM labels in whole %dK memory", conf.ramsize);
 		items[menuptr].text = alasm_text[0];
-		items[menuptr].flags = menuitem::disabled;
+		items[menuptr].flags = MenuItem::disabled;
 		menuptr++;
 	}
 	else {
 		for (unsigned i = 0; i < alasm_found_tables; i++) {
 			sprintf(alasm_text[i], "%d ALASM labels in page %d, offset #%04X", alasm_count[i], alasm_offset[i] / PAGE, (alasm_offset[i] & 0x3FFF) | 0xC000);
 			items[menuptr].text = alasm_text[i];
-			items[menuptr].flags = menuitem::flags_t(0);
+			items[menuptr].flags = MenuItem::flags_t(0);
 			menuptr++;
 		}
 	}
 
 	items[menuptr].text = nil;
-	items[menuptr].flags = menuitem::disabled;
+	items[menuptr].flags = MenuItem::disabled;
 	menuptr++;
 
 	items[menuptr].text = "CANCEL";
-	items[menuptr].flags = menuitem::center;
+	items[menuptr].flags = MenuItem::center;
 	menuptr++;
 
-	menudef menu = { items, menuptr, "import labels", 0 };
+	MenuDef menu = { items, menuptr, "import labels", 0 };
 	if (!handle_menu(&menu)) return;
 	if (menu.pos == 0) import_xas();
 	menu.pos--;
 	if (unsigned(menu.pos) < alasm_found_tables) import_alasm(alasm_offset[menu.pos], alasm_text[menu.pos]);
 }
 
-void mon_labels_t::import_file()
+void MonLabelsT::import_file()
 {
 	const auto ff = fopen(userfile, "rb"); if (!ff) return; fclose(ff);
 	const unsigned count = load(userfile, RAM_BASE_M, conf.ramsize * 1024);
@@ -431,8 +431,8 @@ INT_PTR CALLBACK LabelsDlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		sscanf(zz, "%X", &address);
 
 		void push_pos(); push_pos();
-		t_cpu_mgr::get_cpu().trace_curs = t_cpu_mgr::get_cpu().trace_top = address;
-		activedbg = wndtrace;
+		TCpuMgr::get_cpu().trace_curs = TCpuMgr::get_cpu().trace_top = address;
+		activedbg = dbgwnd::trace;
 
 		EndDialog(dlg, 1);
 		return 1;

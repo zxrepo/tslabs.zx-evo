@@ -5,7 +5,7 @@
 #include "dbgpaint.h"
 #include "dbgreg.h"
 
-const t_reg_layout regs_layout[] =
+const TRegLayout regs_layout[] =
 {
    { offsetof(TZ80State, a)     ,  8,  3, 0, 0, 1, 0, 2 }, //  0 a
    { offsetof(TZ80State, f)     ,  8,  5, 0, 0, 5, 1, 2 }, //  1 f
@@ -37,12 +37,12 @@ const t_reg_layout regs_layout[] =
 
 const size_t regs_layout_count = _countof(regs_layout);
 
-void showregs()
+void show_regs()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
-	const auto& prevcpu = t_cpu_mgr::prev_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
+	const auto& prevcpu = TCpuMgr::prev_cpu();
 
-	const u8 atr = (activedbg == wndregs) ? w_sel : w_norm;
+	const u8 atr = (activedbg == dbgwnd::regs) ? w_sel : w_norm;
 	char line[40];
 	tprint(regs_x, regs_y + 0, "af:**** af'**** sp:**** ir: ****", atr);
 	tprint(regs_x, regs_y + 1, "bc:**** bc'**** pc:**** t:******", atr);
@@ -51,7 +51,7 @@ void showregs()
 
 	if (cpu.halted && !cpu.iff1)
 	{
-		tprint(regs_x + 26, regs_y + 1, "DiHALT", (activedbg == wndregs) ? w_dihalt1 : w_dihalt2);
+		tprint(regs_x + 26, regs_y + 1, "DiHALT", (activedbg == dbgwnd::regs) ? w_dihalt1 : w_dihalt2);
 	}
 	else
 	{
@@ -65,7 +65,7 @@ void showregs()
 		const unsigned mask = (1 << regs_layout[i].width) - 1;
 		const unsigned val = mask & *reinterpret_cast<unsigned*>(PCHAR(static_cast<TZ80State*>(&cpu)) + regs_layout[i].offs);
 		auto atr1 = atr;
-		if (activedbg == wndregs && i == regs_curs)
+		if (activedbg == dbgwnd::regs && i == regs_curs)
 			atr1 = w_curs;
 		if (val != (mask & *reinterpret_cast<unsigned*>(PCHAR(&prevcpu) + regs_layout[i].offs)))
 			atr1 |= 0x08;
@@ -86,7 +86,7 @@ void showregs()
 	{
 		unsigned ln;
 		auto atr1 = atr;
-		if (activedbg == wndregs && regs_curs == unsigned(q + 18)) atr1 = w_curs;
+		if (activedbg == dbgwnd::regs && regs_curs == unsigned(q + 18)) atr1 = w_curs;
 		ln = flg[q + ((cpu.af & (0x80 >> q)) ? 0 : 8)];
 		if ((0x80 >> q)&(cpu.f^prevcpu.f)) atr1 |= 0x08;
 		tprint(regs_x + 24 + q, regs_y + 3, reinterpret_cast<char*>(&ln), atr1);
@@ -101,7 +101,7 @@ void rup() { regs_curs = regs_layout[regs_curs].up; }
 void rdown() { regs_curs = regs_layout[regs_curs].dn; }
 void renter()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	debugscr();
 	debugflip();
 	const auto sz = regs_layout[regs_curs].width;
@@ -155,19 +155,19 @@ void rCF() { regs_curs = 25; renter(); }
 
 void rcodejump()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	if (regs_layout[regs_curs].width == 16)
 	{
-		activedbg = wndtrace;
+		activedbg = dbgwnd::trace;
 		cpu.trace_curs = cpu.trace_top = *reinterpret_cast<u16*>(PCHAR(static_cast<TZ80State*>(&cpu)) + regs_layout[regs_curs].offs);
 	}
 }
 void rdatajump()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	if (regs_layout[regs_curs].width == 16)
 	{
-		activedbg = wndmem;
+		activedbg = dbgwnd::mem;
 		editor = ed_mem;
 		cpu.mem_curs = *reinterpret_cast<u16*>(PCHAR(static_cast<TZ80State*>(&cpu)) + regs_layout[regs_curs].offs);
 	}

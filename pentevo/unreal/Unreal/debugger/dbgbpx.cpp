@@ -19,7 +19,7 @@ enum
 
 typedef bool(__cdecl *func_t)();
 
-char BpxFileName[FILENAME_MAX];
+char bpx_file_name[FILENAME_MAX];
 
 unsigned calcerr;
 unsigned calc(const Z80 *cpu, unsigned *script)
@@ -157,7 +157,7 @@ u8 toscript(char *script, unsigned *dst)
 	   { WORD2('|','|'), 10 }
 	};
 
-	const Z80 &cpu = t_cpu_mgr::get_cpu();
+	const Z80 &cpu = TCpuMgr::get_cpu();
 
 	DECL_REGS(regs, cpu);
 
@@ -270,7 +270,7 @@ void script2text(char *dst, unsigned *src)
 	char stack[64][0x200], tmp[0x200];
 	unsigned sp = 0, r;
 
-	const auto& cpu = t_cpu_mgr::get_cpu();
+	const auto& cpu = TCpuMgr::get_cpu();
 
 	DECL_REGS(regs, cpu);
 
@@ -296,7 +296,7 @@ void script2text(char *dst, unsigned *src)
 				if (*src == unsigned(regs[i].ptr))
 					break;
 			}
-			*reinterpret_cast<unsigned*>(&(stack[sp++])) = regs[i].reg;
+			*reinterpret_cast<unsigned*>(&stack[sp++]) = regs[i].reg;
 			src++;
 			continue;
 		}
@@ -316,7 +316,7 @@ void script2text(char *dst, unsigned *src)
 		strcpy(dst, stack[sp - 1]);
 }
 
-void SetBpxButtons(HWND dlg)
+void set_bpx_buttons(HWND dlg)
 {
 	auto focus = -1, text = 0, box = 0;
 	const auto focused_wnd = GetFocus();
@@ -361,18 +361,18 @@ void SetBpxButtons(HWND dlg)
 	if (defid) SendMessage(dlg, DM_SETDEFID, defid, 0);
 }
 
-void ClearListBox(HWND box)
+void clear_list_box(HWND box)
 {
 	while (SendMessage(box, LB_GETCOUNT, 0, 0))
 		SendMessage(box, LB_DELETESTRING, 0, 0);
 }
 
-void FillCondBox(HWND dlg, unsigned cursor)
+void fill_cond_box(HWND dlg, unsigned cursor)
 {
 	const auto box = GetDlgItem(dlg, IDC_CBP);
-	ClearListBox(box);
+	clear_list_box(box);
 
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	for (unsigned i = 0; i < cpu.cbpn; i++)
 	{
 		char tmp[0x200]; script2text(tmp, cpu.cbp[i]);
@@ -381,13 +381,13 @@ void FillCondBox(HWND dlg, unsigned cursor)
 	SendMessage(box, LB_SETCURSEL, cursor, 0);
 }
 
-void FillBpxBox(HWND dlg, unsigned address)
+void fill_bpx_box(HWND dlg, unsigned address)
 {
 	const auto box = GetDlgItem(dlg, IDC_BPX);
-	ClearListBox(box);
+	clear_list_box(box);
 	unsigned selection = 0;
 
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	unsigned end; //Alone Coder 0.36.7
 	for (unsigned start = 0; start < 0x10000; )
 	{
@@ -407,13 +407,13 @@ void FillBpxBox(HWND dlg, unsigned address)
 	if (selection) SendMessage(box, LB_SETCURSEL, selection - 1, 0);
 }
 
-void FillMemBox(HWND dlg, unsigned address)
+void fill_mem_box(HWND dlg, unsigned address)
 {
 	const auto box = GetDlgItem(dlg, IDC_MEM);
-	ClearListBox(box);
+	clear_list_box(box);
 	unsigned selection = 0;
 
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	unsigned end; //Alone Coder 0.36.7
 	for (unsigned start = 0; start < 0x10000; ) {
 		const u8 mask = MEMBITS_BPR | MEMBITS_BPW;
@@ -433,7 +433,7 @@ void FillMemBox(HWND dlg, unsigned address)
 	if (selection) SendMessage(box, LB_SETCURSEL, selection - 1, 0);
 }
 
-char MoveBpxFromBoxToEdit(HWND dlg, unsigned box, unsigned edit)
+char move_bpx_from_box_to_edit(HWND dlg, unsigned box, unsigned edit)
 {
 	const auto hBox = GetDlgItem(dlg, box);
 	const unsigned max = SendDlgItemMessage(dlg, box, LB_GETCOUNT, 0, 0);
@@ -456,9 +456,9 @@ char MoveBpxFromBoxToEdit(HWND dlg, unsigned box, unsigned edit)
 	return 1;
 }
 
-struct mem_range { unsigned start, end; };
+struct MemRange { unsigned start, end; };
 
-int GetMemRamge(char *str, mem_range &range)
+int get_mem_ramge(char *str, MemRange &range)
 {
 	while (*str == ' ') str++;
 	for (range.start = 0; ishex(*str); str++)
@@ -480,13 +480,13 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (msg == WM_INITDIALOG)
 	{
-		FillCondBox(dlg, 0);
-		FillBpxBox(dlg, 0);
-		FillMemBox(dlg, 0);
+		fill_cond_box(dlg, 0);
+		fill_bpx_box(dlg, 0);
+		fill_mem_box(dlg, 0);
 		SetFocus(GetDlgItem(dlg, IDE_CBP));
 
 	set_buttons_and_return:
-		SetBpxButtons(dlg);
+		set_bpx_buttons(dlg);
 		return 1;
 	}
 	if (msg == WM_SYSCOMMAND && (wp & 0xFFF0) == SC_CLOSE) EndDialog(dlg, 0);
@@ -505,22 +505,22 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 	if (code == LBN_DBLCLK)
 	{
-		if (id == IDC_CBP && MoveBpxFromBoxToEdit(dlg, IDC_CBP, IDE_CBP)) goto del_cond;
-		if (id == IDC_BPX && MoveBpxFromBoxToEdit(dlg, IDC_BPX, IDE_BPX)) goto del_bpx;
-		if (id == IDC_MEM && MoveBpxFromBoxToEdit(dlg, IDC_MEM, IDE_MEM)) goto del_mem;
+		if (id == IDC_CBP && move_bpx_from_box_to_edit(dlg, IDC_CBP, IDE_CBP)) goto del_cond;
+		if (id == IDC_BPX && move_bpx_from_box_to_edit(dlg, IDC_BPX, IDE_BPX)) goto del_bpx;
+		if (id == IDC_MEM && move_bpx_from_box_to_edit(dlg, IDC_MEM, IDE_MEM)) goto del_mem;
 	}
 
 	if (id == IDB_CBP_ADD)
 	{
 		SendDlgItemMessage(dlg, IDE_CBP, WM_GETTEXT, sizeof tmp, LPARAM(tmp));
 		SetFocus(GetDlgItem(dlg, IDE_CBP));
-		auto& cpu = t_cpu_mgr::get_cpu();
+		auto& cpu = TCpuMgr::get_cpu();
 		if (!toscript(tmp, cpu.cbp[cpu.cbpn])) {
 			MessageBox(dlg, "Error in expression\nPlease do RTFM", 0, MB_ICONERROR);
 			return 1;
 		}
 		SendDlgItemMessage(dlg, IDE_CBP, WM_SETTEXT, 0, 0);
-		FillCondBox(dlg, cpu.cbpn++);
+		fill_cond_box(dlg, cpu.cbpn++);
 		cpu.dbgchk = isbrk(cpu);
 		goto set_buttons_and_return;
 	}
@@ -529,18 +529,18 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		SendDlgItemMessage(dlg, IDE_BPX, WM_GETTEXT, sizeof tmp, LPARAM(tmp));
 		SetFocus(GetDlgItem(dlg, IDE_BPX));
-		mem_range range{};
-		if (!GetMemRamge(tmp, range))
+		MemRange range{};
+		if (!get_mem_ramge(tmp, range))
 		{
 			MessageBox(dlg, "Invalid breakpoint address / range", nullptr, MB_ICONERROR);
 			return 1;
 		}
 
-		auto& cpu = t_cpu_mgr::get_cpu();
+		auto& cpu = TCpuMgr::get_cpu();
 		for (auto i = range.start; i <= range.end; i++)
 			cpu.membits[i] |= MEMBITS_BPX;
 		SendDlgItemMessage(dlg, IDE_BPX, WM_SETTEXT, 0, 0);
-		FillBpxBox(dlg, range.start);
+		fill_bpx_box(dlg, range.start);
 		cpu.dbgchk = isbrk(cpu);
 		goto set_buttons_and_return;
 	}
@@ -549,8 +549,8 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		SendDlgItemMessage(dlg, IDE_MEM, WM_GETTEXT, sizeof tmp, LPARAM(tmp));
 		SetFocus(GetDlgItem(dlg, IDE_MEM));
-		mem_range range{};
-		if (!GetMemRamge(tmp, range))
+		MemRange range{};
+		if (!get_mem_ramge(tmp, range))
 		{
 			MessageBox(dlg, "Invalid watch address / range", 0, MB_ICONERROR);
 			return 1;
@@ -560,13 +560,13 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		if (IsDlgButtonChecked(dlg, IDC_MEM_R) == BST_CHECKED) mask |= MEMBITS_BPR;
 		if (IsDlgButtonChecked(dlg, IDC_MEM_W) == BST_CHECKED) mask |= MEMBITS_BPW;
 
-		auto& cpu = t_cpu_mgr::get_cpu();
+		auto& cpu = TCpuMgr::get_cpu();
 		for (auto i = range.start; i <= range.end; i++)
 			cpu.membits[i] |= mask;
 		SendDlgItemMessage(dlg, IDE_MEM, WM_SETTEXT, 0, 0);
 		CheckDlgButton(dlg, IDC_MEM_R, BST_UNCHECKED);
 		CheckDlgButton(dlg, IDC_MEM_W, BST_UNCHECKED);
-		FillMemBox(dlg, range.start);
+		fill_mem_box(dlg, range.start);
 		cpu.dbgchk = isbrk(cpu);
 		goto set_buttons_and_return;
 	}
@@ -576,7 +576,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 	del_cond:
 		SetFocus(GetDlgItem(dlg, IDE_CBP));
 		unsigned cur = SendDlgItemMessage(dlg, IDC_CBP, LB_GETCURSEL, 0, 0);
-		auto& cpu = t_cpu_mgr::get_cpu();
+		auto& cpu = TCpuMgr::get_cpu();
 		if (cur >= cpu.cbpn)
 			return 0;
 		cpu.cbpn--;
@@ -584,7 +584,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 		if (cur && cur == cpu.cbpn)
 			cur--;
-		FillCondBox(dlg, cur);
+		fill_cond_box(dlg, cur);
 		cpu.dbgchk = isbrk(cpu);
 		goto set_buttons_and_return;
 	}
@@ -603,10 +603,10 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		sscanf(tmp, "%X", &start);
 		if (tmp[4] == '-') sscanf(tmp + 5, "%X", &end); else end = start;
 
-		auto& cpu = t_cpu_mgr::get_cpu();
+		auto& cpu = TCpuMgr::get_cpu();
 		for (auto i = start; i <= end; i++)
 			cpu.membits[i] &= mask;
-		if (id == IDC_BPX) FillBpxBox(dlg, 0); else FillMemBox(dlg, 0);
+		if (id == IDC_BPX) fill_bpx_box(dlg, 0); else fill_mem_box(dlg, 0);
 		if (cur && cur == max)
 			cur--;
 		SendDlgItemMessage(dlg, id, LB_SETCURSEL, cur, 0);
@@ -677,13 +677,13 @@ void mon_watchdialog()
 
 void init_bpx(char* file)
 {
-	addpath(BpxFileName, file ? file : "bpx.ini");
-	const auto bpx_file = fopen(BpxFileName, "rt");
+	addpath(bpx_file_name, file ? file : "bpx.ini");
+	const auto bpx_file = fopen(bpx_file_name, "rt");
 	if (!bpx_file) return;
 	if (file)
 	{
 		color(CONSCLR_DEFAULT); printf("bpx: ");
-		color(CONSCLR_INFO);    printf("%s\n", BpxFileName);
+		color(CONSCLR_INFO);    printf("%s\n", bpx_file_name);
 	}
 
 	char line[100];
@@ -694,7 +694,7 @@ void init_bpx(char* file)
 		char type = -1;
 		auto start = -1, end = -1, cpu_idx = -1;
 		const auto n = sscanf(line, "%c%1d=%i-%i", &type, &cpu_idx, &start, &end);
-		if (n < 3 || cpu_idx < 0 || cpu_idx >= int(t_cpu_mgr::get_count()) || start < 0)
+		if (n < 3 || cpu_idx < 0 || cpu_idx >= int(TCpuMgr::get_count()) || start < 0)
 			continue;
 
 		if (end < 0)
@@ -709,7 +709,7 @@ void init_bpx(char* file)
 		default: continue;
 		}
 
-		auto& cpu = t_cpu_mgr::get_cpu(cpu_idx);
+		auto& cpu = TCpuMgr::get_cpu(cpu_idx);
 		for (auto i = unsigned(start); i <= unsigned(end); i++)
 			cpu.membits[i] |= mask;
 		cpu.dbgchk = isbrk(cpu);
@@ -719,12 +719,12 @@ void init_bpx(char* file)
 
 void done_bpx()
 {
-	const auto bpx_file = fopen(BpxFileName, "wt");
+	const auto bpx_file = fopen(bpx_file_name, "wt");
 	if (!bpx_file) return;
 
-	for (unsigned cpu_idx = 0; cpu_idx < t_cpu_mgr::get_count(); cpu_idx++)
+	for (unsigned cpu_idx = 0; cpu_idx < TCpuMgr::get_count(); cpu_idx++)
 	{
-		auto& cpu = t_cpu_mgr::get_cpu(cpu_idx);
+		auto& cpu = TCpuMgr::get_cpu(cpu_idx);
 
 		for (auto i = 0; i < 3; i++)
 		{

@@ -23,6 +23,9 @@ static HMENU debug_menu;
 
 u8 trace_labels;
 
+GDIBMP debug_gdibmp = { { { sizeof(BITMAPINFOHEADER), DEBUG_WND_WIDTH, -DEBUG_WND_HEIGHT, 1, 8, BI_RGB, 0 } } };
+u8 debug_gdibuf[DBG_GDIBUFSZ];
+
 unsigned show_scrshot;
 unsigned user_watches[3] = { 0x4000, 0x8000, 0xC000 };
 
@@ -38,7 +41,7 @@ u8 dgb_extval; // extended memory port like 1FFD or DFFD
 
 unsigned ripper; // ripper mode (none/read/write)
 
-dbgwnd activedbg = wndtrace;
+dbgwnd activedbg = dbgwnd::trace;
 
 void show_tsconf();
 void init_tsconf();
@@ -49,36 +52,30 @@ void debugscr()
 	memset(txtscr + sizeof txtscr / 2, backgr, sizeof txtscr / 2);
 	nfr = 0;
 
-	showregs();
-	showtrace();
-	showmem();
-	showwatch();
-	showstack();
+	show_regs();
+	show_trace();
+	show_mem();
+	show_watch();
+	show_stack();
 	show_ay();
-	showbanks();
-	showports();
-	showdos();
+	show_banks();
+	show_ports();
+	show_dos();
 	show_tsconf();
 
-#if 1
 	show_time();
-#else
-	tprint(copy_x, copy_y, "\x1A", 0x9C);
-	tprint(copy_x + 1, copy_y, "UnrealSpeccy " VERS_STRING, 0x9E);
-	tprint(copy_x + 20, copy_y, "by SMT", 0x9D);
-	tprint(copy_x + 26, copy_y, "\x1B", 0x9C);
-	frame(copy_x, copy_y, 27, 1, 0x0A);
-#endif
 }
 
 void handle_mouse()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
+
 	const unsigned mx = ((mousepos & 0xFFFF) - temp.gx) / 8;
 	const unsigned my = (((mousepos >> 16) & 0x7FFF) - temp.gy) / 16;
+
 	if (my >= trace_y && my < trace_y + trace_size && mx >= trace_x && mx < trace_x + 32)
 	{
-		needclr++; activedbg = wndtrace;
+		needclr++; activedbg = dbgwnd::trace;
 		cpu.trace_curs = cpu.trpc[my - trace_y];
 		if (mx - trace_x < cs[1][0]) cpu.trace_mode = 0;
 		else if (mx - trace_x < cs[2][0]) cpu.trace_mode = 1;
@@ -86,7 +83,7 @@ void handle_mouse()
 	}
 	if (my >= mem_y && my < mem_y + mem_size && mx >= mem_x && mx < mem_x + 37)
 	{
-		needclr++; activedbg = wndmem;
+		needclr++; activedbg = dbgwnd::mem;
 		const unsigned dx = mx - mem_x;
 		if (mem_dump)
 		{
@@ -103,7 +100,7 @@ void handle_mouse()
 		}
 	}
 	if (mx >= regs_x && my >= regs_y && mx < regs_x + 32 && my < regs_y + 4) {
-		needclr++; activedbg = wndregs;
+		needclr++; activedbg = dbgwnd::regs;
 		for (unsigned i = 0; i < regs_layout_count; i++) {
 			unsigned delta = 1;
 			if (regs_layout[i].width == 16) delta = 4;
@@ -112,7 +109,7 @@ void handle_mouse()
 		}
 	}
 	if (mx >= banks_x && my >= banks_y + 1 && mx < banks_x + 7 && my < banks_y + 5) {
-		needclr++; activedbg = wndbanks;
+		needclr++; activedbg = dbgwnd::banks;
 		selbank = my - (banks_y + 1); showbank = true;
 	}
 	else showbank = false;
@@ -120,7 +117,7 @@ void handle_mouse()
 	if (mousepos & 0x80000000) { // right-click
 		enum { idm_bpx = 1, idm_some_other };
 		const auto menu = CreatePopupMenu();
-		if (activedbg == wndtrace) {
+		if (activedbg == dbgwnd::trace) {
 			AppendMenu(menu, MF_STRING, idm_bpx, "breakpoint");
 		}
 		else {
@@ -141,9 +138,9 @@ void handle_mouse()
 	mousepos = 0;
 }
 
-void t_cpu_mgr::copy_to_prev()
+void TCpuMgr::copy_to_prev()
 {
-	for (unsigned i = 0; i < Count; i++)
+	for (unsigned i = 0; i < count; i++)
 		prev_cpus_[i] = TZ80State(*cpus_[i]);
 }
 
@@ -156,13 +153,13 @@ void debug(Z80 *cpu)
 	needclr = 1;
 	dbgbreak = 1;
 	flip();
-	const unsigned int oldrflags = temp.rflags;
+	const auto oldrflags = temp.rflags;
 	temp.rflags = RF_MONITOR;
 	//set_video();
 	ShowWindow(debug_wnd, SW_SHOW);
 
-	t_cpu_mgr::set_current_cpu(cpu->GetIdx());
-	auto prevcpu = &t_cpu_mgr::prev_cpu(cpu->GetIdx());
+	TCpuMgr::set_current_cpu(cpu->GetIdx());
+	auto prevcpu = &TCpuMgr::prev_cpu(cpu->GetIdx());
 	cpu->trace_curs = cpu->pc;
 	cpu->dbg_stopsp = cpu->dbg_stophere = -1;
 	cpu->dbg_loop_r1 = 0, cpu->dbg_loop_r2 = 0xFFFF;
@@ -173,8 +170,8 @@ void debug(Z80 *cpu)
 		if (trace_labels)
 			mon_labels.notify_user_labels();
 
-		cpu = &t_cpu_mgr::get_cpu();
-		prevcpu = &t_cpu_mgr::prev_cpu(cpu->GetIdx());
+		cpu = &TCpuMgr::get_cpu();
+		prevcpu = &TCpuMgr::prev_cpu(cpu->GetIdx());
 	repaint_dbg:
 		cpu->trace_top &= 0xFFFF;
 		cpu->trace_curs &= 0xFFFF;
@@ -202,35 +199,35 @@ void debug(Z80 *cpu)
 				goto leave_dbg;	/* ugh... too much gotos... */
 			Sleep(20);
 		}
-		if (activedbg == wndregs && dispatch_more(ac_regs) > 0)
+		if (activedbg == dbgwnd::regs && dispatch_more(ac_regs) > 0)
 		{
 			continue;
 		}
-		if (activedbg == wndtrace && dispatch_more(ac_trace) > 0)
+		if (activedbg == dbgwnd::trace && dispatch_more(ac_trace) > 0)
 		{
 			continue;
 		}
-		if (activedbg == wndmem && dispatch_more(ac_mem) > 0)
+		if (activedbg == dbgwnd::mem && dispatch_more(ac_mem) > 0)
 		{
 			continue;
 		}
-		if (activedbg == wndbanks && dispatch_more(ac_banks) > 0)
+		if (activedbg == dbgwnd::banks && dispatch_more(ac_banks) > 0)
 		{
 			continue;
 		}
-		if (activedbg == wndregs && dispatch_regs())
+		if (activedbg == dbgwnd::regs && dispatch_regs())
 		{
 			continue;
 		}
-		if (activedbg == wndtrace && dispatch_trace())
+		if (activedbg == dbgwnd::trace && dispatch_trace())
 		{
 			continue;
 		}
-		if (activedbg == wndmem && dispatch_mem())
+		if (activedbg == dbgwnd::mem && dispatch_mem())
 		{
 			continue;
 		}
-		if (activedbg == wndbanks && dispatch_banks())
+		if (activedbg == dbgwnd::banks && dispatch_banks())
 		{
 			continue;
 		}

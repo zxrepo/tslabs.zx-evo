@@ -105,7 +105,7 @@ char query_file_addr(const FILEDLG_MODE mode)
 
 void write_mem()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	auto ptr = memdata;
 	for (auto a1 = addr; a1 <= end; a1++)
 		*cpu.DirectMem(a1) = *ptr++;
@@ -113,7 +113,7 @@ void write_mem()
 
 void read_mem()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	auto ptr = memdata;
 	for (auto a1 = addr; a1 <= end; a1++)
 		*ptr++ = cpu.DirectRm(a1);
@@ -269,12 +269,12 @@ char wr_trdos_file()
 
 void mon_load()
 {
-	static menuitem items[] =
-	{ { "from binary file", menuitem::left },
-	  { "from TR-DOS file", menuitem::left },
-	  { "from TR-DOS sectors", menuitem::left },
-	  { "from raw sectors of FDD image", menuitem::left } };
-	static menudef menu = { items, 3, "Load data to memory...", 0 };
+	static MenuItem items[] =
+	{ { "from binary file", MenuItem::left },
+	  { "from TR-DOS file", MenuItem::left },
+	  { "from TR-DOS sectors", MenuItem::left },
+	  { "from raw sectors of FDD image", MenuItem::left } };
+	static MenuDef menu = { items, 3, "Load data to memory...", 0 };
 
 	if (!handle_menu(&menu))
 		return;
@@ -321,13 +321,13 @@ void mon_load()
 
 void mon_save()
 {
-	static menuitem items[] =
-	{ { "to binary file", menuitem::left },
-	  { "to TR-DOS file", menuitem::left },
-	  { "to TR-DOS sectors", menuitem::left },
-	  { "as Z80 disassembly", menuitem::left },
-	  { "to raw sectors of FDD image", menuitem::flags_t(menuitem::left | menuitem::disabled) } };
-	static menudef menu = { items, 4, "Save data from memory...", 0 };
+	static MenuItem items[] =
+	{ { "to binary file", MenuItem::left },
+	  { "to TR-DOS file", MenuItem::left },
+	  { "to TR-DOS sectors", MenuItem::left },
+	  { "as Z80 disassembly", MenuItem::left },
+	  { "to raw sectors of FDD image", MenuItem::flags_t(MenuItem::left | MenuItem::disabled) } };
+	static MenuDef menu = { items, 4, "Save data from memory...", 0 };
 
 	if (!handle_menu(&menu)) return;
 

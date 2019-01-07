@@ -5,7 +5,6 @@
 #include "vars.h"
 
 auto tsconf_regs = dbg_canvas(81, 0);
-//auto tsconf_devs = dbg_canvas(81, 0);
 
 const char *d_vmode[] = { "ZX  ", "16c ", "256c", "text" };
 const char *d_rres[] = { "256x192", "320x200", "320x240", "360x288" };

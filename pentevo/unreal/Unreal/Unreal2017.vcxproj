@@ -161,6 +161,7 @@
     <ClInclude Include="cheat.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="daa_tabs.h" />
+    <ClInclude Include="debugger\consts.h" />
     <ClInclude Include="debugger\dbgbpx.h" />
     <ClInclude Include="debugger\dbgcmd.h" />
     <ClInclude Include="debugger\dbglabls.h" />

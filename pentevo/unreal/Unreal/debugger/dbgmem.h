@@ -34,5 +34,5 @@ void mde();
 void mhl();
 void mix();
 void miy();
-void showmem();
+void show_mem();
 char dispatch_mem();

@@ -1020,9 +1020,9 @@ void apply_memory()
    temp.rom_mask = (romsize-1) >> 4;
    set_banks();
 
-   for (unsigned i = 0; i < t_cpu_mgr::get_count(); i++)
+   for (unsigned i = 0; i < TCpuMgr::get_count(); i++)
    {
-       Z80 &cpu = t_cpu_mgr::get_cpu(i);
+       Z80 &cpu = TCpuMgr::get_cpu(i);
        cpu.dbgchk = isbrk(cpu);
    }
 }

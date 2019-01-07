@@ -8,6 +8,7 @@
 #include "dxrframe.h"
 #include "font16.h"
 #include "util.h"
+#include "consts.h"
 
 u8 txtscr[debug_text_width * debug_text_height * 2];
 
@@ -234,17 +235,17 @@ unsigned input2(unsigned x, unsigned y, unsigned val)
 }
 
 
-void format_item(char *dst, unsigned width, const char *text, menuitem::flags_t flags)
+void format_item(char *dst, unsigned width, const char *text, MenuItem::flags_t flags)
 {
 	memset(dst, ' ', width + 2); dst[width + 2] = 0;
 	unsigned sz = strlen(text), left = 0;
 	if (sz > width) sz = width;
-	if (flags & menuitem::right) left = width - sz;
-	else if (flags & menuitem::center) left = (width - sz) / 2;
+	if (flags & MenuItem::right) left = width - sz;
+	else if (flags & MenuItem::center) left = (width - sz) / 2;
 	memcpy(dst + left + 1, text, sz);
 }
 
-void paint_items(menudef *menu)
+void paint_items(MenuDef *menu)
 {
 	char ln[debug_text_width]; unsigned item;
 
@@ -258,33 +259,33 @@ void paint_items(menudef *menu)
 	const unsigned menu_x = (debug_text_width - menu_dx) / 2;
 	const unsigned menu_y = (debug_text_height - menu_dy) / 2;
 	filledframe(menu_x, menu_y, menu_dx, menu_dy, menu_inside);
-	format_item(ln, maxlen, menu->title, menuitem::center);
+	format_item(ln, maxlen, menu->title, MenuItem::center);
 	tprint(menu_x, menu_y, ln, menu_header);
 
 	for (/*unsigned*/ item = 0; item < menu->n_items; item++) {
 		u8 color = menu_item;
-		if (menu->items[item].flags & menuitem::disabled) color = menu_item_dis;
+		if (menu->items[item].flags & MenuItem::disabled) color = menu_item_dis;
 		else if (item == menu->pos) color = menu_cursor;
 		format_item(ln, maxlen, menu->items[item].text, menu->items[item].flags);
 		tprint(menu_x, menu_y + item + 2, ln, color);
 	}
 }
 
-void menu_move(menudef *menu, int dir)
+void menu_move(MenuDef *menu, int dir)
 {
 	const unsigned start = menu->pos;
 	for (;;) {
 		menu->pos += dir;
 		if (int(menu->pos) == -1) menu->pos = menu->n_items - 1;
 		if (menu->pos >= menu->n_items) menu->pos = 0;
-		if (!(menu->items[menu->pos].flags & menuitem::disabled)) return;
+		if (!(menu->items[menu->pos].flags & MenuItem::disabled)) return;
 		if (menu->pos == start) return;
 	}
 }
 
-char handle_menu(menudef *menu)
+char handle_menu(MenuDef *menu)
 {
-	if (menu->items[menu->pos].flags & menuitem::disabled)
+	if (menu->items[menu->pos].flags & MenuItem::disabled)
 		menu_move(menu, 1);
 	for (;;)
 	{

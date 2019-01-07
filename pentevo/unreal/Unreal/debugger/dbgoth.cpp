@@ -6,6 +6,7 @@
 #include "dbgpaint.h"
 #include "util.h"
 #include "memory.h" // for benter()
+#include "consts.h"
 
 namespace z80dbg
 {
@@ -17,7 +18,7 @@ namespace z80dbg
 
 void show_time()
 {
-	Z80 &cpu = t_cpu_mgr::get_cpu();
+	Z80 &cpu = TCpuMgr::get_cpu();
 	tprint(time_x, time_y, "time delta:", w_otheroff);
 	char text[32];
 	sprintf(text, "%14I64d", cpu.Delta());
@@ -34,7 +35,7 @@ static void wtline(const char *name, unsigned ptr, unsigned y)
 	else
 		sprintf(line, "%04X ", ptr);
 
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	for (unsigned dx = 0; dx < 8; dx++)
 	{
 		const auto c = cpu.DirectRm(ptr++);
@@ -47,7 +48,7 @@ static void wtline(const char *name, unsigned ptr, unsigned y)
 	tprint(wat_x, wat_y + y, line, w_other);
 }
 
-void showwatch()
+void show_watch()
 {
 	if (show_scrshot)
 	{
@@ -57,7 +58,7 @@ void showwatch()
 	}
 	else
 	{
-		auto& cpu = t_cpu_mgr::get_cpu();
+		auto& cpu = TCpuMgr::get_cpu();
 		wtline("PC", cpu.pc, 0);
 		wtline("SP", cpu.sp, 1);
 		wtline("BC", cpu.bc, 2);
@@ -92,9 +93,9 @@ void mon_setwatch()
 	}
 }
 
-void showstack()
+void show_stack()
 {
-	Z80 &cpu = t_cpu_mgr::get_cpu();
+	Z80 &cpu = TCpuMgr::get_cpu();
 	for (unsigned i = 0; i < stack_size; i++)
 	{
 		char xx[10]; //-2:1234
@@ -170,17 +171,17 @@ void __cdecl BankNames(int i, char *name)
 }
 
 unsigned int selbank = 0, showbank = false;
-void showbanks()
+void show_banks()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	for (unsigned i = 0; i < 4; i++)
 	{
 		char ln[64]; sprintf(ln, "%d:", i);
-		char attr = ((selbank == i) && (showbank) ? (w_otheroff & 0xF) | w_curs : w_otheroff | (activedbg == wndbanks ? 0x10 : 0));
+		char attr = ((selbank == i) && (showbank) ? (w_otheroff & 0xF) | w_curs : w_otheroff | (activedbg == dbgwnd::banks ? 0x10 : 0));
 		tprint(banks_x, banks_y + i + 1, ln, attr);
 		strcpy(ln, "?????");
 		cpu.BankNames(i, ln);
-		attr = ((selbank == i) && (showbank) ? w_curs : ((bankr[i] != bankw[i] ? w_bankro : w_bank) | (activedbg == wndbanks ? 0x10 : 0)));
+		attr = ((selbank == i) && (showbank) ? w_curs : ((bankr[i] != bankw[i] ? w_bankro : w_bank) | (activedbg == dbgwnd::banks ? 0x10 : 0)));
 		tprint(banks_x + 2, banks_y + i + 1, ln, attr);
 	}
 	frame(banks_x, banks_y + 1, 7, 4, FRAME);
@@ -195,7 +196,7 @@ void bup() {
 }
 // врезка побырому
 void benter() {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	debugscr();
 	debugflip();
 
@@ -224,7 +225,7 @@ int dispatch_banks() {
 	return 0;
 }
 
-void showports()
+void show_ports()
 {
 	char ln[64];
 	sprintf(ln, "  FE:%02X", comp.pFE);
@@ -273,7 +274,7 @@ void showports()
 	tprint(ports_x, ports_y - 1, "ports", w_title);
 }
 
-void showdos()
+void show_dos()
 {
 	//    CD:802E
 	//    STAT:24

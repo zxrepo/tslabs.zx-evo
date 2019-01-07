@@ -7,6 +7,7 @@
 #include "dbgmem.h"
 #include "wd93crc.h"
 #include "util.h"
+#include "consts.h"
 
 TRKCACHE edited_track;
 
@@ -23,7 +24,7 @@ void findsector(unsigned addr)
 
 u8 *editam(unsigned addr)
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	if (editor == ed_cmos)
 		return &cmos[addr & (sizeof(cmos) - 1)];
@@ -90,9 +91,9 @@ unsigned memadr(unsigned addr)
 	return addr;
 }
 
-void showmem()
+void show_mem()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	char     line[debug_text_width]; unsigned ii;
 	unsigned cursor_found = 0;
 
@@ -112,7 +113,7 @@ void showmem()
 				sprintf(line, (ii == mem_size / 2) ?
 					"          track not found            " :
 					"                                     ");
-				tprint(mem_x, mem_y + ii, line, (activedbg == wndmem) ? w_sel : w_norm);
+				tprint(mem_x, mem_y + ii, line, (activedbg == dbgwnd::mem) ? w_sel : w_norm);
 			}
 			mem_max = 0;
 			goto title;
@@ -163,9 +164,9 @@ redraw:
 		}
 
 		line[37] = 0;
-		tprint(mem_x, mem_y + ii, line, (activedbg == wndmem) ? w_sel : w_norm);
+		tprint(mem_x, mem_y + ii, line, (activedbg == dbgwnd::mem) ? w_sel : w_norm);
 		cursor_found |= cx;
-		if (cx && (activedbg == wndmem))
+		if (cx && (activedbg == dbgwnd::mem))
 			txtscr[(mem_y + ii) * debug_text_width + mem_x + cx + debug_text_width * debug_text_height] = w_curs;
 	}
 
@@ -203,28 +204,28 @@ title:
 /* ------------------------------------------------------------- */
 void mstl()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	if (mem_max)
 		cpu.mem_curs &= ~(mem_sz - 1), cpu.mem_second = 0;
 }
 void mendl()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	if (mem_max)
 		cpu.mem_curs |= (mem_sz - 1), cpu.mem_second = 1;
 }
 void mup()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	if (mem_max)
 		cpu.mem_curs -= mem_sz;
 }
 void mpgdn()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	if (mem_max)
 		cpu.mem_curs += mem_size * mem_sz, cpu.mem_top += mem_size * mem_sz;
@@ -232,7 +233,7 @@ void mpgdn()
 
 void mpgup()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	if (mem_max)
 		cpu.mem_curs -= mem_size * mem_sz, cpu.mem_top -= mem_size * mem_sz;
@@ -243,7 +244,7 @@ void mdown()
 	if (!mem_max)
 		return;
 
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	cpu.mem_curs += mem_sz;
 	if (((cpu.mem_curs - cpu.mem_top + mem_max) % mem_max) / mem_sz >= mem_size)
 		cpu.mem_top += mem_sz;
@@ -254,7 +255,7 @@ void mleft()
 	if (!mem_max)
 		return;
 
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	if (mem_ascii || !cpu.mem_second)
 		cpu.mem_curs--;
 	if (!mem_ascii)
@@ -263,7 +264,7 @@ void mleft()
 
 void mright()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	if (!mem_max)
 		return;
@@ -278,7 +279,7 @@ void mright()
 
 char dispatch_mem()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	if (!mem_max)
 		return 0;
@@ -318,7 +319,7 @@ char dispatch_mem()
 
 void mtext()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	const unsigned rs = find1dlg(cpu.mem_curs);
 
 	if (rs != UINT_MAX)
@@ -327,7 +328,7 @@ void mtext()
 
 void mcode()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	const auto rs = find2dlg(cpu.mem_curs);
 
 	if (rs != UINT_MAX)
@@ -336,7 +337,7 @@ void mcode()
 
 void mgoto()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	const unsigned v = input4(mem_x, mem_y, cpu.mem_top);
 
 	if (v != UINT_MAX)
@@ -350,48 +351,48 @@ void mswitch()
 
 void msp()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	cpu.mem_curs = cpu.sp;
 }
 void mpc()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	cpu.mem_curs = cpu.pc;
 }
 
 void mbc()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	cpu.mem_curs = cpu.bc;
 }
 
 void mde()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	cpu.mem_curs = cpu.de;
 }
 
 void mhl()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	cpu.mem_curs = cpu.hl;
 }
 
 void mix()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	cpu.mem_curs = cpu.ix;
 }
 
 void miy()
 {
-	auto& cpu = t_cpu_mgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 
 	cpu.mem_curs = cpu.iy;
 }
@@ -411,7 +412,7 @@ void mmodelog()
 
 void mdiskgo()
 {
-	Z80 &cpu = t_cpu_mgr::get_cpu();
+	Z80 &cpu = TCpuMgr::get_cpu();
 
 	if (editor == ed_mem)
 		return;
@@ -425,7 +426,7 @@ void mdiskgo()
 		if (*str >= 'A' && *str <= 'D')
 			break;
 	}
-	mem_disk = *str - 'A'; showmem();
+	mem_disk = *str - 'A'; show_mem();
 	unsigned x = input2(mem_x + 12, mem_y - 1, mem_track);
 	if (x == UINT_MAX)
 		return;
@@ -434,7 +435,7 @@ void mdiskgo()
 	if (editor == ed_phys)
 		return;
 
-	showmem();
+	show_mem();
 	// enter sector
 	for (;; )
 	{

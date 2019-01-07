@@ -1,19 +1,20 @@
 #pragma once
-struct mon_label final
+
+struct MonLabel final
 {
     u8 *address;
     unsigned name_offs;
 };
 
-struct mon_labels_t final
+struct MonLabelsT final
 {
-   mon_label *pairs;
+   MonLabel *pairs;
    unsigned n_pairs;
    char *names;
    unsigned names_size;
 
-   mon_labels_t();
-   ~mon_labels_t();
+   MonLabelsT();
+   ~MonLabelsT();
 
    unsigned add_name(char *name);
    void clear(const u8 *start, unsigned size);
@@ -51,7 +52,7 @@ struct mon_labels_t final
 
 };
 
-extern mon_labels_t mon_labels;
+extern MonLabelsT mon_labels;
 
 void load_labels(char *filename, u8 *base, unsigned size);
 void mon_show_labels();

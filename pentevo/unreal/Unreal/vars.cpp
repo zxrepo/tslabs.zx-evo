@@ -178,15 +178,15 @@ TGsZ80 gscpu(1, z80gs::BankNames, z80gs::step, z80gs::delta,
     z80gs::SetLastT, z80gs::membits, &z80gs::FastMemIf, &z80gs::DbgMemIf);
 #endif
 
-t_cpu_mgr cpu_mgr;
+TCpuMgr cpu_mgr;
 
-void t_cpu_mgr::switch_cpu()
+void TCpuMgr::switch_cpu()
 {
     current_cpu_++;
-    current_cpu_ %= Count;
+    current_cpu_ %= count;
 }
 
-Z80 *t_cpu_mgr::cpus_[] =
+Z80 *TCpuMgr::cpus_[] =
 {
   &cpu,
 #ifdef MOD_GSZ80
@@ -195,9 +195,9 @@ Z80 *t_cpu_mgr::cpus_[] =
 };
 
 
-const unsigned t_cpu_mgr::Count = _countof(cpus_);
-TZ80State t_cpu_mgr::prev_cpus_[t_cpu_mgr::Count];
-unsigned t_cpu_mgr::current_cpu_ = 0;
+const unsigned TCpuMgr::count = _countof(cpus_);
+TZ80State TCpuMgr::prev_cpus_[TCpuMgr::count];
+unsigned TCpuMgr::current_cpu_ = 0;
 
 #ifdef MOD_GSBASS
 GSHLE gs;
@@ -631,7 +631,6 @@ const size_t zxk_maps_count = _countof(zxk_maps);
 PALETTEENTRY syspalette[0x100];
 
 GDIBMP gdibmp = { { { sizeof(BITMAPINFOHEADER), 320, -240, 1, 32, BI_RGB, 0 } } };
-GDIBMP debug_gdibmp = { { { sizeof(BITMAPINFOHEADER), DEBUG_WND_WIDTH, -DEBUG_WND_HEIGHT, 1, 8, BI_RGB, 0 } } };
 
 PALETTE_OPTIONS pals[32] = {{"default",0x00,0x80,0xC0,0xE0,0xFF,0xC8,0xFF,0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0xFF}};
 
@@ -639,7 +638,6 @@ PALETTE_OPTIONS pals[32] = {{"default",0x00,0x80,0xC0,0xE0,0xFF,0xC8,0xFF,0x00,0
 
 u8 snbuf[SNDBUFSZ];
 u8 gdibuf[GDIBUFSZ];
-u8 debug_gdibuf[DBG_GDIBUFSZ];
 
 // on-screen watches block
 unsigned watch_script[4][64];

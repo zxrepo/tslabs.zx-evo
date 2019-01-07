@@ -51,5 +51,5 @@ namespace z80dbg
 {
 void __cdecl SetLastT();
 }
-void showtrace();
+void show_trace();
 char dispatch_trace();

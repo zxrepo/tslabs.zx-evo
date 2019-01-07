@@ -11,10 +11,10 @@ void bup();
 void bdown();
 void benter();
 
-void showwatch();
-void showstack();
+void show_watch();
+void show_stack();
 void show_ay();
-void showbanks();
-void showports();
-void showdos();
+void show_banks();
+void show_ports();
+void show_dos();
 void show_time();

@@ -10,7 +10,6 @@
 
 #define SNDBUFSZ (4*1048576) // large temporary buffer (for reading snapshots)
 #define GDIBUFSZ (448*320*4*4*4)	// Quad size, 32 bit, 448x320 max
-#define DBG_GDIBUFSZ (DEBUG_WND_WIDTH*DEBUG_WND_HEIGHT)	// Quad size, 32 bit, 448x320 max
 
 #pragma pack(8)
 struct PALETTE_OPTIONS
@@ -189,7 +188,6 @@ extern TMainZ80 cpu;
 extern u8 dbgbreak;
 extern u8 snbuf[SNDBUFSZ];		// large temporary buffer (for reading snapshots)
 extern u8 gdibuf[GDIBUFSZ];
-extern u8 debug_gdibuf[DBG_GDIBUFSZ];
 
 extern SNDCHIP ay[2];
 extern SNDAYX32 ayx32;
