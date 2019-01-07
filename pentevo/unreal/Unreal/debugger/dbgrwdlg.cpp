@@ -2,9 +2,9 @@
 #include "emul.h"
 #include "vars.h"
 #include "debug.h"
-#include "dbgpaint.h"
 #include "dbgtrace.h"
 #include "util.h"
+#include "consts.h"
 
 /*
 	 dialogs design

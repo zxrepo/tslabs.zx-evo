@@ -1,10 +1,10 @@
 #include "std.h"
 #include "emul.h"
 #include "vars.h"
-#include "dbgpaint.h"
 #include "dbgwidgets.h"
 #include <algorithm>
 #include <memory>
+#include "consts.h"
 
 dbg_control::dbg_control(int h):h_(h) { }
 

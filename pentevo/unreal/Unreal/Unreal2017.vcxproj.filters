@@ -343,9 +343,6 @@
     <ClCompile Include="debugger\dbgoth.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="debugger\dbgpaint.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
     <ClCompile Include="debugger\dbgreg.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
@@ -658,9 +655,6 @@
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="debugger\dbgoth.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\dbgpaint.h">
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="debugger\dbgreg.h">

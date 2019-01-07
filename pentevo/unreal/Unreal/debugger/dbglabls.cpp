@@ -3,7 +3,6 @@
 #include "emul.h"
 #include "vars.h"
 #include "debug.h"
-#include "dbgpaint.h"
 #include "dbglabls.h"
 #include "memory.h"
 #include "config.h"
@@ -328,7 +327,7 @@ void MonLabelsT::import_menu()
 	menuptr++;
 
 	MenuDef menu = { items, menuptr, "import labels", 0 };
-	if (!handle_menu(&menu)) return;
+	if (!DebugCore::get_view()->handle_menu(&menu)) return;
 	if (menu.pos == 0) import_xas();
 	menu.pos--;
 	if (unsigned(menu.pos) < alasm_found_tables) import_alasm(alasm_offset[menu.pos], alasm_text[menu.pos]);

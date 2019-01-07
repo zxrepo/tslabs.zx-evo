@@ -2,7 +2,6 @@
 #include "emul.h"
 #include "vars.h"
 #include "debug.h"
-#include "dbgpaint.h"
 #include "dbgcmd.h"
 #include "dbgmem.h"
 #include "wd93crc.h"

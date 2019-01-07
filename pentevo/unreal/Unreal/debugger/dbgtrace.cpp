@@ -4,7 +4,6 @@
 #include "debug.h"
 #include "dbgtrace.h"
 #include "dbglabls.h"
-#include "dbgpaint.h"
 #include "dbgcmd.h"
 #include "memory.h"
 #include "z80asm.h"
@@ -12,6 +11,7 @@
 #include "util.h"
 #include "draw.h"
 #include "emulkeys.h"
+#include "consts.h"
 
 extern VCTR vid;
 
@@ -602,7 +602,7 @@ void mon_step()
 
 void mon_stepover()
 {
-	Z80 &cpu = TCpuMgr::get_cpu();
+	auto& cpu = TCpuMgr::get_cpu();
 	u8 trace = 1;
 
 	// call,rst

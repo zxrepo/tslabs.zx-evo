@@ -4,7 +4,6 @@
 #include "draw.h"
 #include "dx.h"
 #include "debug.h"
-#include "dbgpaint.h"
 #include "dbgmem.h"
 #include "dbgrwdlg.h"
 #include "dbgoth.h"

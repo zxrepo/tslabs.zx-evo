@@ -41,7 +41,6 @@
     <ClCompile Include="debugger\dbglabls.cpp" />
     <ClCompile Include="debugger\dbgmem.cpp" />
     <ClCompile Include="debugger\dbgoth.cpp" />
-    <ClCompile Include="debugger\dbgpaint.cpp" />
     <ClCompile Include="debugger\dbgreg.cpp" />
     <ClCompile Include="debugger\dbgrwdlg.cpp" />
     <ClCompile Include="debugger\dbgtrace.cpp" />
@@ -170,7 +169,6 @@
     <ClInclude Include="debugger\dbglabls.h" />
     <ClInclude Include="debugger\dbgmem.h" />
     <ClInclude Include="debugger\dbgoth.h" />
-    <ClInclude Include="debugger\dbgpaint.h" />
     <ClInclude Include="debugger\dbgreg.h" />
     <ClInclude Include="debugger\dbgrwdlg.h" />
     <ClInclude Include="debugger\dbgtrace.h" />

@@ -99,7 +99,7 @@ void init_all(int argc, char **argv)
    init_tape();
    init_hdd_cd();
    start_dx();
-   init_debug();
+   DebugCore::get_instance();
    applyconfig();
    main_reset();
    autoload();

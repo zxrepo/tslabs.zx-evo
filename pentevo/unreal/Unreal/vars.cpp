@@ -250,7 +250,6 @@ u8 trdos_load, trdos_save, trdos_format, trdos_seek; // for leds
 u8 needclr; // clear screenbuffer before rendering
 
 HWND wnd; HINSTANCE hIn;
-HWND debug_wnd;
 
 char droppedFile[512];
 

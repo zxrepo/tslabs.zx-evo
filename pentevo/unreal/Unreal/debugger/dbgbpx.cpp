@@ -627,7 +627,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 void mon_bpdialog()
 {
-	DialogBox(hIn, MAKEINTRESOURCE(IDD_COND), debug_wnd, conddlg);
+	DebugCore::get_view()->show_dialog(MAKEINTRESOURCE(IDD_COND), conddlg);
 }
 
 INT_PTR CALLBACK watchdlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
@@ -672,7 +672,7 @@ INT_PTR CALLBACK watchdlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 void mon_watchdialog()
 {
-	DialogBox(hIn, MAKEINTRESOURCE(IDD_OSW), wnd, watchdlg);
+	DebugCore::get_view()->show_dialog(MAKEINTRESOURCE(IDD_OSW), watchdlg);
 }
 
 void init_bpx(char* file)

@@ -3,7 +3,6 @@
 #include "emul.h"
 #include "vars.h"
 #include "debug.h"
-#include "dbgpaint.h"
 #include "util.h"
 #include "memory.h" // for benter()
 #include "consts.h"

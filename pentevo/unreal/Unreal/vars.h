@@ -4,7 +4,6 @@
 #include "saa1099.h"
 #include "sound/dev_moonsound.h"
 #include "sound/ayx32.h"
-#include "debugger/debug.h"
 
 #define ROMLED_TIME 16
 
@@ -135,7 +134,6 @@ extern DWORD WinVerMinor;
 extern HWND wnd;
 extern HWND dlg;
 extern HINSTANCE hIn;
-extern HWND debug_wnd;
 extern unsigned nowait;
 
 extern action ac_main[];

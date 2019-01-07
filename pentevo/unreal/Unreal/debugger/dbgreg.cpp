@@ -2,8 +2,8 @@
 #include "emul.h"
 #include "vars.h"
 #include "debug.h"
-#include "dbgpaint.h"
 #include "dbgreg.h"
+#include "consts.h"
 
 const TRegLayout regs_layout[] =
 {
