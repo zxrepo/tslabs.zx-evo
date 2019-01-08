@@ -5,6 +5,8 @@
 #include "debug.h"
 #include "config.h"
 #include "util.h"
+#include "core.h"
+#include "cpu_manager.h"
 
 enum
 {

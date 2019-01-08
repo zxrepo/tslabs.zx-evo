@@ -7,6 +7,9 @@
 #include "memory.h"
 #include "config.h"
 #include "util.h"
+#include "view.h"
+#include "core.h"
+#include "cpu_manager.h"
 
 MonLabelsT mon_labels;
 

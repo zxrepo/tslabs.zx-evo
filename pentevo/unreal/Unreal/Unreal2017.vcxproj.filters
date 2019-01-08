@@ -337,13 +337,7 @@
     <ClCompile Include="debugger\dbglabls.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="debugger\dbgmem.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
     <ClCompile Include="debugger\dbgoth.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\dbgreg.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
     <ClCompile Include="debugger\dbgrwdlg.cpp">
@@ -364,6 +358,12 @@
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="debugger\core.cpp" />
+    <ClCompile Include="debugger\view.cpp" />
+    <ClCompile Include="debugger\cpu_manager.cpp" />
+    <ClCompile Include="debugger\views\mem.cpp" />
+    <ClCompile Include="debugger\views\reg.cpp" />
+    <ClCompile Include="debugger\dialogs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="atm.h">
@@ -651,13 +651,7 @@
     <ClInclude Include="debugger\dbglabls.h">
       <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="debugger\dbgmem.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
     <ClInclude Include="debugger\dbgoth.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\dbgreg.h">
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="debugger\dbgrwdlg.h">
@@ -682,6 +676,12 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="debugger\core.h" />
+    <ClInclude Include="debugger\view.h" />
+    <ClInclude Include="debugger\cpu_manager.h" />
+    <ClInclude Include="debugger\views\mem.h" />
+    <ClInclude Include="debugger\views\reg.h" />
+    <ClInclude Include="debugger\dialogs.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

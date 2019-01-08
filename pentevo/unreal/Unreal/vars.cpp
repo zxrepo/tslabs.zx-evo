@@ -178,27 +178,6 @@ TGsZ80 gscpu(1, z80gs::BankNames, z80gs::step, z80gs::delta,
     z80gs::SetLastT, z80gs::membits, &z80gs::FastMemIf, &z80gs::DbgMemIf);
 #endif
 
-TCpuMgr cpu_mgr;
-
-void TCpuMgr::switch_cpu()
-{
-    current_cpu_++;
-    current_cpu_ %= count;
-}
-
-Z80 *TCpuMgr::cpus_[] =
-{
-  &cpu,
-#ifdef MOD_GSZ80
-  &gscpu
-#endif
-};
-
-
-const unsigned TCpuMgr::count = _countof(cpus_);
-TZ80State TCpuMgr::prev_cpus_[TCpuMgr::count];
-unsigned TCpuMgr::current_cpu_ = 0;
-
 #ifdef MOD_GSBASS
 GSHLE gs;
 #endif

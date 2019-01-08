@@ -76,10 +76,17 @@ constexpr auto menu_cursor = 0xE0;
 constexpr auto menu_item = menu_inside;
 constexpr auto menu_item_dis = 0x7A;
 
+constexpr auto tool_x = 18;
+constexpr auto tool_y = 12;
+
 constexpr auto debug_text_width = 150;
 constexpr auto debug_text_height = 30;
 constexpr auto debug_text_size = (debug_text_width * debug_text_height);
 constexpr auto DEBUG_WND_WIDTH = (debug_text_width * 8);
 constexpr auto DEBUG_WND_HEIGHT = (debug_text_height * 16);
+
+constexpr auto file_dlg_x = 6;
+constexpr auto file_dlg_y = 10;
+constexpr auto file_dlg_dx = 25;
 
 #define DBG_GDIBUFSZ (DEBUG_WND_WIDTH*DEBUG_WND_HEIGHT)	// Quad size, 32 bit, 448x320 max

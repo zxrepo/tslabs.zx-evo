@@ -5,11 +5,9 @@ extern const unsigned cs[3][2];
 
 int disasm_line(unsigned addr, char *line);
 
-void mon_step();
-void mon_stepover();
+
 
 void cfindpc();
-void chere();
 void cfindtext();
 void cfindcode();
 void cgoto();
@@ -20,7 +18,6 @@ void cup();
 void cdown();
 void cleft();
 void cright();
-void chere();
 void cpgup();
 void cpgdn();
 void pop_pos();
