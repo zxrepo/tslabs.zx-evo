@@ -2,6 +2,7 @@
 #include "view.h"
 #include "font16.h"
 #include "cpu_manager.h"
+#include "util.h"
 
 char str[80];
 
@@ -212,23 +213,25 @@ auto DebugView::fillrect(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 co
 			txtscr_[yy * debug_text_width + xx + debug_text_height * debug_text_width] = color;
 }
 
-auto DebugView::editbank() -> void
+auto DebugView::wtline(const char* name, unsigned ptr, unsigned y) const -> void
 {
-	const auto x = input2(ports_x + 5, ports_y + 1, comp.p7FFD);
-	if (x != UINT_MAX)
-	{
-		comp.p7FFD = x;
-		set_banks();
-	}
-}
+	char line[40];
+	if (name)
+		sprintf(line, "%3s: ", name);
+	else
+		sprintf(line, "%04X ", ptr);
 
-auto DebugView::editextbank() -> void
-{
-	if (dbg_extport == UINT_MAX)
-		return;
-	const auto x = input2(ports_x + 5, ports_y + 2, dgb_extval);
-	if (x != UINT_MAX)
-		out(dbg_extport, u8(x));
+	auto& cpu = TCpuMgr::get_cpu();
+	for (unsigned dx = 0; dx < 8; dx++)
+	{
+		const auto c = cpu.DirectRm(ptr++);
+		sprintf(line + 5 + 3 * dx, "%02X", c);
+		line[7 + 3 * dx] = ' ';
+		line[29 + dx] = c ? c : '.';
+	}
+
+	line[37] = 0;
+	tprint(wat_x, wat_y + y, line, w_other);
 }
 
 auto DebugView::inputhex(unsigned x, unsigned y, unsigned sz, bool hex) -> unsigned

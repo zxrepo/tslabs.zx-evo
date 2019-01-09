@@ -68,9 +68,7 @@ public:
 	auto filledframe(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 color = fframe_inside) -> void;
 	auto fillattr(unsigned x, unsigned y, unsigned dx, u8 color = fframe_inside) const -> void;
 	auto fillrect(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 color = fframe_inside) const -> void;
-
-	auto editbank()->void;
-	auto editextbank() -> void;
+	auto wtline(const char *name, unsigned ptr, unsigned y) const -> void;
 
 	auto inputhex(unsigned x, unsigned y, unsigned sz, bool hex) -> unsigned;
 	auto input4(unsigned x, unsigned y, unsigned val) -> unsigned;

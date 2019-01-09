@@ -10,6 +10,14 @@
 #include "dbgtsconf.h"
 #include "util.h"
 
+namespace z80dbg
+{
+	__int64 __cdecl delta()
+	{
+		return comp.t_states + cpu.t - cpu.debug_last_t;
+	}
+}
+
 DebugCore* DebugCore::instance_ = nullptr;
 char str[80]{};
 

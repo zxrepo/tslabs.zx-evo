@@ -10,5 +10,6 @@ public:
 
 	auto find1dlg(unsigned start) -> unsigned;
 	auto find2dlg(unsigned start) -> unsigned;
+	auto mon_gsdialog() const -> void;
 
 };

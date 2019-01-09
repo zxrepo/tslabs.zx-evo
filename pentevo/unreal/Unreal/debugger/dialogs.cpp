@@ -3,6 +3,8 @@
 #include "dialogs.h"
 #include "consts.h"
 #include "vars.h"
+#include "util.h"
+#include "resource.h"
 
 char str[80];
 
@@ -61,4 +63,57 @@ auto Dialogs::find2dlg(unsigned start) -> unsigned
 	view_->flip();
 	while (!process_msgs());
 	return -1;
+}
+
+INT_PTR CALLBACK gsdlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
+{
+	char tmp[0x200];
+	if (msg == WM_INITDIALOG) {
+	repaint:
+		while (SendDlgItemMessage(dlg, IDC_GSLIST, LB_GETCOUNT, 0, 0))
+			SendDlgItemMessage(dlg, IDC_GSLIST, LB_DELETESTRING, 0, 0);
+		if (gs.modsize) {
+			sprintf(tmp, "%-.20s (%s)", gs.mod, gs.mod_playing ? "playing" : "stopped");
+			SendDlgItemMessage(dlg, IDC_GSLIST, LB_ADDSTRING, 0, LPARAM(tmp));
+		}
+		for (unsigned i = 1; i < gs.total_fx; i++) {
+			sprintf(tmp, "%csmp %d: v=%d, n=%d, %d%s",
+				gs.cur_fx == i ? '*' : ' ', i,
+				gs.sample[i].volume, gs.sample[i].note, gs.sample[i].end,
+				gs.sample[i].loop < gs.sample[i].end ? " (L)" : nil);
+			SendDlgItemMessage(dlg, IDC_GSLIST, LB_ADDSTRING, 0, LPARAM(tmp));
+		}
+		*tmp = 0;
+		for (auto i = 0; i < 0x100; i++) {
+			if (gs.badgs[i]) sprintf(tmp + strlen(tmp), "%02X ", i);
+		}
+		SendDlgItemMessage(dlg, IDE_GS, WM_SETTEXT, 0, LPARAM(tmp));
+		return 1;
+	}
+	if (msg == WM_SYSCOMMAND && (wp & 0xFFF0) == SC_CLOSE) EndDialog(dlg, 0);
+	if (msg != WM_COMMAND) return 0;
+	const unsigned id = LOWORD(wp);
+	if (id == IDCANCEL || id == IDOK) EndDialog(dlg, 0);
+	if (id == IDB_GS_CLEAR) { memset(gs.badgs, 0, sizeof gs.badgs); SendDlgItemMessage(dlg, IDE_GS, WM_SETTEXT, 0, 0); }
+	if (id == IDB_GS_RESET) { gs.reset(); goto repaint; }
+	if (id == IDB_GS_PLAY || (id == IDC_GSLIST && HIWORD(wp) == LBN_DBLCLK)) {
+		unsigned i = SendDlgItemMessage(dlg, IDC_GSLIST, LB_GETCURSEL, 0, 0);
+		if (i > 0x100) return 1;
+		if (!i && gs.modsize) {
+			gs.mod_playing ^= 1;
+			if (gs.mod_playing) gs.restart_mod(0, 0); else gs.stop_mod();
+			goto repaint;
+		}
+		if (!gs.modsize) i++;
+		gs.debug_note(i);
+	}
+	return 0;
+}
+
+auto Dialogs::mon_gsdialog() const -> void
+{
+	if (conf.gs_type == 2)
+		view_->show_dialog(MAKEINTRESOURCE(IDD_GS), gsdlg);
+	else
+		MessageBox(wnd, "high-level GS emulation\nis not initialized", nullptr, MB_OK | MB_ICONERROR);
 }

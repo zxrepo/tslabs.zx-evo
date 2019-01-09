@@ -337,9 +337,6 @@
     <ClCompile Include="debugger\dbglabls.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="debugger\dbgoth.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
     <ClCompile Include="debugger\dbgrwdlg.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
@@ -364,6 +361,7 @@
     <ClCompile Include="debugger\views\mem.cpp" />
     <ClCompile Include="debugger\views\reg.cpp" />
     <ClCompile Include="debugger\dialogs.cpp" />
+    <ClCompile Include="debugger\views\devs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="atm.h">
@@ -651,9 +649,6 @@
     <ClInclude Include="debugger\dbglabls.h">
       <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="debugger\dbgoth.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
     <ClInclude Include="debugger\dbgrwdlg.h">
       <Filter>debugger</Filter>
     </ClInclude>
@@ -682,6 +677,7 @@
     <ClInclude Include="debugger\views\mem.h" />
     <ClInclude Include="debugger\views\reg.h" />
     <ClInclude Include="debugger\dialogs.h" />
+    <ClInclude Include="debugger\views\devs.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

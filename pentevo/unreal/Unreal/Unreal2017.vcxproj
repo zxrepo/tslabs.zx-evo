@@ -41,7 +41,6 @@
     <ClCompile Include="debugger\dbgbpx.cpp" />
     <ClCompile Include="debugger\dbgcmd.cpp" />
     <ClCompile Include="debugger\dbglabls.cpp" />
-    <ClCompile Include="debugger\dbgoth.cpp" />
     <ClCompile Include="debugger\dbgrwdlg.cpp" />
     <ClCompile Include="debugger\dbgtrace.cpp" />
     <ClCompile Include="debugger\dbgtsconf.cpp" />
@@ -49,6 +48,7 @@
     <ClCompile Include="debugger\debug.cpp" />
     <ClCompile Include="debugger\dialogs.cpp" />
     <ClCompile Include="debugger\view.cpp" />
+    <ClCompile Include="debugger\views\devs.cpp" />
     <ClCompile Include="debugger\views\mem.cpp" />
     <ClCompile Include="debugger\views\reg.cpp" />
     <ClCompile Include="depack.cpp" />
@@ -173,7 +173,6 @@
     <ClInclude Include="debugger\dbgbpx.h" />
     <ClInclude Include="debugger\dbgcmd.h" />
     <ClInclude Include="debugger\dbglabls.h" />
-    <ClInclude Include="debugger\dbgoth.h" />
     <ClInclude Include="debugger\dbgrwdlg.h" />
     <ClInclude Include="debugger\dbgtrace.h" />
     <ClInclude Include="debugger\dbgtsconf.h" />
@@ -182,6 +181,7 @@
     <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="debugger\dialogs.h" />
     <ClInclude Include="debugger\view.h" />
+    <ClInclude Include="debugger\views\devs.h" />
     <ClInclude Include="debugger\views\mem.h" />
     <ClInclude Include="debugger\views\reg.h" />
     <ClInclude Include="defs.h" />

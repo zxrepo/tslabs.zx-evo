@@ -2,16 +2,7 @@
 #include "emul.h"
 #include "vars.h"
 #include "draw.h"
-#include "dx.h"
-#include "debug.h"
-#include "dbgmem.h"
-#include "dbgrwdlg.h"
-#include "dbgoth.h"
-#include "memory.h"
 #include "gui.h"
-#include "util.h"
-#include "leds.h"
-#include "consts.h"
 
 void out(unsigned port, u8 val);
 
