@@ -18,6 +18,3 @@ extern unsigned ripper; // ripper mode (none/read/write)
 
 
 extern u8 trace_labels;
-
-void debugscr();
-

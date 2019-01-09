@@ -5,6 +5,12 @@
 #include "views/mem.h"
 #include "views/reg.h"
 #include "views/devs.h"
+#include "views/trace.h"
+
+namespace z80dbg
+{
+	void __cdecl SetLastT();
+}
 
 enum FILEDLG_MODE { FDM_LOAD = 0, FDM_SAVE, FDM_DISASM };
 

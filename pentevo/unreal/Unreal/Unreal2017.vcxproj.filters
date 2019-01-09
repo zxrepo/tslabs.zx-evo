@@ -362,6 +362,7 @@
     <ClCompile Include="debugger\views\reg.cpp" />
     <ClCompile Include="debugger\dialogs.cpp" />
     <ClCompile Include="debugger\views\devs.cpp" />
+    <ClCompile Include="debugger\views\trace.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="atm.h">
@@ -678,6 +679,7 @@
     <ClInclude Include="debugger\views\reg.h" />
     <ClInclude Include="debugger\dialogs.h" />
     <ClInclude Include="debugger\views\devs.h" />
+    <ClInclude Include="debugger\views\trace.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

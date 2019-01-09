@@ -51,6 +51,7 @@
     <ClCompile Include="debugger\views\devs.cpp" />
     <ClCompile Include="debugger\views\mem.cpp" />
     <ClCompile Include="debugger\views\reg.cpp" />
+    <ClCompile Include="debugger\views\trace.cpp" />
     <ClCompile Include="depack.cpp" />
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="drawers.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="debugger\views\devs.h" />
     <ClInclude Include="debugger\views\mem.h" />
     <ClInclude Include="debugger\views\reg.h" />
+    <ClInclude Include="debugger\views\trace.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="depack.h" />
     <ClInclude Include="draw.h" />

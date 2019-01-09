@@ -44,11 +44,6 @@ int disasm_line(unsigned addr, char *line)
 	return len;
 }
 
-#define TWF_BRANCH  0x010000
-#define TWF_BRADDR  0x020000
-#define TWF_LOOPCMD 0x040000
-#define TWF_CALLCMD 0x080000
-#define TWF_BLKCMD  0x100000
 unsigned tracewndflags()
 {
 	auto& cpu = TCpuMgr::get_cpu();
@@ -233,9 +228,7 @@ void c_lbl_import()
 }
 
 /* ------------------------------------------------------------- */
-unsigned save_pos[8] = { UINT_MAX };
-unsigned save_cur[8] = { UINT_MAX };
-unsigned stack_pos[32] = { UINT_MAX }, stack_cur[32] = { UINT_MAX };
+
 
 void push_pos()
 {
@@ -259,75 +252,6 @@ unsigned cpu_up(unsigned ip)
 	return prev - buf1 + p1;
 }
 
-void cgoto()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	const auto v = input4(trace_x, trace_y, cpu.trace_top);
-	if (v != UINT_MAX)
-		cpu.trace_top = cpu.trace_curs = v;
-}
-
-void csetpc()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.pc = cpu.trace_curs;
-}
-
-void center()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	if (!cpu.trace_mode)
-		sprintf(str, "%04X", cpu.trace_curs);
-	else if (cpu.trace_mode == 1)
-		strcpy(str, dumppc);
-	else
-		strcpy(str, asmpc);
-
-	if (input.lastkey != VK_RETURN)
-	{
-		*str = 0;
-		PostThreadMessage(GetCurrentThreadId(), WM_KEYDOWN, input.lastkey, 1);
-	}
-
-	for (;;)
-	{
-		if (!inputhex(trace_x + cs[cpu.trace_mode][0], trace_y + trcurs_y + asmii, cs[cpu.trace_mode][1], cpu.trace_mode < 2))
-			break;
-		if (!cpu.trace_mode)
-		{
-			push_pos();
-			sscanf(str, "%X", &cpu.trace_top);
-			cpu.trace_curs = cpu.trace_top;
-			for (unsigned i = 0; i < asmii; i++)
-				cpu.trace_top = cpu_up(cpu.trace_top);
-			break;
-		}
-		else if (cpu.trace_mode == 1)
-		{
-			char *p; //Alone Coder 0.36.7
-			for (/*char * */p = str + strlen(str) - 1; p >= str && *p == ' '; *p-- = 0) {}
-			u8 dump[8]; unsigned i;
-			for (p = str, i = 0; ishex(*p) && ishex(p[1]); p += 2)
-				dump[i++] = hex(p);
-			if (*p) continue;
-			for (unsigned j = 0; j < i; j++)
-				cpu.DirectWm(cpu.trace_curs + j, dump[j]);
-			break;
-		}
-		else
-		{
-			const unsigned sz = assemble_cmd(reinterpret_cast<u8*>(str), cpu.trace_curs);
-			if (sz)
-			{
-				for (unsigned i = 0; i < sz; i++)
-					cpu.DirectWm(cpu.trace_curs + i, asmresult[i]);
-				show_trace();
-				cdown();
-				break;
-			}
-		}
-	}
-}
 
 char dispatch_trace()
 {
@@ -339,168 +263,8 @@ char dispatch_trace()
 	return 0;
 }
 
-void cfindtext()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	const auto oldmode = editor; editor = ed_mem;
-	const auto rs = find1dlg(cpu.trace_curs);
-	editor = oldmode;
-	if (rs != UINT_MAX)
-		cpu.trace_top = cpu.trace_curs = rs;
-}
-void cfindcode()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	const auto oldmode = editor; editor = ed_mem;
-	const auto rs = find2dlg(cpu.trace_curs);
-	editor = oldmode;
-	if (rs != UINT_MAX)
-		cpu.trace_top = cpu.trace_curs = rs;
-}
-
-void cbpx()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.membits[cpu.trace_curs] ^= MEMBITS_BPX;
-}
-
-void cfindpc()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.trace_top = cpu.trace_curs = cpu.pc;
-}
-
-void cup()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	if (cpu.trace_curs > cpu.trace_top)
-	{
-		for (unsigned i = 1; i < trace_size; i++)
-			if (cpu.trpc[i] == cpu.trace_curs)
-				cpu.trace_curs = cpu.trpc[i - 1];
-	}
-	else
-		cpu.trace_top = cpu.trace_curs = cpu_up(cpu.trace_curs);
-}
-
-void cdown()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	for (unsigned i = 0; i < trace_size; i++)
-		if (cpu.trpc[i] == cpu.trace_curs)
-		{
-			cpu.trace_curs = cpu.trpc[i + 1];
-			if (i + 1 == trace_size)
-				cpu.trace_top = cpu.trpc[1];
-			break;
-		}
-}
-void cleft() { TCpuMgr::get_cpu().trace_mode--; }
-void cright() { TCpuMgr::get_cpu().trace_mode++; }
-
-void cpgdn()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	unsigned curs = 0;
-	for (unsigned i = 0; i < trace_size; i++)
-		if (cpu.trace_curs == cpu.trpc[i]) curs = i;
-	cpu.trace_top = cpu.trpc[trace_size];
-	show_trace();
-	cpu.trace_curs = cpu.trpc[curs];
-}
-
-void cpgup()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	unsigned curs = 0;
-	for (auto i = 0; i < trace_size; i++)
-		if (cpu.trace_curs == cpu.trpc[i]) curs = i;
-	for (auto i = 0; i < trace_size; i++)
-		cpu.trace_top = cpu_up(cpu.trace_top);
-
-	show_trace();
-	cpu.trace_curs = cpu.trpc[curs];
-}
-
-void pop_pos()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	if (stack_pos[0] == UINT_MAX)
-		return;
-
-	cpu.trace_curs = stack_cur[0];
-	cpu.trace_top = stack_pos[0];
-	memcpy(&stack_pos[0], &stack_pos[1], sizeof stack_pos - sizeof *stack_pos);
-	memcpy(&stack_cur[0], &stack_cur[1], sizeof stack_cur - sizeof *stack_cur);
-	stack_pos[(sizeof stack_pos / sizeof *stack_pos) - 1] = -1;
-}
-
-void cjump()
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	char *ptr = nullptr;
-
-	for (auto p = asmpc; *p; p++)
-		if (ishex(p[0]) & ishex(p[1]) & ishex(p[2]) & ishex(p[3])) ptr = p;
-	if (!ptr) return;
-	push_pos();
-	unsigned addr;
-	sscanf(ptr, "%04X", &addr);
-	cpu.trace_curs = cpu.trace_top = addr;
-}
-
-void cdjump()
-{
-	char *ptr = 0;
-	for (auto p = asmpc; *p; p++)
-		if (ishex(p[0]) & ishex(p[1]) & ishex(p[2]) & ishex(p[3])) ptr = p;
-	if (!ptr) return;
-	unsigned addr; sscanf(ptr, "%04X", &addr);
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.mem_curs = addr; activedbg = dbgwnd::mem; editor = ed_mem;
-}
-
 void cfliplabels()
 {
 	trace_labels = !trace_labels; show_trace();
-}
-void csave(unsigned n)
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	save_pos[n] = cpu.trace_top;
-	save_cur[n] = cpu.trace_curs;
-}
-void crest(unsigned n)
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	if (save_pos[n] == UINT_MAX)
-		return;
-	push_pos();
-	cpu.trace_top = save_pos[n];
-	cpu.trace_curs = save_cur[n];
-}
-void csave1() { csave(0); }
-void csave2() { csave(1); }
-void csave3() { csave(2); }
-void csave4() { csave(3); }
-void csave5() { csave(4); }
-void csave6() { csave(5); }
-void csave7() { csave(6); }
-void csave8() { csave(7); }
-void crest1() { crest(0); }
-void crest2() { crest(1); }
-void crest3() { crest(2); }
-void crest4() { crest(3); }
-void crest5() { crest(4); }
-void crest6() { crest(5); }
-void crest7() { crest(6); }
-void crest8() { crest(7); }
-
-namespace z80dbg
-{
-	void __cdecl SetLastT()
-	{
-		cpu.debug_last_t = comp.t_states + cpu.t;
-	}
 }
 

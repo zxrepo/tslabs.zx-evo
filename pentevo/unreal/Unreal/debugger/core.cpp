@@ -16,6 +16,12 @@ namespace z80dbg
 	{
 		return comp.t_states + cpu.t - cpu.debug_last_t;
 	}
+
+	void __cdecl SetLastT()
+	{
+		cpu.debug_last_t = comp.t_states + cpu.t;
+	}
+
 }
 
 DebugCore* DebugCore::instance_ = nullptr;
