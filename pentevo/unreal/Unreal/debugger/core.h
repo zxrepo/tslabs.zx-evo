@@ -4,6 +4,7 @@
 #include "dialogs.h"
 #include "views/mem.h"
 #include "views/reg.h"
+#include "views/devs.h"
 
 enum FILEDLG_MODE { FDM_LOAD = 0, FDM_SAVE, FDM_DISASM };
 
@@ -19,6 +20,14 @@ class DebugCore final
 	DebugView* view_{};
 	MemView* mem_{};
 	RegView* regs_{};
+	WatchView* watch_{};
+	StackView* stack_{};
+	AyView* ay_{};
+	BanksView* banks_{};
+	PortsView* ports_{};
+	DosView* dos_{};
+	TimeView* time_{};
+
 	Dialogs* dialogs_{};
 
 	unsigned addr = 0;
@@ -74,7 +83,8 @@ public:
 	static auto get_dialogs()->Dialogs*;
 	static auto isbrk(const Z80 &cpu)->u8;
 
-	auto debug(Z80* cpu) const -> void;
-	auto debug_events(Z80 *cpu) const -> void;
+	auto debugscr() -> void;
+	auto debug(Z80* cpu) -> void;
+	auto debug_events(Z80 *cpu) -> void;
 	auto handle_mouse() -> void;
 };

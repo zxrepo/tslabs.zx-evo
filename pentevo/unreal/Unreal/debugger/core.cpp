@@ -25,9 +25,17 @@ DebugCore::DebugCore()
 {
 	create_window();
 	view_ = new DebugView(wnd_);
-	dialogs_ = new Dialogs(view_);
 	mem_ = new MemView(ref_, *view_);
+	dialogs_ = new Dialogs(*view_, *mem_);
 	regs_ = new RegView(ref_, *view_);
+	watch_ = new WatchView(ref_, *view_);
+
+	stack_ = new StackView(ref_, *view_);
+	ay_ = new AyView(ref_, *view_);
+	banks_ = new BanksView(ref_, *view_);
+	ports_ = new PortsView(ref_, *view_);
+	dos_ = new DosView(ref_, *view_);
+	time_ = new TimeView(ref_, *view_);
 }
 
 auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam) -> LRESULT
@@ -284,11 +292,11 @@ auto DebugCore::mon_aux() -> void
 	switch (activedbg)
 	{
 	case dbgwnd::banks:
-		showbank = true;
+		banks_->showbank = true;
 		break;
 
 	default:
-		showbank = false;
+		banks_->showbank = false;
 		break;
 	}
 }
@@ -732,7 +740,7 @@ auto DebugCore::rw_select_drive() -> char
 	}
 }
 
-auto DebugCore::debug(Z80* cpu) const -> void
+auto DebugCore::debug(Z80* cpu) -> void
 {
 	sound_stop();
 	temp.mon_scale = temp.scale;
@@ -794,7 +802,7 @@ auto DebugCore::debug(Z80* cpu) const -> void
 		if (activedbg == dbgwnd::regs &&  regs_->dispatch_regs()) continue;
 		if (activedbg == dbgwnd::trace && dispatch_trace()) continue;
 		if (activedbg == dbgwnd::mem && mem_->dispatch_mem()) continue;
-		if (activedbg == dbgwnd::banks && dispatch_banks()) continue;
+		if (activedbg == dbgwnd::banks && banks_->dispatch_banks()) continue;
 		if (needclr)
 		{
 			needclr--;
@@ -816,7 +824,7 @@ leave_dbg:
 	input.nokb = 20;
 }
 
-auto DebugCore::debug_events(Z80* cpu) const -> void
+auto DebugCore::debug_events(Z80* cpu) -> void
 {
 	const auto pc = cpu->pc & 0xFFFF;
 	const auto membit = cpu->membits + pc;
@@ -891,14 +899,18 @@ auto DebugCore::handle_mouse() -> void
 			unsigned delta = 1;
 			if (regs_layout[i].width == 16) delta = 4;
 			if (regs_layout[i].width == 8) delta = 2;
-			if (my - regs_y == regs_layout[i].y && mx - regs_x - regs_layout[i].x < delta) regs_->regs_curs = i;
+			if (my - regs_y == regs_layout[i].y && mx - regs_x - regs_layout[i].x < delta) {
+				regs_->regs_curs = i;
+			}
 		}
 	}
 	if (mx >= banks_x && my >= banks_y + 1 && mx < banks_x + 7 && my < banks_y + 5) {
-		needclr++; activedbg = dbgwnd::banks;
-		selbank = my - (banks_y + 1); showbank = true;
+		needclr++;
+		activedbg = dbgwnd::banks;
+		banks_->selbank = my - (banks_y + 1);
+		banks_->showbank = true;
 	}
-	else showbank = false;
+	else banks_->showbank = false;
 
 	if (mousepos & 0x80000000) { // right-click
 		enum { idm_bpx = 1, idm_some_other };
@@ -983,4 +995,22 @@ auto DebugCore::isbrk(const Z80& cpu) -> u8
 #endif
 
 #endif
+}
+
+auto DebugCore::debugscr() -> void
+{
+	view_->clear_canvas();
+
+	regs_->show_regs();
+	show_trace();
+	mem_->show_mem();
+	watch_->render();
+	stack_->render();
+	ay_->render();
+	banks_->render();
+	ports_->render();
+	dos_->render();
+	show_tsconf();
+
+	time_->render();
 }

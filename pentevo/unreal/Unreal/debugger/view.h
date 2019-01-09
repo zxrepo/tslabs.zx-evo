@@ -63,6 +63,8 @@ public:
 	auto add_frame(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 attr) -> void;
 	auto handle_menu(MenuDef *menu) -> char;
 
+	auto clear_canvas() -> void;
+
 	auto tprint(unsigned x, unsigned y, const char *str, u8 attr) const -> void;
 	auto tprint_fg(unsigned x, unsigned y, const char *str, u8 attr) const -> void;
 	auto filledframe(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 color = fframe_inside) -> void;

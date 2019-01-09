@@ -45,10 +45,10 @@ class BanksView final
 	DebugCore& core_;
 	DebugView& view_;
 
+public:
 	unsigned selbank = 0;
 	bool showbank = false;
 
-public:
 	BanksView(DebugCore& core, DebugView& view);
 
 	auto benter() -> void;

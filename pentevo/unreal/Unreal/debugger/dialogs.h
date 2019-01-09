@@ -1,15 +1,17 @@
 #pragma once
 #include "view.h"
+#include "views/mem.h"
 
 class Dialogs
 {
-	DebugView * view_{};
+	DebugView& view_;
+	MemView& mem_;
 
 public:
-	explicit Dialogs(DebugView *view);
+	explicit Dialogs(DebugView& view, MemView& mem);
 
-	auto find1dlg(unsigned start) -> unsigned;
-	auto find2dlg(unsigned start) -> unsigned;
+	auto find1dlg(unsigned start) const -> unsigned;
+	auto find2dlg(unsigned start) const -> unsigned;
 	auto mon_gsdialog() const -> void;
 
 };

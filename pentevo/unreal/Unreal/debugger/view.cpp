@@ -172,6 +172,14 @@ auto DebugView::handle_menu(MenuDef* menu) -> char
 	}
 }
 
+auto DebugView::clear_canvas() -> void
+{
+	memset(txtscr_, backgr_ch, sizeof txtscr_ / 2);
+	memset(txtscr_ + sizeof txtscr_ / 2, backgr, sizeof txtscr_ / 2);
+
+	frames_.clear();
+}
+
 auto DebugView::tprint(unsigned x, unsigned y, const char* str, u8 attr) const -> void
 {
 	for (unsigned ptr = y * debug_text_width + x; *str; str++, ptr++) {

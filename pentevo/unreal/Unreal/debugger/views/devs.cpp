@@ -3,6 +3,7 @@
 #include "debugger/cpu_manager.h"
 #include "emul.h"
 #include "util.h"
+#include "funcs.h"
 
 void __cdecl BankNames(int i, char *name)
 {
@@ -51,7 +52,7 @@ auto WatchView::mon_setwatch() -> void
 		show_scrshot = 0;
 
 	for (unsigned i = 0; i < 3; i++) {
-		debugscr();
+		core_.debugscr();
 		const auto addr = view_.input4(wat_x, wat_y + wat_sz - 3 + i, user_watches[i]);
 		if (addr == UINT_MAX) return;
 		user_watches[i] = addr;
@@ -158,7 +159,7 @@ auto BanksView::dispatch_banks() -> char
 auto BanksView::benter() -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
-	debugscr();
+	core_.debugscr();
 	view_.flip();
 
 	char bankstr[64] = { 0 }; cpu.BankNames(selbank, bankstr);

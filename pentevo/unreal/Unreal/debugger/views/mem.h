@@ -23,9 +23,7 @@ class MemView final
 	auto findsector(unsigned addr) -> void;
 	auto editam(unsigned addr)->u8*;
 	auto editwm(unsigned addr, u8 byte) -> void;
-	auto memadr(unsigned addr) const -> unsigned;
-	auto editrm(unsigned addr)->u8;
-
+	
 public:
 	unsigned mem_sz = 8;
 	u8 mem_dump{};
@@ -33,6 +31,9 @@ public:
 	u8 mem_ascii{};
 
 	MemView(DebugCore& core, DebugView& view);
+
+	auto memadr(unsigned addr) const -> unsigned;
+	auto editrm(unsigned addr)->u8;
 
 	auto mleft() const -> void;
 	auto mright() const -> void;
