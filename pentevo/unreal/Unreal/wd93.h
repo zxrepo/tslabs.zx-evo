@@ -1,4 +1,5 @@
 #pragma once
+#include "sysdefs.h"
 
 const int Z80FQ = 3500000; // todo: #define as (conf.frame*conf.intfq)
 const int FDD_RPS = 5; // rotation speed

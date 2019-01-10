@@ -1,9 +1,12 @@
 #pragma once
-#include "emul_2203.h"
+#include "defs.h"
+#include "emul.h"
 #include "sndchip.h"
-#include "saa1099.h"
-#include "sound/dev_moonsound.h"
 #include "sound/ayx32.h"
+#include "zf232.h"
+#include "gshle.h"
+#include "input.h"
+#include "hdd.h"
 
 #define ROMLED_TIME 16
 

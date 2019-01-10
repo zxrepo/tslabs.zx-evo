@@ -1,5 +1,4 @@
 #include "std.h"
-#include "emul.h"
 #include "vars.h"
 #include "inputpc.h"
 

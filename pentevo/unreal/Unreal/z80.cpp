@@ -5,7 +5,7 @@
 #include "draw.h"
 #include "memory.h"
 #include "tape.h"
-#include "debugger/debug.h"
+#include "debugger/core.h"
 #include "sound.h"
 #include "atm.h"
 #include "tsconf.h"
@@ -16,6 +16,8 @@
 #include "fontatm2.h"
 #include "util.h"
 #include "z80.h"
+#include "sound/dev_moonsound.h"
+#include "saa1099.h"
 
 extern VCTR vid;
 

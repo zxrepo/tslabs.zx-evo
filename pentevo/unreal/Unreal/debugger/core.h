@@ -5,6 +5,7 @@
 #include "views/devs.h"
 #include "views/trace.h"
 #include "libs/dialogs.h"
+#include "views/dbgtsconf.h"
 
 namespace z80dbg
 {
@@ -25,28 +26,28 @@ class DebugCore final
 {
 	static DebugCore * instance_;
 
-	DebugCore& ref_ = *this;
+	DebugCore& ref_;
 
 	HWND wnd_{};
 	HMENU menu_{};
 
-	DebugView* view_{};
-	MemView* mem_{};
-	RegView* regs_{};
-	WatchView* watch_{};
-	StackView* stack_{};
-	AyView* ay_{};
-	BanksView* banks_{};
-	PortsView* ports_{};
-	DosView* dos_{};
-	TimeView* time_{};
-	TraceView* trace_{};
+	DebugView* view_ = nullptr;
+	MemView* mem_ = nullptr;
+	RegView* regs_ = nullptr;
+	WatchView* watch_ = nullptr;
+	StackView* stack_ = nullptr;
+	AyView* ay_ = nullptr;
+	BanksView* banks_ = nullptr;
+	PortsView* ports_ = nullptr;
+	DosView* dos_ = nullptr;
+	TimeView* time_ = nullptr;
+	TraceView* trace_ = nullptr;
+	TsconfView* tsconf_ = nullptr;
 
-	Dialogs* dialogs_{};
+	Dialogs* dialogs_ = nullptr;
 
 	unsigned addr = 0;
 	unsigned end = 0xFFFF;
-	unsigned ripper{}; // ripper mode (none/read/write)
 
 	unsigned rw_drive{};
 	unsigned rw_trk{};
@@ -56,8 +57,6 @@ class DebugCore final
 	unsigned rw_side{};
 
 	char fname[20] = "", trdname[9] = "12345678", trdext[2] = "C";
-
-	DebugCore();
 
 	static auto APIENTRY wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam)->LRESULT;
 	static auto rw_err(const char *msg) -> void;
@@ -89,22 +88,25 @@ class DebugCore final
 	auto rw_select_drive() -> char;
 
 public:
+	unsigned ripper{}; // ripper mode (none/read/write)
 	dbgwnd activedbg = dbgwnd::trace;
 
+	DebugCore();
+
 	static auto debug_cond_check(Z80 *cpu) -> void;
+	static auto debug_events(Z80 *cpu) -> void;
+	static auto isbrk(const Z80 &cpu)->u8;
 
 	static auto get_instance()->DebugCore*;
 	static auto get_view()->DebugView*;
 	static auto get_dialogs()->Dialogs*;
 	static auto get_trace()->TraceView*;
 
-	static auto isbrk(const Z80 &cpu)->u8;
-
 	static auto init_bpx(char* file) -> void;
 	static auto done_bpx() -> void;
 
 	auto debugscr() -> void;
 	auto debug(Z80* cpu) -> void;
-	auto debug_events(Z80 *cpu) -> void;
+	
 	auto handle_mouse() -> void;
 };

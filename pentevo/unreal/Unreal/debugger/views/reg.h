@@ -11,7 +11,7 @@ struct TRegLayout final
 
 extern const std::vector<TRegLayout> regs_layout;
 
-class RegView
+class RegView final
 {
 	DebugCore &core_;
 	DebugView &view_;

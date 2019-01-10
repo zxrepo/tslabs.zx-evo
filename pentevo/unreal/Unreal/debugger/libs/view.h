@@ -37,7 +37,7 @@ enum class dbgwnd
 	banks
 };
 
-class DebugView
+class DebugView final
 {
 	const HWND wnd_;
 

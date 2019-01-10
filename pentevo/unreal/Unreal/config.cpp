@@ -2,8 +2,6 @@
 #include "emul.h"
 #include "vars.h"
 #include "memory.h"
-#include "debugger/debug.h"
-#include "debugger/dbglabls.h"
 #include "draw.h"
 #include "dx.h"
 #include "fontatm2.h"
@@ -14,6 +12,10 @@
 #include "atm.h"
 #include "util.h"
 #include "config.h"
+#include "debugger/libs/dbglabls.h"
+#include "debugger/libs/cpu_manager.h"
+#include "debugger/core.h"
+#include "sound/dev_moonsound.h"
 
 char load_errors;
 const char* SSHOT_EXT[] = { "scr", "bmp", "png", "gif" };
@@ -1023,7 +1025,7 @@ void apply_memory()
    for (unsigned i = 0; i < TCpuMgr::get_count(); i++)
    {
        Z80 &cpu = TCpuMgr::get_cpu(i);
-       cpu.dbgchk = isbrk(cpu);
+       cpu.dbgchk = DebugCore::isbrk(cpu);
    }
 }
 

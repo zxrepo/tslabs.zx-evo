@@ -3,7 +3,6 @@
 #include "vars.h"
 #include "config.h"
 #include "dx.h"
-#include "draw.h"
 #include "iehelp.h"
 #include "gs.h"
 #include "leds.h"
@@ -14,12 +13,12 @@
 #include "savesnd.h"
 #include "wd93dat.h"
 #include "tables.h"
-#include "debugger/dbgbpx.h"
-#include "debugger/dbglabls.h"
 #include "util.h"
 #include "getopt.h"
-#include "debugger/debug.h"
 #include "ft812.h"
+#include "debugger/core.h"
+#include "debugger/libs/dbglabls.h"
+#include "emul_2203.h"
 
 void cpu_info()
 {
@@ -103,7 +102,7 @@ void init_all(int argc, char **argv)
    applyconfig();
    main_reset();
    autoload();
-   init_bpx(bpx);
+   DebugCore::get_instance()->init_bpx(bpx);
    init_labels(labels);
    temp.Gdiplus = GdiplusStartup();
    if (!temp.Gdiplus)
@@ -165,7 +164,7 @@ void __declspec(noreturn) exit()
    zf232.rs_close();
    zf232.zf_close();
    done_ie_help();
-   done_bpx();
+   DebugCore::get_instance()->done_bpx();
    GdiplusShutdown();
 
 //   timeEndPeriod(1);

@@ -1,10 +1,13 @@
 #include "std.h"
+#include "defs.h"
 #include "emul.h"
 #include "vars.h"
 #include "gs.h"
 #include "tape.h"
 #include "config.h"
 #include "sndcounter.h"
+#include "saa1099.h"
+#include "sound/dev_moonsound.h"
 
 extern SNDRENDER sound;
 extern SNDCHIP ay[2];

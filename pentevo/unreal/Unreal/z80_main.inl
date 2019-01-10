@@ -62,7 +62,7 @@ ret:
 #ifdef Z80_DBG
 	brk_mem_rd = addr;
 	/* this is sloooow */
-	debug_cond_check(&cpu);
+	DebugCore::debug_cond_check(&cpu);
 #endif
 
    return brk_mem_val;
@@ -83,7 +83,7 @@ void wm(unsigned addr, u8 val)
 	brk_mem_wr = addr;
     brk_mem_val = val;
 	/* this is sloooow */
-	debug_cond_check(&cpu);
+	DebugCore::debug_cond_check(&cpu);
 #endif
 
 #ifdef MOD_GSZ80
@@ -262,7 +262,7 @@ void Z80FAST step()
 void step1()
 {
 #ifdef Z80_DBG
-  debug_events(&cpu);
+	DebugCore::debug_events(&cpu);
 #endif
   step();
 }

@@ -7,7 +7,6 @@
 #include "dx.h"
 #include "dxrend.h"
 #include "util.h"
-#include "libs/dbgtsconf.h"
 #include "config.h"
 #include "libs/cpu_manager.h"
 #include "libs/dbglabls.h"
@@ -33,7 +32,7 @@ namespace z80dbg
 DebugCore* DebugCore::instance_ = nullptr;
 char str[80]{};
 
-DebugCore::DebugCore()
+DebugCore::DebugCore() : ref_(*this)
 {
 	create_window();
 	view_ = new DebugView(wnd_);
@@ -49,6 +48,7 @@ DebugCore::DebugCore()
 	dos_ = new DosView(ref_, *view_);
 	time_ = new TimeView(ref_, *view_);
 	trace_ = new TraceView(ref_, *view_, *mem_);
+	tsconf_ = new TsconfView(*view_);
 }
 
 auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam) -> LRESULT
@@ -134,8 +134,6 @@ auto DebugCore::create_window() -> void
 		gdibmp.header.bmiColors[i].rgbGreen = g;
 		gdibmp.header.bmiColors[i].rgbBlue = b;
 	}
-
-	init_tsconf();
 }
 
 auto DebugCore::mon_emul() const -> void
@@ -870,7 +868,7 @@ auto DebugCore::debug_events(Z80* cpu) -> void
 	brk_mem_rd = brk_mem_wr = -1;	// reset only when breakpoints active
 
 	if (cpu->dbgbreak)
-		debug(cpu);
+		get_instance()->debug(cpu);
 }
 
 auto DebugCore::handle_mouse() -> void
@@ -1110,7 +1108,7 @@ auto DebugCore::debugscr() -> void
 	banks_->render();
 	ports_->render();
 	dos_->render();
-	show_tsconf();
+	tsconf_->render();
 
 	time_->render();
 }

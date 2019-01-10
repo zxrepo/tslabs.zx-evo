@@ -1,6 +1,7 @@
 #include "std.h"
 #include "cpu_manager.h"
 #include "vars.h"
+#include "gsz80.h"
 
 Z80 *TCpuMgr::cpus_[] =
 {

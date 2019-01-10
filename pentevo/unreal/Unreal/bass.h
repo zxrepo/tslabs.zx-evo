@@ -8,8 +8,6 @@
 #ifndef BASS_H
 #define BASS_H
 
-#include <wtypes.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

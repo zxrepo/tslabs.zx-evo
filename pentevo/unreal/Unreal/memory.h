@@ -1,4 +1,5 @@
 #pragma once
+#include "defs.h"
 
 void set_mode(ROM_MODE mode);
 void set_banks();

@@ -2,14 +2,13 @@
 #include "emul.h"
 #include "vars.h"
 #include "font.h"
-#include "font16.h"
 #include "gs.h"
 #include "tape.h"
 #include "draw.h"
-#include "debugger/debug.h"
-#include "debugger/dbgbpx.h"
 #include "memory.h"
 #include "util.h"
+#include "debugger/libs/dialogs.h"
+#include "debugger/libs/cpu_manager.h"
 
 extern VCTR vid;
 extern CACHE_ALIGNED u32 vbuf[2][sizeof_vbuf];
@@ -447,7 +446,7 @@ void memband_led()
 
    Z80 &cpu = TCpuMgr::get_cpu();
    for (unsigned i = 0; i < 0x10000; i++)
-      cpu.membits[i] &= ripper | ~(MEMBITS_R | MEMBITS_W | MEMBITS_X);
+      cpu.membits[i] &= DebugCore::get_instance()->ripper | ~(MEMBITS_R | MEMBITS_W | MEMBITS_X);
 }
 #endif
 

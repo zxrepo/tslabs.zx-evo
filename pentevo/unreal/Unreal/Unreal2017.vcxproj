@@ -39,7 +39,7 @@
     <ClCompile Include="debugger\core.cpp" />
     <ClCompile Include="debugger\libs\cpu_manager.cpp" />
     <ClCompile Include="debugger\libs\dbglabls.cpp" />
-    <ClCompile Include="debugger\libs\dbgtsconf.cpp" />
+    <ClCompile Include="debugger\views\dbgtsconf.cpp" />
     <ClCompile Include="debugger\libs\dbgwidgets.cpp" />
     <ClCompile Include="debugger\libs\dialogs.cpp" />
     <ClCompile Include="debugger\libs\view.cpp" />
@@ -53,6 +53,7 @@
     <ClCompile Include="drawnomc.cpp" />
     <ClCompile Include="dx.cpp" />
     <ClCompile Include="dxerr.cpp" />
+    <ClCompile Include="dxguid.cpp" />
     <ClCompile Include="dxrcopy.cpp" />
     <ClCompile Include="dxrend.cpp" />
     <ClCompile Include="dxrframe.cpp" />
@@ -167,7 +168,7 @@
     <ClInclude Include="debugger\core.h" />
     <ClInclude Include="debugger\libs\cpu_manager.h" />
     <ClInclude Include="debugger\libs\dbglabls.h" />
-    <ClInclude Include="debugger\libs\dbgtsconf.h" />
+    <ClInclude Include="debugger\views\dbgtsconf.h" />
     <ClInclude Include="debugger\libs\dbgwidgets.h" />
     <ClInclude Include="ddk.h" />
     <ClInclude Include="debugger\libs\dialogs.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="dx.h" />
     <ClInclude Include="dxerr.h" />
     <ClInclude Include="dxerr8.h" />
+    <ClInclude Include="dxerrors.h" />
     <ClInclude Include="dxrcopy.h" />
     <ClInclude Include="dxrend.h" />
     <ClInclude Include="dxrframe.h" />

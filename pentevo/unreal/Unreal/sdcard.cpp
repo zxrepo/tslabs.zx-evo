@@ -1,4 +1,5 @@
 #include "std.h"
+#include "defs.h"
 #include "emul.h"
 #include "vars.h"
 #include "sdcard.h"

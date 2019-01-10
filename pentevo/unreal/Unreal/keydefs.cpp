@@ -1,19 +1,10 @@
 #include "std.h"
 #include "emul.h"
-#include "vars.h"
 #include "emulkeys.h"
 #include "snapshot.h"
 #include "gui.h"
 #include "savesnd.h"
 #include "cheat.h"
-#include "debugger/dbgreg.h"
-#include "debugger/dbgcmd.h"
-#include "debugger/dbgoth.h"
-#include "debugger/dbgrwdlg.h"
-#include "debugger/dbgbpx.h"
-#include "debugger/dbgtrace.h"
-#include "debugger/dbglabls.h"
-#include "debugger/dbgmem.h"
 
 action ac_main[] =
 {

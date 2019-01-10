@@ -1,4 +1,7 @@
 /* Machine generated. Do not edit. */
+#pragma once
+#include <dmerror.h>
+#include <vfwmsgs.h>
 
 static const WCHAR name1W[] = { 'S','_','O','K',0 };
 static const CHAR description1A[] = "The function completed successfully";

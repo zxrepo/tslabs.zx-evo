@@ -8,6 +8,7 @@
 
 #ifndef _DXERR8_H_
 #define _DXERR8_H_
+#include <Windows.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -336,9 +336,6 @@
     <ClCompile Include="debugger\views\reg.cpp" />
     <ClCompile Include="debugger\views\devs.cpp" />
     <ClCompile Include="debugger\views\trace.cpp" />
-    <ClCompile Include="debugger\libs\dbgtsconf.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
     <ClCompile Include="debugger\libs\dbgwidgets.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
@@ -346,6 +343,9 @@
     <ClCompile Include="debugger\libs\view.cpp" />
     <ClCompile Include="debugger\libs\cpu_manager.cpp" />
     <ClCompile Include="debugger\libs\dbglabls.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger\views\dbgtsconf.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
   </ItemGroup>
@@ -641,13 +641,13 @@
     <ClInclude Include="debugger\libs\dbgwidgets.h">
       <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="debugger\libs\dbgtsconf.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
     <ClInclude Include="debugger\libs\dialogs.h" />
     <ClInclude Include="debugger\libs\view.h" />
     <ClInclude Include="debugger\libs\cpu_manager.h" />
     <ClInclude Include="debugger\libs\dbglabls.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\views\dbgtsconf.h">
       <Filter>debugger</Filter>
     </ClInclude>
   </ItemGroup>

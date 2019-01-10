@@ -1,4 +1,5 @@
 #pragma once
+#include "emul.h"
 
 extern char load_errors;
 extern const char* SSHOT_EXT[4];
