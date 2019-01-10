@@ -1,16 +1,22 @@
 #pragma once
-#include "view.h"
 #include "defs.h"
-#include "dialogs.h"
 #include "views/mem.h"
 #include "views/reg.h"
 #include "views/devs.h"
-#include "views/trace.h"
+#include "libs/dialogs.h"
 
 namespace z80dbg
 {
 	void __cdecl SetLastT();
 }
+
+// debug breakpoints format descriptor
+typedef struct
+{
+	unsigned reg;       // token string (e.g. 'DOS','OUT')
+	const void *ptr;    // pointer to variable, containing queried value
+	u8 size;            // size of variable (1, 2, 4) or 0 for address of function: bool func()
+} BPXR;
 
 enum FILEDLG_MODE { FDM_LOAD = 0, FDM_SAVE, FDM_DISASM };
 
@@ -62,7 +68,7 @@ class DebugCore final
 	auto mon_stepover() -> void;
 	auto mon_switch_cpu() -> void;
 	auto mon_nxt() -> void;
-	auto mon_aux() -> void;
+	auto mon_aux() const -> void;
 	auto mon_prv() -> void;
 	auto mon_switch_dump() const -> void;
 	auto mon_dump() const -> void;

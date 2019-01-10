@@ -1,8 +1,9 @@
 #pragma once
+
 #include "sysdefs.h"
 #include "wd93.h"
-#include "debugger/view.h"
 #include "debugger/core.h"
+#include "debugger/libs/view.h"
 
 enum { ed_mem, ed_phys, ed_log, ed_cmos, ed_nvram, ed_max };
 
@@ -62,4 +63,3 @@ public:
 	auto show_mem() -> void;
 	auto dispatch_mem() -> char;
 };
-

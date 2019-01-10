@@ -1,6 +1,6 @@
 #pragma once
 #include "view.h"
-#include "views/mem.h"
+#include "debugger/views/mem.h"
 
 class Dialogs
 {
@@ -13,5 +13,6 @@ public:
 	auto find1dlg(unsigned start) const -> unsigned;
 	auto find2dlg(unsigned start) const -> unsigned;
 	auto mon_gsdialog() const -> void;
+	auto mon_bpdialog() const -> void;
 
 };

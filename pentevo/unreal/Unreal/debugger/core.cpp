@@ -7,8 +7,8 @@
 #include "dx.h"
 #include "cpu_manager.h"
 #include "dxrend.h"
-#include "dbgtsconf.h"
 #include "util.h"
+#include "libs/dbgtsconf.h"
 
 namespace z80dbg
 {
@@ -293,7 +293,7 @@ auto DebugCore::mon_nxt() -> void
 	mon_aux();
 }
 
-auto DebugCore::mon_aux() -> void
+auto DebugCore::mon_aux() const -> void
 {
 	switch (activedbg)
 	{
@@ -542,7 +542,7 @@ auto DebugCore::chere() const -> void
 auto DebugCore::rw_trdos_sectors(FILEDLG_MODE mode, u8* memdata) -> char
 {
 	view_->filledframe(file_dlg_x, file_dlg_y, file_dlg_dx, 7);
-	auto title = (mode == FDM_LOAD) ? " Read from TR-DOS sectors" : " Write to TR-DOS sectors ";
+	const auto title = (mode == FDM_LOAD) ? " Read from TR-DOS sectors" : " Write to TR-DOS sectors ";
 	view_->tprint(file_dlg_x, file_dlg_y, title, frm_header);
 
 	char ln[64];

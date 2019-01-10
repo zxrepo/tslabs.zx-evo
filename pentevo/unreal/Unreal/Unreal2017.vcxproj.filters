@@ -334,35 +334,26 @@
     <ClCompile Include="debugger\dbgcmd.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="debugger\dbglabls.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\dbgrwdlg.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\dbgtrace.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\dbgtsconf.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\dbgwidgets.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\debug.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="debugger\core.cpp" />
-    <ClCompile Include="debugger\view.cpp" />
-    <ClCompile Include="debugger\cpu_manager.cpp" />
     <ClCompile Include="debugger\views\mem.cpp" />
     <ClCompile Include="debugger\views\reg.cpp" />
-    <ClCompile Include="debugger\dialogs.cpp" />
     <ClCompile Include="debugger\views\devs.cpp" />
     <ClCompile Include="debugger\views\trace.cpp" />
+    <ClCompile Include="debugger\libs\dbgtsconf.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger\libs\dbgwidgets.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger\libs\dialogs.cpp" />
+    <ClCompile Include="debugger\libs\view.cpp" />
+    <ClCompile Include="debugger\libs\cpu_manager.cpp" />
+    <ClCompile Include="debugger\libs\dbglabls.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="atm.h">
@@ -647,21 +638,6 @@
     <ClInclude Include="debugger\dbgcmd.h">
       <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="debugger\dbglabls.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\dbgrwdlg.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\dbgtrace.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\dbgtsconf.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\dbgwidgets.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
     <ClInclude Include="debugger\debug.h">
       <Filter>debugger</Filter>
     </ClInclude>
@@ -673,13 +649,22 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="debugger\core.h" />
-    <ClInclude Include="debugger\view.h" />
-    <ClInclude Include="debugger\cpu_manager.h" />
     <ClInclude Include="debugger\views\mem.h" />
     <ClInclude Include="debugger\views\reg.h" />
-    <ClInclude Include="debugger\dialogs.h" />
     <ClInclude Include="debugger\views\devs.h" />
     <ClInclude Include="debugger\views\trace.h" />
+    <ClInclude Include="debugger\libs\dbgwidgets.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\libs\dbgtsconf.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\libs\dialogs.h" />
+    <ClInclude Include="debugger\libs\view.h" />
+    <ClInclude Include="debugger\libs\cpu_manager.h" />
+    <ClInclude Include="debugger\libs\dbglabls.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

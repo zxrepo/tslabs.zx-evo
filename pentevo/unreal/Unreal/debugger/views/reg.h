@@ -51,8 +51,8 @@ public:
 	auto rright() -> void;
 	auto rup() -> void;
 	auto rdown() -> void;
-	auto renter() -> void;
+	auto renter() const -> void;
 
 	auto show_regs() const -> void;
-	auto dispatch_regs() -> char;
+	auto dispatch_regs() const -> char;
 };

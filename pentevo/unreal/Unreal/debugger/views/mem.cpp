@@ -1,11 +1,11 @@
 #include "std.h"
 #include "mem.h"
-#include "debugger/cpu_manager.h"
 #include "debugger/consts.h"
 #include "util.h"
 #include "vars.h"
 #include "wd93crc.h"
 #include "debugger/core.h"
+#include "debugger/libs/cpu_manager.h"
 
 char str[80];
 

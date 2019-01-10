@@ -1,9 +1,10 @@
 #include "std.h"
 #include "devs.h"
-#include "debugger/cpu_manager.h"
 #include "emul.h"
 #include "util.h"
 #include "funcs.h"
+#include "debugger/consts.h"
+#include "debugger/libs/cpu_manager.h"
 
 void __cdecl BankNames(int i, char *name)
 {

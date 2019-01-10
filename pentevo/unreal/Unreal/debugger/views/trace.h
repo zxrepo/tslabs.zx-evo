@@ -1,4 +1,5 @@
 #pragma once
+#include "debugger/core.h"
 
 #define TWF_BRANCH  0x010000
 #define TWF_BRADDR  0x020000
@@ -8,22 +9,40 @@
 
 class TraceView
 {
+	DebugCore& core_;
+	DebugView& view_;
+
+	const unsigned cs[3][2] = { {0,4}, {5,10}, {16,16} };
+
 	unsigned save_pos[8] = { UINT_MAX };
 	unsigned save_cur[8] = { UINT_MAX };
 	unsigned stack_pos[32] = { UINT_MAX }, stack_cur[32] = { UINT_MAX };
+	unsigned trcurs_y{};
+	unsigned asmii{};
+	char asmpc[64]{}, dumppc[12]{};
+	u8 trace_labels{};
 
 	auto csave(unsigned n) -> void;
 	auto crest(unsigned n) -> void;
+	auto push_pos() -> void;
+	auto cpu_up(unsigned ip) const -> unsigned;
+	auto tracewndflags() const -> unsigned;
+
+	auto disasm_line(unsigned addr, char *line) -> int;
 
 public:
+
+	TraceView(DebugCore& core, DebugView& view);
+
+
 	auto cfindpc() const -> void;
 	auto cfindtext() -> void;
 	auto cfindcode() -> void;
-	auto cgoto() -> void;
+	auto cgoto() const -> void;
 	auto cbpx() const -> void;
 	auto center() -> void;
 	auto csetpc() const -> void;
-	auto cup() -> void;
+	auto cup() const -> void;
 	auto cdown() const -> void;
 	auto cleft() const -> void;
 	auto cright() const -> void;

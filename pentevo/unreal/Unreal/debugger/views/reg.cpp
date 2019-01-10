@@ -2,8 +2,8 @@
 #include "reg.h"
 #include "defs.h"
 #include "vars.h"
-#include "debugger/cpu_manager.h"
 #include "debugger/consts.h"
+#include "debugger/libs/cpu_manager.h"
 
 //const size_t regs_layout_count = _countof(regs_layout);
  
@@ -224,10 +224,10 @@ auto RegView::rdown() -> void
 	regs_curs = regs_layout[regs_curs].dn;
 }
 
-auto RegView::renter() -> void
+auto RegView::renter() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
-	debugscr();
+	core_.debugscr();
 	view_.flip();
 	const auto sz = regs_layout[regs_curs].width;
 	auto val = ((1 << sz) - 1) & *reinterpret_cast<unsigned*>(PCHAR(static_cast<TZ80State*>(&cpu)) + regs_layout[regs_curs].offs);
@@ -314,7 +314,7 @@ auto RegView::show_regs() const -> void
 	view_.add_frame(regs_x, regs_y, 32, 4, FRAME);
 }
 
-auto RegView::dispatch_regs() -> char
+auto RegView::dispatch_regs() const -> char
 {
 	if ((input.lastkey >= '0' && input.lastkey <= '9') || (input.lastkey >= 'A' && input.lastkey <= 'F'))
 	{
