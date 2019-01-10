@@ -5,10 +5,16 @@
 #include "consts.h"
 #include "op_system.h"
 #include "dx.h"
-#include "cpu_manager.h"
 #include "dxrend.h"
 #include "util.h"
 #include "libs/dbgtsconf.h"
+#include "config.h"
+#include "libs/cpu_manager.h"
+#include "libs/dbglabls.h"
+#include "emulkeys.h"
+#include "funcs.h"
+
+char bpx_file_name[FILENAME_MAX];
 
 namespace z80dbg
 {
@@ -33,7 +39,7 @@ DebugCore::DebugCore()
 	view_ = new DebugView(wnd_);
 	mem_ = new MemView(ref_, *view_);
 	dialogs_ = new Dialogs(*view_, *mem_);
-	regs_ = new RegView(ref_, *view_);
+	regs_ = new RegView(ref_, *view_, *mem_);
 	watch_ = new WatchView(ref_, *view_);
 
 	stack_ = new StackView(ref_, *view_);
@@ -42,6 +48,7 @@ DebugCore::DebugCore()
 	ports_ = new PortsView(ref_, *view_);
 	dos_ = new DosView(ref_, *view_);
 	time_ = new TimeView(ref_, *view_);
+	trace_ = new TraceView(ref_, *view_, *mem_);
 }
 
 auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam) -> LRESULT
@@ -71,8 +78,8 @@ auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARA
 		case IDM_DEBUG_TILLRETURN: core->mon_exitsub(); break;
 		case IDM_DEBUG_RUNTOCURSOR: core->chere(); break;
 
-		case IDM_BREAKPOINT_TOGGLE: cbpx(); break;
-		case IDM_BREAKPOINT_MANAGER: mon_bpdialog(); break;
+		case IDM_BREAKPOINT_TOGGLE: get_trace()->cbpx(); break;
+		case IDM_BREAKPOINT_MANAGER: get_dialogs()->mon_bpdialog(); break;
 
 		case IDM_MON_LOADBLOCK: core->mon_load(); break;
 		case IDM_MON_SAVEBLOCK: core->mon_save(); break;
@@ -514,7 +521,7 @@ auto DebugCore::mon_save() -> void
 		for (auto a = addr; a <= end; ) {
 			//            char line[64]; //Alone Coder 0.36.7
 			char line[16 + 129]; //Alone Coder 0.36.7
-			a += disasm_line(a, line);
+			a += trace_->disasm_line(a, line);
 			fprintf(ff, "%s\n", line);
 		}
 		fclose(ff);
@@ -768,7 +775,7 @@ auto DebugCore::debug(Z80* cpu) -> void
 
 	while (dbgbreak) // debugger event loop
 	{
-		if (trace_labels)
+		if (trace_->trace_labels)
 			mon_labels.notify_user_labels();
 
 		cpu = &TCpuMgr::get_cpu();
@@ -778,7 +785,7 @@ auto DebugCore::debug(Z80* cpu) -> void
 		cpu->trace_curs &= 0xFFFF;
 
 		debugscr();
-		if (cpu->trace_curs < cpu->trace_top || cpu->trace_curs >= cpu->trpc[trace_size] || asmii == UINT_MAX)
+		if (cpu->trace_curs < cpu->trace_top || cpu->trace_curs >= cpu->trpc[trace_size] || trace_->asmii == UINT_MAX)
 		{
 			cpu->trace_top = cpu->trace_curs;
 			debugscr();
@@ -806,7 +813,7 @@ auto DebugCore::debug(Z80* cpu) -> void
 		if (activedbg == dbgwnd::mem && dispatch_more(ac_mem) > 0) continue;
 		if (activedbg == dbgwnd::banks && dispatch_more(ac_banks) > 0) continue;
 		if (activedbg == dbgwnd::regs &&  regs_->dispatch_regs()) continue;
-		if (activedbg == dbgwnd::trace && dispatch_trace()) continue;
+		if (activedbg == dbgwnd::trace && trace_->dispatch_trace()) continue;
 		if (activedbg == dbgwnd::mem && mem_->dispatch_mem()) continue;
 		if (activedbg == dbgwnd::banks && banks_->dispatch_banks()) continue;
 		if (needclr)
@@ -877,8 +884,8 @@ auto DebugCore::handle_mouse() -> void
 	{
 		needclr++; activedbg = dbgwnd::trace;
 		cpu.trace_curs = cpu.trpc[my - trace_y];
-		if (mx - trace_x < cs[1][0]) cpu.trace_mode = 0;
-		else if (mx - trace_x < cs[2][0]) cpu.trace_mode = 1;
+		if (mx - trace_x < trace_->cs[1][0]) cpu.trace_mode = 0;
+		else if (mx - trace_x < trace_->cs[2][0]) cpu.trace_mode = 1;
 		else cpu.trace_mode = 2;
 	}
 	if (my >= mem_y && my < mem_y + mem_size && mx >= mem_x && mx < mem_x + 37)
@@ -935,7 +942,7 @@ auto DebugCore::handle_mouse() -> void
 			globalpos.x,
 			globalpos.y, 0, wnd, nullptr);
 		DestroyMenu(menu);
-		if (cmd == idm_bpx) cbpx();
+		if (cmd == idm_bpx) trace_->cbpx();
 	}
 	mousepos = 0;
 }
@@ -977,6 +984,11 @@ auto DebugCore::get_dialogs() -> Dialogs*
 	return get_instance()->dialogs_;
 }
 
+auto DebugCore::get_trace() -> TraceView*
+{
+	return get_instance()->trace_;
+}
+
 auto DebugCore::isbrk(const Z80& cpu) -> u8
 {
 #ifndef MOD_DEBUGCORE
@@ -1003,12 +1015,94 @@ auto DebugCore::isbrk(const Z80& cpu) -> u8
 #endif
 }
 
+auto DebugCore::init_bpx(char* file) -> void
+{
+	addpath(bpx_file_name, file ? file : "bpx.ini");
+	const auto bpx_file = fopen(bpx_file_name, "rt");
+	if (!bpx_file) return;
+	if (file)
+	{
+		color(CONSCLR_DEFAULT); printf("bpx: ");
+		color(CONSCLR_INFO);    printf("%s\n", bpx_file_name);
+	}
+
+	char line[100];
+	while (!feof(bpx_file))
+	{
+		fgets(line, sizeof(line), bpx_file);
+		line[sizeof(line) - 1] = 0;
+		char type = -1;
+		auto start = -1, end = -1, cpu_idx = -1;
+		const auto n = sscanf(line, "%c%1d=%i-%i", &type, &cpu_idx, &start, &end);
+		if (n < 3 || cpu_idx < 0 || cpu_idx >= int(TCpuMgr::get_count()) || start < 0)
+			continue;
+
+		if (end < 0)
+			end = start;
+
+		unsigned mask = 0;
+		switch (type)
+		{
+		case 'r': mask |= MEMBITS_BPR; break;
+		case 'w': mask |= MEMBITS_BPW; break;
+		case 'x': mask |= MEMBITS_BPX; break;
+		default: continue;
+		}
+
+		auto& cpu = TCpuMgr::get_cpu(cpu_idx);
+		for (auto i = unsigned(start); i <= unsigned(end); i++)
+			cpu.membits[i] |= mask;
+		cpu.dbgchk = isbrk(cpu);
+	}
+	fclose(bpx_file);
+}
+
+auto DebugCore::done_bpx() -> void
+{
+	const auto bpx_file = fopen(bpx_file_name, "wt");
+	if (!bpx_file) return;
+
+	for (unsigned cpu_idx = 0; cpu_idx < TCpuMgr::get_count(); cpu_idx++)
+	{
+		auto& cpu = TCpuMgr::get_cpu(cpu_idx);
+
+		for (auto i = 0; i < 3; i++)
+		{
+			for (unsigned start = 0; start < 0x10000; )
+			{
+				static const unsigned mask[] = { MEMBITS_BPR, MEMBITS_BPW, MEMBITS_BPX };
+				if (!(cpu.membits[start] & mask[i]))
+				{
+					start++;
+					continue;
+				}
+				const unsigned active = cpu.membits[start];
+				unsigned end;
+				for (end = start; end < 0xFFFF && !((active ^ cpu.membits[end + 1]) & mask[i]); end++) {}
+
+				static const char type[] = { 'r', 'w', 'x' };
+				if (active & mask[i])
+				{
+					if (start == end)
+						fprintf(bpx_file, "%c%1d=0x%04X\n", type[i], cpu_idx, start);
+					else
+						fprintf(bpx_file, "%c%1d=0x%04X-0x%04X\n", type[i], cpu_idx, start, end);
+				}
+
+				start = end + 1;
+			}
+		}
+	}
+
+	fclose(bpx_file);
+}
+
 auto DebugCore::debugscr() -> void
 {
 	view_->clear_canvas();
 
 	regs_->show_regs();
-	show_trace();
+	trace_->show_trace();
 	mem_->show_mem();
 	watch_->render();
 	stack_->render();

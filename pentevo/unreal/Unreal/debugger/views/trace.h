@@ -11,16 +11,13 @@ class TraceView
 {
 	DebugCore& core_;
 	DebugView& view_;
-
-	const unsigned cs[3][2] = { {0,4}, {5,10}, {16,16} };
+	MemView& mem_;
 
 	unsigned save_pos[8] = { UINT_MAX };
 	unsigned save_cur[8] = { UINT_MAX };
 	unsigned stack_pos[32] = { UINT_MAX }, stack_cur[32] = { UINT_MAX };
 	unsigned trcurs_y{};
-	unsigned asmii{};
 	char asmpc[64]{}, dumppc[12]{};
-	u8 trace_labels{};
 
 	auto csave(unsigned n) -> void;
 	auto crest(unsigned n) -> void;
@@ -28,12 +25,16 @@ class TraceView
 	auto cpu_up(unsigned ip) const -> unsigned;
 	auto tracewndflags() const -> unsigned;
 
-	auto disasm_line(unsigned addr, char *line) -> int;
-
+	
 public:
+	const unsigned cs[3][2] = { {0,4}, {5,10}, {16,16} };
 
-	TraceView(DebugCore& core, DebugView& view);
+	u8 trace_labels{};
+	unsigned asmii{};
 
+	TraceView(DebugCore& core, DebugView& view, MemView& mem);
+
+	auto disasm_line(unsigned addr, char *line) -> int;
 
 	auto cfindpc() const -> void;
 	auto cfindtext() -> void;

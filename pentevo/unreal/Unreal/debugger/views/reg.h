@@ -15,11 +15,12 @@ class RegView
 {
 	DebugCore &core_;
 	DebugView &view_;
+	MemView& mem_;
 
 public:
 	unsigned regs_curs{};
 
-	RegView(DebugCore& core, DebugView& view);
+	RegView(DebugCore& core, DebugView& view, MemView& mem);
 
 	auto ra() -> void;
 	auto rf() -> void;
@@ -45,7 +46,7 @@ public:
 	auto rCF() -> void;
 
 	auto rcodejump() const -> void;
-	auto rdatajump() -> void;
+	auto rdatajump() const -> void;
 
 	auto rleft() -> void;
 	auto rright() -> void;

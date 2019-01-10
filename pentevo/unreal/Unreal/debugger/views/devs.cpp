@@ -60,6 +60,13 @@ auto WatchView::mon_setwatch() -> void
 	}
 }
 
+auto WatchView::mon_scrshot() -> void
+{
+	show_scrshot++; 
+	if (show_scrshot == 3)
+		show_scrshot = 0;
+}
+
 auto WatchView::render() -> void
 {
 	if (show_scrshot)

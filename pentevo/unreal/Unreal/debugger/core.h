@@ -3,6 +3,7 @@
 #include "views/mem.h"
 #include "views/reg.h"
 #include "views/devs.h"
+#include "views/trace.h"
 #include "libs/dialogs.h"
 
 namespace z80dbg
@@ -39,6 +40,7 @@ class DebugCore final
 	PortsView* ports_{};
 	DosView* dos_{};
 	TimeView* time_{};
+	TraceView* trace_{};
 
 	Dialogs* dialogs_{};
 
@@ -90,10 +92,16 @@ public:
 	dbgwnd activedbg = dbgwnd::trace;
 
 	static auto debug_cond_check(Z80 *cpu) -> void;
+
 	static auto get_instance()->DebugCore*;
 	static auto get_view()->DebugView*;
 	static auto get_dialogs()->Dialogs*;
+	static auto get_trace()->TraceView*;
+
 	static auto isbrk(const Z80 &cpu)->u8;
+
+	static auto init_bpx(char* file) -> void;
+	static auto done_bpx() -> void;
 
 	auto debugscr() -> void;
 	auto debug(Z80* cpu) -> void;

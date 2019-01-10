@@ -2,6 +2,7 @@
 #pragma once
 #include "sysdefs.h"
 #include <vector>
+#include "view.h"
 
 
 using namespace std;
@@ -90,6 +91,8 @@ public:
 
 class dbg_canvas final
 {
+	DebugView& view_;
+
 	u8 attr_ = 0;
 	int base_x_;
 	int base_y_;
@@ -105,7 +108,7 @@ class dbg_canvas final
 	void print_dbg(char* line, int color);
 
 public:
-	dbg_canvas(int base_x, int base_y);
+	dbg_canvas(DebugView& view, int base_x, int base_y);
 	~dbg_canvas();
 
 	dbg_canvas& set_attr(const u8 color);

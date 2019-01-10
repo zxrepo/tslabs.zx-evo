@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
 #include "sysdefs.h"
-#include "consts.h"
 #include "vars.h"
+#include "debugger/consts.h"
 
 struct MenuItem final
 {

@@ -6,6 +6,7 @@
 #include "debugger/consts.h"
 #include "debugger/libs/cpu_manager.h"
 #include "debugger/libs/dbglabls.h"
+#include "memory.h"
 
 char str[80];
 
@@ -175,7 +176,7 @@ auto TraceView::disasm_line(unsigned addr, char* line) -> int
 	return len;
 }
 
-TraceView::TraceView(DebugCore& core, DebugView& view): core_(core), view_(view)
+TraceView::TraceView(DebugCore& core, DebugView& view, MemView& mem): core_(core), view_(view), mem_(mem)
 {
 }
 
@@ -188,10 +189,10 @@ auto TraceView::cfindpc() const -> void
 auto TraceView::cfindtext() -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
-	const auto oldmode = editor;
-	editor = ed_mem;
-	const auto rs = find1dlg(cpu.trace_curs);
-	editor = oldmode;
+	const auto oldmode = mem_.editor;
+	mem_.editor = ed_mem;
+	const auto rs = DebugCore::get_dialogs()->find1dlg(cpu.trace_curs);
+	mem_.editor = oldmode;
 	if (rs != UINT_MAX)
 		cpu.trace_top = cpu.trace_curs = rs;
 }
@@ -199,10 +200,10 @@ auto TraceView::cfindtext() -> void
 auto TraceView::cfindcode() -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
-	const auto oldmode = editor;
-	editor = ed_mem;
-	const auto rs = find2dlg(cpu.trace_curs);
-	editor = oldmode;
+	const auto oldmode = mem_.editor;
+	mem_.editor = ed_mem;
+	const auto rs = DebugCore::get_dialogs()->find2dlg(cpu.trace_curs);
+	mem_.editor = oldmode;
 	if (rs != UINT_MAX)
 		cpu.trace_top = cpu.trace_curs = rs;
 }
@@ -381,7 +382,7 @@ auto TraceView::cdjump() -> void
 	auto& cpu = TCpuMgr::get_cpu();
 	cpu.mem_curs = addr;
 	core_.activedbg = dbgwnd::mem; 
-	editor = ed_mem;
+	mem_.editor = ed_mem;
 }
 
 auto TraceView::csave1() -> void

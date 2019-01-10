@@ -328,12 +328,6 @@
     <ClCompile Include="sound\ayx32.cpp">
       <Filter>Sources\sound</Filter>
     </ClCompile>
-    <ClCompile Include="debugger\dbgbpx.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="debugger\dbgcmd.cpp">
-      <Filter>debugger</Filter>
-    </ClCompile>
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
@@ -631,15 +625,6 @@
     </ClInclude>
     <ClInclude Include="sound\ayx32.h">
       <Filter>Headers\sound</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\dbgbpx.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\dbgcmd.h">
-      <Filter>debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="debugger\debug.h">
-      <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="debugger\consts.h" />
     <ClInclude Include="imgui\imconfig.h" />

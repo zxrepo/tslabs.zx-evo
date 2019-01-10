@@ -1,10 +1,8 @@
 #include "std.h"
-#include "emul.h"
-#include "vars.h"
 #include "dbgwidgets.h"
 #include <algorithm>
 #include <memory>
-#include "consts.h"
+#include "debugger/consts.h"
 
 dbg_control::dbg_control(int h):h_(h) { }
 
@@ -351,16 +349,14 @@ void dbg_column::paint()
 void dbg_canvas::print_dbg(char* line, int color)
 {
 	if (color == -1)
-		tprint(base_x_ + x_, base_y_ + y_, line, attr_);
+		view_.tprint(base_x_ + x_, base_y_ + y_, line, attr_);
 	else
-		tprint(base_x_ + x_, base_y_ + y_, line, static_cast<u8>(color));
+		view_.tprint(base_x_ + x_, base_y_ + y_, line, static_cast<u8>(color));
 
 	last_len_ = strlen(line);
 }
 
-dbg_canvas::dbg_canvas(int base_x, int base_y)
-	: base_x_(base_x),
-	base_y_(base_y)
+dbg_canvas::dbg_canvas(DebugView& view, int base_x, int base_y) : base_x_(base_x), base_y_(base_y), view_(view)
 { }
 
 dbg_canvas::~dbg_canvas()
@@ -427,13 +423,13 @@ dbg_canvas& dbg_canvas::move_x_to_len()
 
 dbg_canvas& dbg_canvas::draw_frame(const int w, int h)
 {
-	frame(base_x_ + x_, base_y_ + y_, w, h, FRAME);
+	view_.add_frame(base_x_ + x_, base_y_ + y_, w, h, FRAME);
 	return *this;
 }
 
 dbg_canvas& dbg_canvas::fill_rect(const int w, const int h)
 {
-	fillrect(base_x_ + x_, base_y_ + y_, w, h, w_norm);
+	view_.fillrect(base_x_ + x_, base_y_ + y_, w, h, w_norm);
 
 	return *this;
 }

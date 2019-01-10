@@ -7,6 +7,7 @@
 #include "debugger/consts.h"
 #include "debugger/views/mem.h"
 #include "cpu_manager.h"
+#include "funcs.h"
 
 static bool __cdecl get_dos_flag()
 {
@@ -633,7 +634,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		SendDlgItemMessage(dlg, IDE_CBP, WM_SETTEXT, 0, 0);
 		fill_cond_box(dlg, cpu.cbpn++);
-		cpu.dbgchk = isbrk(cpu);
+		cpu.dbgchk = DebugCore::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -653,7 +654,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 			cpu.membits[i] |= MEMBITS_BPX;
 		SendDlgItemMessage(dlg, IDE_BPX, WM_SETTEXT, 0, 0);
 		fill_bpx_box(dlg, range.start);
-		cpu.dbgchk = isbrk(cpu);
+		cpu.dbgchk = DebugCore::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -679,7 +680,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		CheckDlgButton(dlg, IDC_MEM_R, BST_UNCHECKED);
 		CheckDlgButton(dlg, IDC_MEM_W, BST_UNCHECKED);
 		fill_mem_box(dlg, range.start);
-		cpu.dbgchk = isbrk(cpu);
+		cpu.dbgchk = DebugCore::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -697,7 +698,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		if (cur && cur == cpu.cbpn)
 			cur--;
 		fill_cond_box(dlg, cur);
-		cpu.dbgchk = isbrk(cpu);
+		cpu.dbgchk = DebugCore::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -722,7 +723,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		if (cur && cur == max)
 			cur--;
 		SendDlgItemMessage(dlg, id, LB_SETCURSEL, cur, 0);
-		cpu.dbgchk = isbrk(cpu);
+		cpu.dbgchk = DebugCore::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -741,4 +742,58 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 auto Dialogs::mon_bpdialog() const -> void
 {
 	view_.show_dialog(MAKEINTRESOURCE(IDD_COND), conddlg);
+}
+
+INT_PTR CALLBACK watchdlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
+{
+	char tmp[0x200]; unsigned i;
+	static const int ids1[] = { IDC_W1_ON, IDC_W2_ON, IDC_W3_ON, IDC_W4_ON };
+	static const int ids2[] = { IDE_W1, IDE_W2, IDE_W3, IDE_W4 };
+	if (msg == WM_INITDIALOG) {
+		for (i = 0; i < 4; i++) {
+			CheckDlgButton(dlg, ids1[i], watch_enabled[i] ? BST_CHECKED : BST_UNCHECKED);
+			script2text(tmp, watch_script[i]); SetWindowText(GetDlgItem(dlg, ids2[i]), tmp);
+		}
+		CheckDlgButton(dlg, IDC_TR_RAM, trace_ram ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(dlg, IDC_TR_ROM, trace_ram ? BST_CHECKED : BST_UNCHECKED);
+	reinit:
+		for (i = 0; i < 4; i++)
+			EnableWindow(GetDlgItem(dlg, ids2[i]), watch_enabled[i]);
+		return 1;
+	}
+	if (msg == WM_COMMAND && (LOWORD(wp) == ids1[0] || LOWORD(wp) == ids1[1] || LOWORD(wp) == ids1[2] || LOWORD(wp) == ids1[3])) {
+		for (i = 0; i < 4; i++)
+			watch_enabled[i] = IsDlgButtonChecked(dlg, ids1[i]) == BST_CHECKED;
+		goto reinit;
+	}
+	if ((msg == WM_SYSCOMMAND && (wp & 0xFFF0) == SC_CLOSE) || (msg == WM_COMMAND && LOWORD(wp) == IDCANCEL)) {
+		trace_ram = IsDlgButtonChecked(dlg, IDC_TR_RAM) == BST_CHECKED;
+		trace_rom = IsDlgButtonChecked(dlg, IDC_TR_ROM) == BST_CHECKED;
+		for (i = 0; i < 4; i++)
+			if (watch_enabled[i]) {
+				SendDlgItemMessage(dlg, ids2[i], WM_GETTEXT, sizeof tmp, LPARAM(tmp));
+				if (!toscript(tmp, watch_script[i])) {
+					sprintf(tmp, "Watch %d: error in expression\nPlease do RTFM", i + 1);
+					MessageBox(dlg, tmp, nullptr, MB_ICONERROR); watch_enabled[i] = 0;
+					SetFocus(GetDlgItem(dlg, ids2[i]));
+					return 0;
+				}
+			}
+		EndDialog(dlg, 0);
+	}
+	return 0;
+}
+
+auto Dialogs::mon_watchdialog() const -> void
+{
+	view_.show_dialog(MAKEINTRESOURCE(IDD_OSW), watchdlg);
+}
+
+auto Dialogs::mon_setup_dlg() -> void
+{
+#ifdef MOD_SETTINGS
+	setup_dlg();
+	temp.rflags = RF_MONITOR;
+	set_video();
+#endif
 }

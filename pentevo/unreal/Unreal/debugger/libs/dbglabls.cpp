@@ -2,14 +2,13 @@
 #include "resource.h"
 #include "emul.h"
 #include "vars.h"
-#include "debug.h"
 #include "dbglabls.h"
 #include "memory.h"
 #include "config.h"
 #include "util.h"
 #include "view.h"
-#include "core.h"
 #include "cpu_manager.h"
+#include "debugger/core.h"
 
 MonLabelsT mon_labels;
 
@@ -434,7 +433,7 @@ INT_PTR CALLBACK LabelsDlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 		void push_pos(); push_pos();
 		TCpuMgr::get_cpu().trace_curs = TCpuMgr::get_cpu().trace_top = address;
-		activedbg = dbgwnd::trace;
+		DebugCore::get_instance()->activedbg = dbgwnd::trace;
 
 		EndDialog(dlg, 1);
 		return 1;

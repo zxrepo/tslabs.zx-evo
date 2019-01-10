@@ -3,6 +3,7 @@
 #include "font16.h"
 #include "cpu_manager.h"
 #include "util.h"
+#include "debugger/consts.h"
 
 char str[80];
 

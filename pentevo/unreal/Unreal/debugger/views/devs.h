@@ -14,6 +14,7 @@ public:
 	WatchView(DebugCore& core, DebugView& view);
 
 	auto mon_setwatch() -> void;
+	auto mon_scrshot() -> void;
 	auto render() -> void;
 };
 

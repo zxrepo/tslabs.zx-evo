@@ -38,8 +38,6 @@
     </ClCompile>
     <ClCompile Include="debugger\core.cpp" />
     <ClCompile Include="debugger\libs\cpu_manager.cpp" />
-    <ClCompile Include="debugger\dbgbpx.cpp" />
-    <ClCompile Include="debugger\dbgcmd.cpp" />
     <ClCompile Include="debugger\libs\dbglabls.cpp" />
     <ClCompile Include="debugger\libs\dbgtsconf.cpp" />
     <ClCompile Include="debugger\libs\dbgwidgets.cpp" />
@@ -168,13 +166,10 @@
     <ClInclude Include="debugger\consts.h" />
     <ClInclude Include="debugger\core.h" />
     <ClInclude Include="debugger\libs\cpu_manager.h" />
-    <ClInclude Include="debugger\dbgbpx.h" />
-    <ClInclude Include="debugger\dbgcmd.h" />
     <ClInclude Include="debugger\libs\dbglabls.h" />
     <ClInclude Include="debugger\libs\dbgtsconf.h" />
     <ClInclude Include="debugger\libs\dbgwidgets.h" />
     <ClInclude Include="ddk.h" />
-    <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="debugger\libs\dialogs.h" />
     <ClInclude Include="debugger\libs\view.h" />
     <ClInclude Include="debugger\views\devs.h" />

@@ -37,7 +37,7 @@ const std::vector<TRegLayout> regs_layout =
    { offsetof(TZ80State, f)     , 30, 31, 3,24,25,17,25 }, // 25 CF
 };
 
-RegView::RegView(DebugCore& core, DebugView& view): core_(core), view_(view)
+RegView::RegView(DebugCore& core, DebugView& view, MemView& mem): core_(core), view_(view), mem_(mem)
 {
 }
 
@@ -193,13 +193,13 @@ auto RegView::rcodejump() const -> void
 	}
 }
 
-auto RegView::rdatajump() -> void
+auto RegView::rdatajump() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	if (regs_layout[regs_curs].width == 16)
 	{
 		core_.activedbg = dbgwnd::mem;
-		editor = ed_mem;
+		mem_.editor = ed_mem;
 		cpu.mem_curs = *reinterpret_cast<u16*>(PCHAR(static_cast<TZ80State*>(&cpu)) + regs_layout[regs_curs].offs);
 	}
 }
