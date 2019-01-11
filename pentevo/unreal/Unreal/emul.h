@@ -4,6 +4,9 @@
 #include "sndrender.h"
 #include "tsconf.h"
 #include "savevid.h"
+#include <string>
+#include <functional>
+#include <vector>
 
 #define EMUL_DEBUG
 #define TRASH_PAGE

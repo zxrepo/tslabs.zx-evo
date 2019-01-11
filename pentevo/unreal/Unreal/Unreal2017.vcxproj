@@ -258,6 +258,7 @@
     <ClInclude Include="tables.h" />
     <ClInclude Include="tape.h" />
     <ClInclude Include="tsconf.h" />
+    <ClInclude Include="ui_action.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="vars.h" />
     <ClInclude Include="vs1001.h" />

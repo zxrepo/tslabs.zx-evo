@@ -348,6 +348,7 @@
     <ClCompile Include="debugger\views\dbgtsconf.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
+    <ClCompile Include="dxguid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="atm.h">
@@ -650,6 +651,8 @@
     <ClInclude Include="debugger\views\dbgtsconf.h">
       <Filter>debugger</Filter>
     </ClInclude>
+    <ClInclude Include="dxerrors.h" />
+    <ClInclude Include="ui_action.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

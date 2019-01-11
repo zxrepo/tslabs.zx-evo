@@ -1,5 +1,6 @@
 #pragma once
 #include "defs.h"
+#include "ui_action.h"
 
 class DebugCore;
 class DebugView;
@@ -27,6 +28,8 @@ namespace z80dbg
 {
 	void __cdecl SetLastT();
 }
+
+extern std::vector<UIAction> mon_actions;
 
 // debug breakpoints format descriptor
 struct BPXR

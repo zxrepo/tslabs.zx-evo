@@ -5,6 +5,8 @@
 #include "gui.h"
 #include "savesnd.h"
 #include "cheat.h"
+#include "ui_action.h"
+#include "debugger/core.h"
 
 action ac_main[] =
 {
@@ -71,6 +73,10 @@ action ac_main_xt[] =
    { "main.xtkbd", main_atmkbd },
 
    { 0, 0 },
+};
+
+std::vector<UIAction> mon_actions = {
+	UIAction("mon.exit", [](auto act, auto args) { correct_exit(); }),
 };
 
 #ifdef MOD_MONITOR

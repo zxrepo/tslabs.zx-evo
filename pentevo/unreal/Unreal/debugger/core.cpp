@@ -28,9 +28,9 @@ namespace z80dbg
 	}
 
 }
+char str[80]{};
 
 DebugCore* DebugCore::instance_ = nullptr;
-char str[80]{};
 
 DebugCore::DebugCore() : ref_(*this)
 {
