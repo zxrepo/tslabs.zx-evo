@@ -1,7 +1,7 @@
 #include "std.h"
-#include "../emul.h"
-#include "../vars.h"
-#include "../util.h"
+#include "emul.h"
+#include "vars.h"
+#include "util.h"
 #include "dev_moonsound.h"
 
 #include "ymf262.h"

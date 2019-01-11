@@ -1,5 +1,6 @@
 #pragma once
 #include "debugger/core.h"
+#include "debugger/libs/view.h"
 
 void __cdecl BankNames(int i, char *name);
 
@@ -37,7 +38,7 @@ class AyView final
 public:
 	AyView(DebugCore& core, DebugView& view);
 
-	auto mon_switchay() const -> void;
+	static auto mon_switchay() -> void;
 	auto render() const -> void;
 };
 
@@ -52,12 +53,12 @@ public:
 
 	BanksView(DebugCore& core, DebugView& view);
 
-	auto benter() -> void;
+	auto benter() const -> void;
 	auto bup() -> void;
 	auto bdown() -> void;
-	auto editbank() -> void;
+	auto editbank() const -> void;
 
-	auto dispatch_banks() -> char;
+	auto dispatch_banks() const -> char;
 	auto render() const -> void;
 };
 
@@ -71,7 +72,7 @@ class PortsView final
 public:
 	PortsView(DebugCore& core, DebugView& view);
 
-	auto editextbank() -> void;
+	auto editextbank() const -> void;
 	auto render() -> void;
 };
 

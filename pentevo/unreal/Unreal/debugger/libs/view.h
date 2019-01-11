@@ -59,6 +59,8 @@ public:
 	auto on_paint(HWND hwnd) const ->void;
 	auto show_dialog(__in LPCSTR lpTemplateName, __in_opt DLGPROC lpDialogFunc) const -> void;
 
+	auto set_scr(u32 addr, u8 val) const -> void;
+
 	auto flip() -> void;
 	auto add_frame(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 attr) -> void;
 	auto handle_menu(MenuDef *menu) -> char;

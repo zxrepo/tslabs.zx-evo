@@ -4,7 +4,7 @@
 
 unsigned calc(const Z80 *cpu, unsigned *script);
 
-class Dialogs
+class Dialogs final
 {
 	DebugView& view_;
 	MemView& mem_;

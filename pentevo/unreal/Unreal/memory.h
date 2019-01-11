@@ -1,5 +1,8 @@
 #pragma once
+#include "sysdefs.h"
 #include "defs.h"
+#include "emul.h"
+#include "vars.h"
 
 void set_mode(ROM_MODE mode);
 void set_banks();

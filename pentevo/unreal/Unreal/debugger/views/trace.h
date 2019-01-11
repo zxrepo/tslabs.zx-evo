@@ -1,5 +1,7 @@
 #pragma once
 #include "debugger/core.h"
+#include "debugger/libs/view.h"
+#include "debugger/views/mem.h"
 
 #define TWF_BRANCH  0x010000
 #define TWF_BRADDR  0x020000
@@ -7,7 +9,9 @@
 #define TWF_CALLCMD 0x080000
 #define TWF_BLKCMD  0x100000
 
-class TraceView
+class DebugCore;
+
+class TraceView final
 {
 	DebugCore& core_;
 	DebugView& view_;
@@ -34,11 +38,11 @@ public:
 
 	TraceView(DebugCore& core, DebugView& view, MemView& mem);
 
-	auto disasm_line(unsigned addr, char *line) -> int;
+	auto disasm_line(unsigned addr, char *line) const -> int;
 
 	auto cfindpc() const -> void;
-	auto cfindtext() -> void;
-	auto cfindcode() -> void;
+	auto cfindtext() const -> void;
+	auto cfindcode() const -> void;
 	auto cgoto() const -> void;
 	auto cbpx() const -> void;
 	auto center() -> void;
@@ -71,7 +75,7 @@ public:
 	auto crest8() -> void;
 
 	auto cfliplabels() -> void;
-	auto c_lbl_import() -> void;
+	static auto c_lbl_import() -> void;
 
 
 	auto show_trace() -> void;

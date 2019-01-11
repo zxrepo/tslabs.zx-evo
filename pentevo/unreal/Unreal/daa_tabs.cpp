@@ -1,3 +1,4 @@
+#include "std.h"
 #include "sysdefs.h"
 #include "daa_tabs.h"
 

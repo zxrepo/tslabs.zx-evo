@@ -147,7 +147,7 @@ auto TraceView::tracewndflags() const -> unsigned
 	return 0;
 }
 
-auto TraceView::disasm_line(unsigned addr, char* line) -> int
+auto TraceView::disasm_line(unsigned addr, char* line) const -> int
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	u8 dbuf[16 + 129/*Alone Code 0.36.7*/];
@@ -186,7 +186,7 @@ auto TraceView::cfindpc() const -> void
 	cpu.trace_top = cpu.trace_curs = cpu.pc;
 }
 
-auto TraceView::cfindtext() -> void
+auto TraceView::cfindtext() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	const auto oldmode = mem_.editor;
@@ -197,7 +197,7 @@ auto TraceView::cfindtext() -> void
 		cpu.trace_top = cpu.trace_curs = rs;
 }
 
-auto TraceView::cfindcode() -> void
+auto TraceView::cfindcode() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	const auto oldmode = mem_.editor;
@@ -374,7 +374,7 @@ auto TraceView::cjump() -> void
 
 auto TraceView::cdjump() -> void
 {
-	char *ptr = 0;
+	char *ptr = nullptr;
 	for (auto p = asmpc; *p; p++)
 		if (ishex(p[0]) & ishex(p[1]) & ishex(p[2]) & ishex(p[3])) ptr = p;
 	if (!ptr) return;
@@ -509,7 +509,7 @@ auto TraceView::show_trace() -> void
 			asmii = ii;
 			if (core_.activedbg == dbgwnd::trace)
 				for (unsigned q = 0; q < cs[cpu.trace_mode][1]; q++)
-					txtscr[debug_text_width * debug_text_height + (trace_y + ii) * debug_text_width + trace_x + cs[cpu.trace_mode][0] + q] = w_curs;
+					view_.set_scr(debug_text_width * debug_text_height + (trace_y + ii) * debug_text_width + trace_x + cs[cpu.trace_mode][0] + q, w_curs);
 		}
 
 		if (cpu.pc_trflags & TWF_BRANCH)
@@ -560,4 +560,8 @@ auto TraceView::dispatch_trace() -> char
 		return 1;
 	}
 	return 0;
+}
+
+auto csave(unsigned n) -> void
+{
 }

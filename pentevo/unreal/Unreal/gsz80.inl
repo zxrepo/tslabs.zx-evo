@@ -57,7 +57,7 @@ void z80loop()
       while ((gs_t_states + gscpu.t < end) && (gscpu.t < GSCPUINT)) // (int)gscpu.t < max_gscpu_t
       {
 #ifdef Z80_DBG
-         debug_events(&gscpu);
+         DebugCore::debug_events(&gscpu);
 #endif
 /* [vv]
          if (gscpu.halted)

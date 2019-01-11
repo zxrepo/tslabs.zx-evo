@@ -356,7 +356,7 @@ void dbg_canvas::print_dbg(char* line, int color)
 	last_len_ = strlen(line);
 }
 
-dbg_canvas::dbg_canvas(DebugView& view, int base_x, int base_y) : base_x_(base_x), base_y_(base_y), view_(view)
+dbg_canvas::dbg_canvas(DebugView& view, int base_x, int base_y) : view_(view), base_x_(base_x), base_y_(base_y)
 { }
 
 dbg_canvas::~dbg_canvas()

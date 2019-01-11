@@ -387,7 +387,7 @@ redraw:
 		view_.tprint(mem_x, mem_y + ii, line, (core_.activedbg == dbgwnd::mem) ? w_sel : w_norm);
 		cursor_found |= cx;
 		if (cx && (core_.activedbg == dbgwnd::mem))
-			txtscr[(mem_y + ii) * debug_text_width + mem_x + cx + debug_text_width * debug_text_height] = w_curs;
+			view_.set_scr((mem_y + ii) * debug_text_width + mem_x + cx + debug_text_width * debug_text_height, w_curs);
 	}
 
 	if (!cursor_found)

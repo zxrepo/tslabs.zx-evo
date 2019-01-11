@@ -3,7 +3,7 @@
 
 // AYX32 emulator for Unreal Speccy
 
-#include "..\sysdefs.h"
+#include "sysdefs.h"
 
 typedef void (*TASK)();
 

@@ -3,7 +3,7 @@
 #ifndef _SOUND_DEV_MOONSOUND_H
 #define _SOUND_DEV_MOONSOUND_H
 
-#include "../sysdefs.h"
+#include "sysdefs.h"
 
 struct ZXMMoonSound_priv;
 

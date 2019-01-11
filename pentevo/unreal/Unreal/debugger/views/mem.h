@@ -1,8 +1,7 @@
 #pragma once
-
 #include "sysdefs.h"
-#include "wd93.h"
 #include "debugger/core.h"
+#include "wd93.h"
 #include "debugger/libs/view.h"
 
 enum { ed_mem, ed_phys, ed_log, ed_cmos, ed_nvram, ed_max };

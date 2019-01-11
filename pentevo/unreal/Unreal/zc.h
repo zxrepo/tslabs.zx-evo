@@ -1,6 +1,9 @@
 #pragma once
 // Z-Controller by KOE
 // Only SD-card
+#include "sysdefs.h"
+#include "zc.h"
+#include "sdcard.h"
 
 class TZc
 {

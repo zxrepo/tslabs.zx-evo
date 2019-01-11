@@ -1,5 +1,12 @@
 #pragma once
+#include "sysdefs.h"
 #include "debugger/core.h"
+#include "debugger/libs/view.h"
+#include "debugger/views/mem.h"
+
+class DebugCore;
+class MemView;
+class DebugView;
 
 struct TRegLayout final
 {

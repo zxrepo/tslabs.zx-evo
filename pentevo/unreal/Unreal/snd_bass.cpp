@@ -1,6 +1,6 @@
 #include "std.h"
-#include "emul.h"
 #include "util.h"
+#include "snd_bass.h"
 
 #if defined(MOD_GSZ80) || defined(MOD_GSBASS)
 namespace BASS

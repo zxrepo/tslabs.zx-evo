@@ -73,7 +73,7 @@ auto WatchView::render() -> void
 	{
 		for (unsigned y = 0; y < wat_sz; y++)
 			for (unsigned x = 0; x < 37; x++)
-				txtscr[debug_text_width * debug_text_height + (wat_y + y) * debug_text_width + (wat_x + x)] = 0xFF;
+				view_.set_scr(debug_text_width * debug_text_height + (wat_y + y) * debug_text_width + (wat_x + x), 0xff);
 	}
 	else
 	{
@@ -127,7 +127,7 @@ AyView::AyView(DebugCore& core, DebugView& view) : core_(core), view_(view)
 {
 }
 
-auto AyView::mon_switchay() const -> void
+auto AyView::mon_switchay() -> void
 {
 	comp.active_ay ^= 1;
 }
@@ -153,7 +153,7 @@ BanksView::BanksView(DebugCore& core, DebugView& view) : core_(core), view_(view
 {
 }
 
-auto BanksView::dispatch_banks() -> char
+auto BanksView::dispatch_banks() const -> char
 {
 	if ((conf.mem_model == MM_TSL) && (selbank != UINT_MAX) &&
 		((input.lastkey >= '0' && input.lastkey <= '9') || (input.lastkey >= 'A' && input.lastkey <= 'F')))
@@ -164,7 +164,7 @@ auto BanksView::dispatch_banks() -> char
 	return 0;
 }
 
-auto BanksView::benter() -> void
+auto BanksView::benter() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	core_.debugscr();
@@ -197,7 +197,7 @@ auto BanksView::bdown() -> void
 	selbank &= 3;
 }
 
-auto BanksView::editbank() -> void
+auto BanksView::editbank() const -> void
 {
 	const auto x = view_.input2(ports_x + 5, ports_y + 1, comp.p7FFD);
 	if (x != UINT_MAX)
@@ -228,7 +228,7 @@ PortsView::PortsView(DebugCore& core, DebugView& view) : core_(core), view_(view
 {
 }
 
-auto PortsView::editextbank() -> void
+auto PortsView::editextbank() const -> void
 {
 	if (dbg_extport == UINT_MAX)
 		return;

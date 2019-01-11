@@ -1,5 +1,6 @@
 #pragma once
 #include "debugger/libs/dbgwidgets.h"
+#include "debugger/libs/view.h"
 
 class TsconfView
 {

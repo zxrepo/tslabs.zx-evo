@@ -8,6 +8,7 @@
 #include "debugger/views/mem.h"
 #include "cpu_manager.h"
 #include "funcs.h"
+#include "leds.h"
 
 static bool __cdecl get_dos_flag()
 {
@@ -100,7 +101,7 @@ auto Dialogs::find1dlg(unsigned start) const -> unsigned
 	}
 	view_.tprint(11, 12, "  not found   ", fframe_error);
 	view_.flip();
-	while (!process_msgs());
+	while (!process_msgs()) {}
 	return -1;
 }
 

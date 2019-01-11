@@ -1,5 +1,21 @@
 #pragma once
 #include "defs.h"
+
+class DebugCore;
+class DebugView;
+class MemView;
+class RegView;
+class WatchView;
+class StackView;
+class AyView;
+class BanksView;
+class PortsView;
+class DosView;
+class TimeView;
+class TraceView;
+class TsconfView;
+class Dialogs;
+
 #include "views/mem.h"
 #include "views/reg.h"
 #include "views/devs.h"
@@ -13,12 +29,12 @@ namespace z80dbg
 }
 
 // debug breakpoints format descriptor
-typedef struct
+struct BPXR
 {
 	unsigned reg;       // token string (e.g. 'DOS','OUT')
 	const void *ptr;    // pointer to variable, containing queried value
 	u8 size;            // size of variable (1, 2, 4) or 0 for address of function: bool func()
-} BPXR;
+};
 
 enum FILEDLG_MODE { FDM_LOAD = 0, FDM_SAVE, FDM_DISASM };
 

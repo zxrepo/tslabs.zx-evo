@@ -77,6 +77,11 @@ auto DebugView::show_dialog(LPCSTR lpTemplateName, DLGPROC lpDialogFunc) const -
 	DialogBox(hIn, lpTemplateName, wnd_, lpDialogFunc);
 }
 
+auto DebugView::set_scr(u32 addr, u8 val) const -> void
+{
+	txtscr_[addr] = val;
+}
+
 auto DebugView::flip() -> void
 {
 	for (auto y = 0; y < debug_text_height; y++)
