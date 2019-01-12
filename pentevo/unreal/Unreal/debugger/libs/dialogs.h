@@ -9,6 +9,8 @@ class Dialogs final
 	DebugView& view_;
 	MemView& mem_;
 
+	auto subscrible() -> void;
+
 public:
 	static auto mon_setup_dlg() -> void;
 

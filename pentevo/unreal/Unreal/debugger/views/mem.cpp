@@ -65,6 +65,167 @@ auto MemView::editwm(unsigned addr, u8 byte) -> void
 		wd93_crc(edited_track.hdr[sector].data - 1, edited_track.hdr[sector].datlen + 1);
 }
 
+auto MemView::subscrible() -> void
+{
+	ActionManager::subscrible(ActionType::memory, "left", [this]()
+	{
+		if (!mem_max)
+			return;
+
+		auto& cpu = TCpuMgr::get_cpu();
+		if (mem_ascii || !cpu.mem_second)
+			cpu.mem_curs--;
+		if (!mem_ascii)
+			cpu.mem_second ^= 1;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "right", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+
+		if (!mem_max)
+			return;
+
+		if (mem_ascii || cpu.mem_second)
+			cpu.mem_curs++;
+		if (!mem_ascii)
+			cpu.mem_second ^= 1;
+		if (((cpu.mem_curs - cpu.mem_top + mem_max) % mem_max) / mem_sz >= mem_size)
+			cpu.mem_top += mem_sz;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "up", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+
+		if (mem_max)
+			cpu.mem_curs -= mem_sz;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "down", [this]()
+	{
+		if (!mem_max)
+			return;
+
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.mem_curs += mem_sz;
+		if (((cpu.mem_curs - cpu.mem_top + mem_max) % mem_max) / mem_sz >= mem_size)
+			cpu.mem_top += mem_sz;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "pgup", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+
+		if (mem_max)
+			cpu.mem_curs -= mem_size * mem_sz, cpu.mem_top -= mem_size * mem_sz;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "pgdn", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+
+		if (mem_max)
+			cpu.mem_curs += mem_size * mem_sz, cpu.mem_top += mem_size * mem_sz;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "switch", [this]()
+	{
+		mem_ascii ^= 1;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "stline", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+
+		if (mem_max)
+			cpu.mem_curs &= ~(mem_sz - 1), cpu.mem_second = 0;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "endline", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+
+		if (mem_max)
+			cpu.mem_curs |= (mem_sz - 1), cpu.mem_second = 1;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "findtext", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		const unsigned rs = DebugCore::get_dialogs()->find1dlg(cpu.mem_curs);
+
+		if (rs != UINT_MAX)
+			cpu.mem_curs = rs;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "findcode", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		const auto rs = DebugCore::get_dialogs()->find2dlg(cpu.mem_curs);
+
+		if (rs != UINT_MAX)
+			cpu.mem_curs = rs;
+	});
+
+
+	ActionManager::subscrible(ActionType::memory, "goto", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		const unsigned v = view_.input4(mem_x, mem_y, cpu.mem_top);
+
+		if (v != UINT_MAX)
+			cpu.mem_top = (v & ~(mem_sz - 1)), cpu.mem_curs = v;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "mem", [this]() { editor = ed_mem; });
+	ActionManager::subscrible(ActionType::memory, "diskphys", [this]() { editor = ed_phys; });
+	ActionManager::subscrible(ActionType::memory, "disklog", [this]() { editor = ed_log; });
+	ActionManager::subscrible(ActionType::memory, "diskgo", [this]() { mdiskgo(); });
+
+	ActionManager::subscrible(ActionType::memory, "pc", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.mem_curs = cpu.pc;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "sp", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.mem_curs = cpu.sp;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "bc", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.mem_curs = cpu.bc;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "de", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.mem_curs = cpu.de;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "hl", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.mem_curs = cpu.hl;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "ix", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.mem_curs = cpu.ix;
+	});
+
+	ActionManager::subscrible(ActionType::memory, "iy", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.mem_curs = cpu.iy;
+	});
+}
+
 auto MemView::memadr(unsigned addr) const -> unsigned
 {
 	if (editor == ed_mem)
@@ -95,131 +256,7 @@ auto MemView::editrm(unsigned addr) -> u8
 
 MemView::MemView(DebugCore& core, DebugView& view) : view_(view), core_(core)
 {
-}
-
-auto MemView::mleft() const -> void
-{
-	if (!mem_max)
-		return;
-
-	auto& cpu = TCpuMgr::get_cpu();
-	if (mem_ascii || !cpu.mem_second)
-		cpu.mem_curs--;
-	if (!mem_ascii)
-		cpu.mem_second ^= 1;
-}
-
-auto MemView::mright() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	if (!mem_max)
-		return;
-
-	if (mem_ascii || cpu.mem_second)
-		cpu.mem_curs++;
-	if (!mem_ascii)
-		cpu.mem_second ^= 1;
-	if (((cpu.mem_curs - cpu.mem_top + mem_max) % mem_max) / mem_sz >= mem_size)
-		cpu.mem_top += mem_sz;
-}
-
-auto MemView::mup() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	if (mem_max)
-		cpu.mem_curs -= mem_sz;
-}
-
-auto MemView::mdown() const -> void
-{
-	if (!mem_max)
-		return;
-
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.mem_curs += mem_sz;
-	if (((cpu.mem_curs - cpu.mem_top + mem_max) % mem_max) / mem_sz >= mem_size)
-		cpu.mem_top += mem_sz;
-}
-
-auto MemView::mpgdn() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	if (mem_max)
-		cpu.mem_curs += mem_size * mem_sz, cpu.mem_top += mem_size * mem_sz;
-}
-
-auto MemView::mpgup() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	if (mem_max)
-		cpu.mem_curs -= mem_size * mem_sz, cpu.mem_top -= mem_size * mem_sz;
-}
-
-auto MemView::mswitch() -> void
-{
-	mem_ascii ^= 1;
-}
-
-auto MemView::mstl() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	if (mem_max)
-		cpu.mem_curs &= ~(mem_sz - 1), cpu.mem_second = 0;
-}
-
-auto MemView::mendl() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	if (mem_max)
-		cpu.mem_curs |= (mem_sz - 1), cpu.mem_second = 1;
-}
-
-auto MemView::mtext() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	const unsigned rs = DebugCore::get_dialogs()->find1dlg(cpu.mem_curs);
-
-	if (rs != UINT_MAX)
-		cpu.mem_curs = rs;
-}
-
-auto MemView::mcode() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	const auto rs = DebugCore::get_dialogs()->find2dlg(cpu.mem_curs);
-
-	if (rs != UINT_MAX)
-		cpu.mem_curs = rs;
-}
-
-auto MemView::mgoto() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	const unsigned v = view_.input4(mem_x, mem_y, cpu.mem_top);
-
-	if (v != UINT_MAX)
-		cpu.mem_top = (v & ~(mem_sz - 1)), cpu.mem_curs = v;
-}
-
-auto MemView::mmodemem() -> void
-{
-	editor = ed_mem;
-}
-
-auto MemView::mmodephys() -> void
-{
-	editor = ed_phys;
-}
-
-auto MemView::mmodelog() -> void
-{
-	editor = ed_log;
+	subscrible();
 }
 
 auto MemView::mdiskgo() -> void
@@ -238,7 +275,7 @@ auto MemView::mdiskgo() -> void
 		if (*str >= 'A' && *str <= 'D')
 			break;
 	}
-	mem_disk = *str - 'A'; show_mem();
+	mem_disk = *str - 'A'; render();
 	unsigned x = view_.input2(mem_x + 12, mem_y - 1, mem_track);
 	if (x == UINT_MAX)
 		return;
@@ -247,7 +284,7 @@ auto MemView::mdiskgo() -> void
 	if (editor == ed_phys)
 		return;
 
-	show_mem();
+	render();
 	// enter sector
 	for (;; )
 	{
@@ -262,56 +299,7 @@ auto MemView::mdiskgo() -> void
 		cpu.mem_curs += edited_track.hdr[x - 1].datlen;
 }
 
-auto MemView::mpc() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	cpu.mem_curs = cpu.pc;
-}
-
-auto MemView::msp() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	cpu.mem_curs = cpu.sp;
-}
-
-auto MemView::mbc() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	cpu.mem_curs = cpu.bc;
-}
-
-auto MemView::mde() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	cpu.mem_curs = cpu.de;
-}
-
-auto MemView::mhl() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	cpu.mem_curs = cpu.hl;
-}
-
-auto MemView::mix() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	cpu.mem_curs = cpu.ix;
-}
-
-auto MemView::miy() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-
-	cpu.mem_curs = cpu.iy;
-}
-
-auto MemView::show_mem() -> void
+auto MemView::render() -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	char     line[debug_text_width]; unsigned ii;
@@ -421,7 +409,7 @@ title:
 	view_.add_frame(mem_x, mem_y, 37, mem_size, FRAME);
 }
 
-auto MemView::dispatch_mem() -> char
+auto MemView::dispatch() -> char
 {
 	auto& cpu = TCpuMgr::get_cpu();
 

@@ -34,6 +34,9 @@ enum class ActionType
 	main,
 	monitor,
 	reg,
+	trace,
+	memory,
+	banks,
 };
 
 class ActionManager
@@ -50,7 +53,7 @@ public:
 		return instance_;
 	}
 
-	static auto registred(ActionType type, const std::string& name, ActionFunctor action) -> void
+	static auto subscrible(ActionType type, const std::string& name, ActionFunctor action) -> void
 	{
 		auto manager = get_instance();
 		auto key = std::tuple<ActionType, std::string>(type, name);

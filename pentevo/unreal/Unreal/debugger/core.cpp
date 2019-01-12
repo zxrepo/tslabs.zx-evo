@@ -12,8 +12,12 @@
 #include "libs/dbglabls.h"
 #include "emulkeys.h"
 #include "funcs.h"
+#include "wd93dat.h"
+#include "cheat.h"
 
 char bpx_file_name[FILENAME_MAX];
+char str[80]{};
+ActionManager action_manager{};
 
 namespace z80dbg
 {
@@ -28,9 +32,9 @@ namespace z80dbg
 	}
 
 }
-char str[80]{};
 
 DebugCore* DebugCore::instance_ = nullptr;
+ActionManager* ActionManager::instance_ = nullptr;
 
 DebugCore::DebugCore() : ref_(*this)
 {
@@ -49,6 +53,8 @@ DebugCore::DebugCore() : ref_(*this)
 	time_ = new TimeView(ref_, *view_);
 	trace_ = new TraceView(ref_, *view_, *mem_);
 	tsconf_ = new TsconfView(*view_);
+
+	subscrible();
 }
 
 auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam) -> LRESULT
@@ -97,6 +103,61 @@ auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARA
 auto DebugCore::rw_err(const char* msg) -> void
 {
 	MessageBox(wnd, msg, "Error", MB_OK | MB_ICONERROR);
+}
+
+auto DebugCore::subscrible() -> void
+{
+	ActionManager::subscrible(ActionType::monitor, "emul",			[this]() { mon_emul(); });
+	ActionManager::subscrible(ActionType::monitor, "saveblock",		[this]() { mon_save(); });
+	ActionManager::subscrible(ActionType::monitor, "loadblock",		[this]() { mon_load(); });
+	ActionManager::subscrible(ActionType::monitor, "fillblock",		[this]() { mon_fill(); });
+	ActionManager::subscrible(ActionType::monitor, "step",			[this]() { mon_step(); });
+	ActionManager::subscrible(ActionType::monitor, "stepover",		[this]() { mon_stepover(); });
+	ActionManager::subscrible(ActionType::monitor, "exitsub",		[this]() { mon_exitsub(); });
+	ActionManager::subscrible(ActionType::monitor, "dump",			[this]() { mon_dump(); });
+	ActionManager::subscrible(ActionType::monitor, "switchdump",	[this]() { mon_switch_dump(); });
+	ActionManager::subscrible(ActionType::monitor, "next",			[this]() { mon_nxt(); });
+	ActionManager::subscrible(ActionType::monitor, "prev",			[this]() { mon_prv(); });
+	ActionManager::subscrible(ActionType::monitor, "rip",			[this]() { mon_tool(); });
+	ActionManager::subscrible(ActionType::monitor, "help",			[]() { mon_help(); });
+	ActionManager::subscrible(ActionType::monitor, "cpu",			[this]() { mon_switch_cpu(); });
+	ActionManager::subscrible(ActionType::monitor, "exit",			[]() { correct_exit(); });
+
+	// global command 
+	// todo move out
+	ActionManager::subscrible(ActionType::monitor, "pokedialog",	[]() { main_poke(); });
+	ActionManager::subscrible(ActionType::monitor, "tapebrowser",	[]() { main_tapebrowser(); });
+	ActionManager::subscrible(ActionType::monitor, "reset",			[]() { main_reset(); });
+	ActionManager::subscrible(ActionType::monitor, "reset128",		[]() { main_reset128(); });
+	ActionManager::subscrible(ActionType::monitor, "resetsys",		[]() { main_resetsys(); });
+	ActionManager::subscrible(ActionType::monitor, "reset48",		[]() { main_reset48(); });
+	ActionManager::subscrible(ActionType::monitor, "resetbasic",	[]() { main_resetbas(); });
+	ActionManager::subscrible(ActionType::monitor, "resetdos",		[]() { main_resetdos(); });
+	ActionManager::subscrible(ActionType::monitor, "resetcache",	[]() { main_resetcache(); });
+	ActionManager::subscrible(ActionType::monitor, "nmi",			[]() { main_nmi(); });
+	ActionManager::subscrible(ActionType::monitor, "nmidos",		[]() { main_nmidos(); });
+	ActionManager::subscrible(ActionType::monitor, "nmicache",		[]() { main_nmicache(); });
+	ActionManager::subscrible(ActionType::monitor, "save",			[]() { savesnap(); });
+	ActionManager::subscrible(ActionType::monitor, "load",			[]() { opensnap(); });
+	ActionManager::subscrible(ActionType::monitor, "savesound",		[]() { savesnddialog(); });
+	ActionManager::subscrible(ActionType::monitor, "qsave1",		[]() { qsave1(); });
+	ActionManager::subscrible(ActionType::monitor, "qsave2",		[]() { qsave2(); });
+	ActionManager::subscrible(ActionType::monitor, "qsave3",		[]() { qsave3(); });
+	ActionManager::subscrible(ActionType::monitor, "qload1",		[]() { qload1(); });
+	ActionManager::subscrible(ActionType::monitor, "qload2",		[]() { qload2(); });
+	ActionManager::subscrible(ActionType::monitor, "qload3",		[]() { qload3(); });
+	ActionManager::subscrible(ActionType::monitor, "labels",		[]() { mon_show_labels(); });
+	ActionManager::subscrible(ActionType::monitor, "memsearch",		[]() { main_cheat(); });
+	
+	/*
+	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
+	*/
 }
 
 auto DebugCore::create_window() -> void
@@ -156,7 +217,7 @@ auto DebugCore::mon_exitsub() const -> void
 	cpu.dbg_stophere = cpu.DirectRm(cpu.sp) + 0x100 * cpu.DirectRm(cpu.sp + 1);
 }
 
-auto DebugCore::mon_step() -> void
+auto DebugCore::mon_step() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	auto& prevcpu = TCpuMgr::prev_cpu();
@@ -243,7 +304,7 @@ auto DebugCore::mon_step() -> void
 	cpu.trace_curs = cpu.pc;
 }
 
-auto DebugCore::mon_stepover() -> void
+auto DebugCore::mon_stepover() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	u8 trace = 1;
@@ -338,7 +399,7 @@ auto DebugCore::mon_tool() -> void
 	auto& cpu = TCpuMgr::get_cpu();
 	static u8 unref = 0xCF;
 	if (ripper) {
-		OPENFILENAME ofn = { 0 };
+		OPENFILENAME ofn{};
 		char savename[0x200]; *savename = 0;
 		ofn.lStructSize = (WinVerMajor < 5) ? OPENFILENAME_SIZE_VERSION_400 : sizeof(OPENFILENAME);
 		ofn.lpstrFilter = "Memory dump\0*.bin\0";
@@ -532,16 +593,6 @@ auto DebugCore::mon_save() -> void
 	}
 	default:;
 	}
-}
-
-auto DebugCore::chere() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.dbgbreak = 0;
-	dbgbreak = 0;
-	cpu.dbgchk = 1;
-
-	cpu.dbg_stophere = cpu.trace_curs;
 }
 
 auto DebugCore::rw_trdos_sectors(FILEDLG_MODE mode, u8* memdata) -> char
@@ -810,10 +861,10 @@ auto DebugCore::debug(Z80* cpu) -> void
 		if (activedbg == dbgwnd::trace && dispatch_more(ac_trace) > 0) continue;
 		if (activedbg == dbgwnd::mem && dispatch_more(ac_mem) > 0) continue;
 		if (activedbg == dbgwnd::banks && dispatch_more(ac_banks) > 0) continue;
-		if (activedbg == dbgwnd::regs &&  regs_->dispatch_regs()) continue;
+		if (activedbg == dbgwnd::regs &&  regs_->dispatch()) continue;
 		if (activedbg == dbgwnd::trace && trace_->dispatch_trace()) continue;
-		if (activedbg == dbgwnd::mem && mem_->dispatch_mem()) continue;
-		if (activedbg == dbgwnd::banks && banks_->dispatch_banks()) continue;
+		if (activedbg == dbgwnd::mem && mem_->dispatch()) continue;
+		if (activedbg == dbgwnd::banks && banks_->dispatch()) continue;
 		if (needclr)
 		{
 			needclr--;
@@ -1095,13 +1146,13 @@ auto DebugCore::done_bpx() -> void
 	fclose(bpx_file);
 }
 
-auto DebugCore::debugscr() -> void
+auto DebugCore::debugscr() const -> void
 {
 	view_->clear_canvas();
 
-	regs_->show_regs();
+	regs_->render();
 	trace_->show_trace();
-	mem_->show_mem();
+	mem_->render();
 	watch_->render();
 	stack_->render();
 	ay_->render();
@@ -1112,3 +1163,17 @@ auto DebugCore::debugscr() -> void
 
 	time_->render();
 }
+
+auto DebugCore::correct_exit() -> void
+{
+	sound_stop();
+	if (!done_fdd(true))
+		return;
+
+	DeleteCriticalSection(&tsu_toggle_cr);
+
+	nowait = 1;
+	normal_exit = true;
+	exit();
+}
+

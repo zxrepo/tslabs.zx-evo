@@ -29,7 +29,7 @@ namespace z80dbg
 	void __cdecl SetLastT();
 }
 
-extern std::vector<UIAction> mon_actions;
+extern ActionManager action_manager;
 
 // debug breakpoints format descriptor
 struct BPXR
@@ -77,15 +77,18 @@ class DebugCore final
 
 	char fname[20] = "", trdname[9] = "12345678", trdext[2] = "C";
 
+	DebugCore();
+
 	static auto APIENTRY wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam)->LRESULT;
 	static auto rw_err(const char *msg) -> void;
 
+	auto subscrible() -> void;
 	auto create_window() ->void;
 
 	auto mon_emul() const -> void;
 	auto mon_exitsub() const -> void;
-	auto mon_step() -> void;
-	auto mon_stepover() -> void;
+	auto mon_step() const -> void;
+	auto mon_stepover() const -> void;
 	auto mon_switch_cpu() -> void;
 	auto mon_nxt() -> void;
 	auto mon_aux() const -> void;
@@ -97,7 +100,7 @@ class DebugCore final
 	auto mon_load() -> void;
 	auto mon_save() -> void;
 
-	auto chere() const -> void;
+	
 
 	auto rw_trdos_sectors(FILEDLG_MODE mode, u8* memdata) -> char;
 	auto wr_trdos_file(u8* memdata) -> char;
@@ -106,11 +109,11 @@ class DebugCore final
 	auto read_mem(u8* memdata) const -> void;
 	auto rw_select_drive() -> char;
 
+	static auto correct_exit() -> void;
+
 public:
 	unsigned ripper{}; // ripper mode (none/read/write)
 	dbgwnd activedbg = dbgwnd::trace;
-
-	DebugCore();
 
 	static auto debug_cond_check(Z80 *cpu) -> void;
 	static auto debug_events(Z80 *cpu) -> void;
@@ -124,7 +127,7 @@ public:
 	static auto init_bpx(char* file) -> void;
 	static auto done_bpx() -> void;
 
-	auto debugscr() -> void;
+	auto debugscr() const -> void;
 	auto debug(Z80* cpu) -> void;
 	
 	auto handle_mouse() -> void;

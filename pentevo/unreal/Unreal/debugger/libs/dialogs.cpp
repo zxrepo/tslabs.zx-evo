@@ -81,6 +81,7 @@ char str[80];
 
 Dialogs::Dialogs(DebugView& view, MemView& mem): view_(view), mem_(mem)
 {
+	subscrible();
 }
 
 auto Dialogs::find1dlg(unsigned start) const -> unsigned
@@ -788,6 +789,14 @@ INT_PTR CALLBACK watchdlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 auto Dialogs::mon_watchdialog() const -> void
 {
 	view_.show_dialog(MAKEINTRESOURCE(IDD_OSW), watchdlg);
+}
+
+auto Dialogs::subscrible() -> void
+{
+	ActionManager::subscrible(ActionType::monitor, "gs",		[this]() { mon_gsdialog(); });
+	ActionManager::subscrible(ActionType::monitor, "osw",		[this]() { mon_watchdialog(); });
+	ActionManager::subscrible(ActionType::monitor, "settings",	[this]() { mon_setup_dlg(); });
+	ActionManager::subscrible(ActionType::monitor, "bpdialog",	[this]() { mon_bpdialog(); });
 }
 
 auto Dialogs::mon_setup_dlg() -> void

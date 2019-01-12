@@ -147,6 +147,142 @@ auto TraceView::tracewndflags() const -> unsigned
 	return 0;
 }
 
+auto TraceView::subscrible() -> void
+{
+	ActionManager::subscrible(ActionType::trace, "findpc", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.trace_top = cpu.trace_curs = cpu.pc;
+	});
+
+	ActionManager::subscrible(ActionType::trace, "here", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.dbgbreak = 0;
+		dbgbreak = 0;
+		cpu.dbgchk = 1;
+		cpu.dbg_stophere = cpu.trace_curs;
+	});
+
+	ActionManager::subscrible(ActionType::trace, "findtext", [this]() { cfindtext(); });
+	ActionManager::subscrible(ActionType::trace, "findcode", [this]() { cfindcode(); });
+
+	ActionManager::subscrible(ActionType::trace, "goto", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		const auto v = view_.input4(trace_x, trace_y, cpu.trace_top);
+		if (v != UINT_MAX)
+			cpu.trace_top = cpu.trace_curs = v;
+	});
+
+	ActionManager::subscrible(ActionType::trace, "bpx", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.membits[cpu.trace_curs] ^= MEMBITS_BPX;
+	});
+
+	ActionManager::subscrible(ActionType::trace, "asm", [this]() { center(); });
+
+	ActionManager::subscrible(ActionType::trace, "setpc", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		cpu.pc = cpu.trace_curs;
+	});
+
+	ActionManager::subscrible(ActionType::trace, "up", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		if (cpu.trace_curs > cpu.trace_top)
+		{
+			for (unsigned i = 1; i < trace_size; i++)
+				if (cpu.trpc[i] == cpu.trace_curs)
+					cpu.trace_curs = cpu.trpc[i - 1];
+		}
+		else
+			cpu.trace_top = cpu.trace_curs = cpu_up(cpu.trace_curs);
+	});
+
+	ActionManager::subscrible(ActionType::trace, "down", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		for (unsigned i = 0; i < trace_size; i++)
+			if (cpu.trpc[i] == cpu.trace_curs)
+			{
+				cpu.trace_curs = cpu.trpc[i + 1];
+				if (i + 1 == trace_size)
+					cpu.trace_top = cpu.trpc[1];
+				break;
+			}
+	});
+
+	ActionManager::subscrible(ActionType::trace, "left", [this]()
+	{
+		TCpuMgr::get_cpu().trace_mode--;
+	});
+
+	ActionManager::subscrible(ActionType::trace, "right", [this]()
+	{
+		TCpuMgr::get_cpu().trace_mode++;
+	});
+
+	ActionManager::subscrible(ActionType::trace, "pgdn", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		unsigned curs = 0;
+		for (unsigned i = 0; i < trace_size; i++)
+			if (cpu.trace_curs == cpu.trpc[i]) curs = i;
+		cpu.trace_top = cpu.trpc[trace_size];
+		show_trace();
+		cpu.trace_curs = cpu.trpc[curs];
+	});
+
+	ActionManager::subscrible(ActionType::trace, "pgup", [this]()
+	{
+		auto& cpu = TCpuMgr::get_cpu();
+		unsigned curs = 0;
+		for (auto i = 0; i < trace_size; i++)
+			if (cpu.trace_curs == cpu.trpc[i]) curs = i;
+		for (auto i = 0; i < trace_size; i++)
+			cpu.trace_top = cpu_up(cpu.trace_top);
+
+		show_trace();
+		cpu.trace_curs = cpu.trpc[curs];
+	});
+
+	ActionManager::subscrible(ActionType::trace, "save1", [this]() { csave(0); });
+	ActionManager::subscrible(ActionType::trace, "save2", [this]() { csave(1); });
+	ActionManager::subscrible(ActionType::trace, "save3", [this]() { csave(2); });
+	ActionManager::subscrible(ActionType::trace, "save4", [this]() { csave(3); });
+	ActionManager::subscrible(ActionType::trace, "save5", [this]() { csave(4); });
+	ActionManager::subscrible(ActionType::trace, "save6", [this]() { csave(5); });
+	ActionManager::subscrible(ActionType::trace, "save7", [this]() { csave(6); });
+	ActionManager::subscrible(ActionType::trace, "save8", [this]() { csave(7); });
+
+	ActionManager::subscrible(ActionType::trace, "crest1", [this]() { crest(0); });
+	ActionManager::subscrible(ActionType::trace, "crest2", [this]() { crest(1); });
+	ActionManager::subscrible(ActionType::trace, "crest3", [this]() { crest(2); });
+	ActionManager::subscrible(ActionType::trace, "crest4", [this]() { crest(3); });
+	ActionManager::subscrible(ActionType::trace, "crest5", [this]() { crest(4); });
+	ActionManager::subscrible(ActionType::trace, "crest6", [this]() { crest(5); });
+	ActionManager::subscrible(ActionType::trace, "crest7", [this]() { crest(6); });
+	ActionManager::subscrible(ActionType::trace, "crest8", [this]() { crest(7); });
+
+	ActionManager::subscrible(ActionType::trace, "back", [this]() { pop_pos(); });
+	ActionManager::subscrible(ActionType::trace, "context", [this]() { cjump(); });
+	ActionManager::subscrible(ActionType::trace, "datajump", [this]() { cdjump(); });
+
+	ActionManager::subscrible(ActionType::trace, "labels", [this]()
+	{
+		trace_labels = !trace_labels;
+		show_trace();
+	});
+
+	ActionManager::subscrible(ActionType::trace, "importl", [this]()
+	{
+		mon_labels.import_menu();
+	});
+}
+
 auto TraceView::disasm_line(unsigned addr, char* line) const -> int
 {
 	auto& cpu = TCpuMgr::get_cpu();
@@ -180,12 +316,6 @@ TraceView::TraceView(DebugCore& core, DebugView& view, MemView& mem): core_(core
 {
 }
 
-auto TraceView::cfindpc() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.trace_top = cpu.trace_curs = cpu.pc;
-}
-
 auto TraceView::cfindtext() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
@@ -206,20 +336,6 @@ auto TraceView::cfindcode() const -> void
 	mem_.editor = oldmode;
 	if (rs != UINT_MAX)
 		cpu.trace_top = cpu.trace_curs = rs;
-}
-
-auto TraceView::cgoto() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	const auto v = view_.input4(trace_x, trace_y, cpu.trace_top);
-	if (v != UINT_MAX)
-		cpu.trace_top = cpu.trace_curs = v;
-}
-
-auto TraceView::cbpx() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.membits[cpu.trace_curs] ^= MEMBITS_BPX;
 }
 
 auto TraceView::center() -> void
@@ -278,72 +394,6 @@ auto TraceView::center() -> void
 	}
 }
 
-auto TraceView::csetpc() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	cpu.pc = cpu.trace_curs;
-}
-
-auto TraceView::cup() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	if (cpu.trace_curs > cpu.trace_top)
-	{
-		for (unsigned i = 1; i < trace_size; i++)
-			if (cpu.trpc[i] == cpu.trace_curs)
-				cpu.trace_curs = cpu.trpc[i - 1];
-	}
-	else
-		cpu.trace_top = cpu.trace_curs = cpu_up(cpu.trace_curs);
-}
-
-auto TraceView::cdown() const -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	for (unsigned i = 0; i < trace_size; i++)
-		if (cpu.trpc[i] == cpu.trace_curs)
-		{
-			cpu.trace_curs = cpu.trpc[i + 1];
-			if (i + 1 == trace_size)
-				cpu.trace_top = cpu.trpc[1];
-			break;
-		}
-}
-
-auto TraceView::cleft() const -> void
-{
-	TCpuMgr::get_cpu().trace_mode--;
-}
-
-auto TraceView::cright() const -> void
-{
-	TCpuMgr::get_cpu().trace_mode++;
-}
-
-auto TraceView::cpgup() -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	unsigned curs = 0;
-	for (auto i = 0; i < trace_size; i++)
-		if (cpu.trace_curs == cpu.trpc[i]) curs = i;
-	for (auto i = 0; i < trace_size; i++)
-		cpu.trace_top = cpu_up(cpu.trace_top);
-
-	show_trace();
-	cpu.trace_curs = cpu.trpc[curs];
-}
-
-auto TraceView::cpgdn() -> void
-{
-	auto& cpu = TCpuMgr::get_cpu();
-	unsigned curs = 0;
-	for (unsigned i = 0; i < trace_size; i++)
-		if (cpu.trace_curs == cpu.trpc[i]) curs = i;
-	cpu.trace_top = cpu.trpc[trace_size];
-	show_trace();
-	cpu.trace_curs = cpu.trpc[curs];
-}
-
 auto TraceView::pop_pos() -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
@@ -383,97 +433,6 @@ auto TraceView::cdjump() -> void
 	cpu.mem_curs = addr;
 	core_.activedbg = dbgwnd::mem; 
 	mem_.editor = ed_mem;
-}
-
-auto TraceView::csave1() -> void
-{
-	csave(0);
-}
-
-auto TraceView::csave2() -> void
-{
-	csave(1);
-}
-
-auto TraceView::csave3() -> void
-{
-	csave(2);
-}
-
-auto TraceView::csave4() -> void
-{
-	csave(3);
-}
-
-auto TraceView::csave5() -> void
-{
-	csave(4);
-}
-
-auto TraceView::csave6() -> void
-{
-	csave(5);
-}
-
-auto TraceView::csave7() -> void
-{
-	csave(6);
-}
-
-auto TraceView::csave8() -> void
-{
-	csave(7);
-}
-
-auto TraceView::crest1() -> void
-{
-	crest(0);
-}
-
-auto TraceView::crest2() -> void
-{
-	crest(1);
-}
-
-auto TraceView::crest3() -> void
-{
-	crest(2);
-}
-
-auto TraceView::crest4() -> void
-{
-	crest(3);
-}
-
-auto TraceView::crest5() -> void
-{
-	crest(4);
-}
-
-auto TraceView::crest6() -> void
-{
-	crest(5);
-}
-
-auto TraceView::crest7() -> void
-{
-	crest(6);
-}
-
-auto TraceView::crest8() -> void
-{
-	crest(7);
-}
-
-auto TraceView::cfliplabels() -> void
-{
-	trace_labels = !trace_labels;
-	show_trace();
-}
-
-auto TraceView::c_lbl_import() -> void
-{
-	mon_labels.import_menu();
 }
 
 auto TraceView::show_trace() -> void

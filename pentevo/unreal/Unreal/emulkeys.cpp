@@ -13,8 +13,6 @@
 #include "tape.h"
 #include "gui.h"
 #include "snapshot.h"
-#include "wd93dat.h"
-#include "init.h"
 #include "z80.h"
 #include "emulkeys.h"
 #include "util.h"
@@ -448,19 +446,6 @@ void wnd_resize(int scale)
 void main_size1() { wnd_resize(1); }
 void main_size2() { wnd_resize(2); }
 void main_sizem() { wnd_resize(0); }
-
-void correct_exit()
-{
-   sound_stop();
-   if (!done_fdd(true))
-       return;
-
-   DeleteCriticalSection(&tsu_toggle_cr);
-
-   nowait = 1;
-   normal_exit = true;
-   exit();
-}
 
 void opensnap()
 {

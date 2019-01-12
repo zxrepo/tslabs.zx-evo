@@ -23,6 +23,9 @@ class MemView final
 	auto findsector(unsigned addr) -> void;
 	auto editam(unsigned addr)->u8*;
 	auto editwm(unsigned addr, u8 byte) -> void;
+	auto mdiskgo() -> void;
+
+	auto subscrible() -> void;
 	
 public:
 	unsigned mem_sz = 8;
@@ -35,30 +38,6 @@ public:
 	auto memadr(unsigned addr) const -> unsigned;
 	auto editrm(unsigned addr)->u8;
 
-	auto mleft() const -> void;
-	auto mright() const -> void;
-	auto mup() const -> void;
-	auto mdown() const -> void;
-	auto mpgdn() const -> void;
-	auto mpgup() const -> void;
-	auto mswitch() -> void;
-	auto mstl() const -> void;
-	auto mendl() const -> void;
-	auto mtext() const -> void;
-	auto mcode() const -> void;
-	auto mgoto() const -> void;
-	auto mmodemem() -> void;
-	auto mmodephys() -> void;
-	auto mmodelog() -> void;
-	auto mdiskgo() -> void;
-
-	auto mpc() const -> void;
-	auto msp() const -> void;
-	auto mbc() const -> void;
-	auto mde() const -> void;
-	auto mhl() const -> void;
-	auto mix() const -> void;
-	auto miy() const -> void;
-	auto show_mem() -> void;
-	auto dispatch_mem() -> char;
+	auto render() -> void;
+	auto dispatch() -> char;
 };

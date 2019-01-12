@@ -43,8 +43,15 @@ void __cdecl BankNames(int i, char *name)
 		strcpy(name, "CACH1");
 }
 
+auto WatchView::subsrible() -> void
+{
+	ActionManager::subscrible(ActionType::monitor, "setwatch", [this]() { mon_setwatch(); });
+	ActionManager::subscrible(ActionType::monitor, "scrshot", [this]() { mon_scrshot(); });
+}
+
 WatchView::WatchView(DebugCore& core, DebugView& view): core_(core), view_(view)
 {
+	subsrible();
 }
 
 auto WatchView::mon_setwatch() -> void
@@ -123,8 +130,14 @@ auto StackView::render() const -> void
 	view_.add_frame(stack_x, stack_y, 7, stack_size, FRAME);
 }
 
+auto AyView::subscrible() -> void
+{
+	ActionManager::subscrible(ActionType::monitor, "switchay", [this]() { mon_switchay(); });
+}
+
 AyView::AyView(DebugCore& core, DebugView& view) : core_(core), view_(view)
 {
+	subscrible();
 }
 
 auto AyView::mon_switchay() -> void
@@ -149,11 +162,30 @@ auto AyView::render() const -> void
 	view_.add_frame(ay_x, ay_y, 48, 1, FRAME);
 }
 
-BanksView::BanksView(DebugCore& core, DebugView& view) : core_(core), view_(view)
+auto BanksView::subscrible() -> void
 {
+	ActionManager::subscrible(ActionType::banks, "up", [this]()
+	{
+		selbank--;
+		selbank &= 3;
+	});
+
+	ActionManager::subscrible(ActionType::banks, "down", [this]()
+	{
+		selbank++;
+		selbank &= 3;
+	});
+
+	ActionManager::subscrible(ActionType::banks, "edit", [this]() { benter(); });
+	ActionManager::subscrible(ActionType::monitor, "setbank", [this]() { editbank(); });
 }
 
-auto BanksView::dispatch_banks() const -> char
+BanksView::BanksView(DebugCore& core, DebugView& view) : core_(core), view_(view)
+{
+	subscrible();
+}
+
+auto BanksView::dispatch() const -> char
 {
 	if ((conf.mem_model == MM_TSL) && (selbank != UINT_MAX) &&
 		((input.lastkey >= '0' && input.lastkey <= '9') || (input.lastkey >= 'A' && input.lastkey <= 'F')))
@@ -185,18 +217,6 @@ auto BanksView::benter() const -> void
 	}
 }
 
-auto BanksView::bup() -> void
-{
-	selbank--; 
-	selbank &= 3;
-}
-
-auto BanksView::bdown() -> void
-{
-	selbank++;
-	selbank &= 3;
-}
-
 auto BanksView::editbank() const -> void
 {
 	const auto x = view_.input2(ports_x + 5, ports_y + 1, comp.p7FFD);
@@ -222,6 +242,12 @@ auto BanksView::render() const -> void
 	}
 	view_.add_frame(banks_x, banks_y + 1, 7, 4, FRAME);
 	view_.tprint(banks_x, banks_y, "pages", w_title);
+}
+
+auto PortsView::subscrible() -> void
+{
+	ActionManager::subscrible(ActionType::monitor, "sethimem", [this]() { editextbank(); });
+	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
 }
 
 PortsView::PortsView(DebugCore& core, DebugView& view) : core_(core), view_(view)

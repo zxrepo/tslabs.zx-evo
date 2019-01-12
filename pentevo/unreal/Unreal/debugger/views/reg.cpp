@@ -6,7 +6,7 @@
 #include "debugger/libs/cpu_manager.h"
 
 //const size_t regs_layout_count = _countof(regs_layout);
- 
+
 const std::vector<TRegLayout> regs_layout =
 {
    { offsetof(TZ80State, a)     ,  8,  3, 0, 0, 1, 0, 2 }, //  0 a
@@ -37,150 +37,183 @@ const std::vector<TRegLayout> regs_layout =
    { offsetof(TZ80State, f)     , 30, 31, 3,24,25,17,25 }, // 25 CF
 };
 
-RegView::RegView(DebugCore& core, DebugView& view, MemView& mem): core_(core), view_(view), mem_(mem)
+auto RegView::subscrible() -> void
 {
+	ActionManager::subscrible(ActionType::reg, "left", [this]()
+	{
+		regs_curs = regs_layout[regs_curs].lf;
+	});
+
+	ActionManager::subscrible(ActionType::reg, "right", [this]()
+	{
+		regs_curs = regs_layout[regs_curs].rt;
+	});
+
+	ActionManager::subscrible(ActionType::reg, "up", [this]()
+	{
+		regs_curs = regs_layout[regs_curs].up;
+	});
+
+	ActionManager::subscrible(ActionType::reg, "down", [this]()
+	{
+		regs_curs = regs_layout[regs_curs].dn;
+	});
+
+	ActionManager::subscrible(ActionType::reg, "edit", [this]() { renter(); });
+
+	ActionManager::subscrible(ActionType::reg, "a", [this]()
+	{
+		regs_curs = 0;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "f", [this]() {
+		regs_curs = 1;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "bc", [this]() {
+		regs_curs = 2;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "de", [this]()
+	{
+		regs_curs = 3;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "hl", [this]()
+	{
+		regs_curs = 4;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "pc", [this]()
+	{
+		regs_curs = 10;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "sp", [this]()
+	{
+		regs_curs = 9;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "ix", [this]()
+	{
+		regs_curs = 11;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "iy", [this]()
+	{
+		regs_curs = 12;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "i", [this]()
+	{
+		regs_curs = 13;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "r", [this]()
+	{
+		regs_curs = 14;
+		input.lastkey = 0;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "im", [this]()
+	{
+		regs_curs = 15;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "iff1", [this]()
+	{
+		regs_curs = 16;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "iff2", [this]()
+	{
+		regs_curs = 17;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "SF", [this]()
+	{
+		regs_curs = 18;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "ZF", [this]()
+	{
+		regs_curs = 19;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "F5", [this]()
+	{
+		regs_curs = 20;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "HF", [this]()
+	{
+		regs_curs = 21;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "F3", [this]()
+	{
+		regs_curs = 22;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "PF", [this]()
+	{
+		regs_curs = 23;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "NF", [this]()
+	{
+		regs_curs = 24;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "CF", [this]()
+	{
+		regs_curs = 25;
+		renter();
+	});
+
+	ActionManager::subscrible(ActionType::reg, "codejump", [this]() { rcodejump(); });
+	ActionManager::subscrible(ActionType::reg, "datajump", [this]() { rdatajump(); });
+	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
+	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
 }
 
-auto RegView::ra() -> void
+RegView::RegView(DebugCore& core, DebugView& view, MemView& mem) : core_(core), view_(view), mem_(mem)
 {
-	regs_curs = 0;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::rf() -> void
-{
-	regs_curs = 1;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::rbc() -> void
-{
-	regs_curs = 2;
-	input.lastkey = 0;
-	renter();
-}
-auto RegView::rde() -> void
-{
-	regs_curs = 3;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::rhl() -> void
-{
-	regs_curs = 4;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::rsp() -> void
-{
-	regs_curs = 9;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::rpc() -> void
-{
-	regs_curs = 10;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::rix()  -> void
-{
-	regs_curs = 11;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::riy()  -> void
-{
-	regs_curs = 12;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::ri()  -> void
-{
-	regs_curs = 13;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::rr()  -> void
-{
-	regs_curs = 14;
-	input.lastkey = 0;
-	renter();
-}
-
-auto RegView::rm()  -> void
-{
-	regs_curs = 15;
-	renter();
-}
-
-auto RegView::r_1()  -> void
-{
-	regs_curs = 16;
-	renter();
-}
-
-auto RegView::r_2()  -> void
-{
-	regs_curs = 17;
-	renter();
-}
-
-auto RegView::rSF()  -> void
-{
-	regs_curs = 18;
-	renter();
-}
-
-auto RegView::rZF()  -> void
-{
-	regs_curs = 19;
-	renter();
-}
-
-auto RegView::rF5()  -> void
-{
-	regs_curs = 20;
-	renter();
-}
-
-auto RegView::rHF()  -> void
-{
-	regs_curs = 21;
-	renter();
-}
-
-auto RegView::rF3()  -> void
-{
-	regs_curs = 22;
-	renter();
-}
-
-auto RegView::rPF()  -> void
-{
-	regs_curs = 23;
-	renter();
-}
-
-auto RegView::rNF()  -> void
-{
-	regs_curs = 24;
-	renter();
-}
-
-auto RegView::rCF()  -> void
-{
-	regs_curs = 25;
-	renter();
+	subscrible();
 }
 
 auto RegView::rcodejump() const -> void
@@ -202,26 +235,6 @@ auto RegView::rdatajump() const -> void
 		mem_.editor = ed_mem;
 		cpu.mem_curs = *reinterpret_cast<u16*>(PCHAR(static_cast<TZ80State*>(&cpu)) + regs_layout[regs_curs].offs);
 	}
-}
-
-auto RegView::rleft() -> void
-{
-	regs_curs = regs_layout[regs_curs].lf;
-}
-
-auto RegView::rright() -> void
-{
-	regs_curs = regs_layout[regs_curs].rt;
-}
-
-auto RegView::rup() -> void
-{
-	regs_curs = regs_layout[regs_curs].up;
-}
-
-auto RegView::rdown() -> void
-{
-	regs_curs = regs_layout[regs_curs].dn;
 }
 
 auto RegView::renter() const -> void
@@ -256,7 +269,7 @@ auto RegView::renter() const -> void
 	cpu.r_hi = cpu.r_low & 0x80;
 }
 
-auto RegView::show_regs() const -> void
+auto RegView::render() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 	const auto& prevcpu = TCpuMgr::prev_cpu();
@@ -279,7 +292,7 @@ auto RegView::show_regs() const -> void
 	}
 
 	cpu.r_low = (cpu.r_low & 0x7F) + cpu.r_hi;
-	for(auto& reg : regs_layout)
+	for (auto& reg : regs_layout)
 	{
 		const unsigned mask = (1 << reg.width) - 1;
 		const unsigned val = mask & *reinterpret_cast<unsigned*>(PCHAR(static_cast<TZ80State*>(&cpu)) + reg.offs);
@@ -314,7 +327,7 @@ auto RegView::show_regs() const -> void
 	view_.add_frame(regs_x, regs_y, 32, 4, FRAME);
 }
 
-auto RegView::dispatch_regs() const -> char
+auto RegView::dispatch() const -> char
 {
 	if ((input.lastkey >= '0' && input.lastkey <= '9') || (input.lastkey >= 'A' && input.lastkey <= 'F'))
 	{

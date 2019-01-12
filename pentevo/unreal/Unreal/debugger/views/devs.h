@@ -9,8 +9,9 @@ class WatchView final
 	DebugCore& core_;
 	DebugView& view_;
 	unsigned show_scrshot{};
-
 	unsigned user_watches[3] = { 0x4000, 0x8000, 0xC000 };
+
+	auto subsrible() -> void;
 public:
 	WatchView(DebugCore& core, DebugView& view);
 
@@ -35,6 +36,7 @@ class AyView final
 	DebugCore& core_;
 	DebugView& view_;
 
+	auto subscrible() -> void;
 public:
 	AyView(DebugCore& core, DebugView& view);
 
@@ -47,18 +49,18 @@ class BanksView final
 	DebugCore& core_;
 	DebugView& view_;
 
+	auto subscrible() -> void;
+
+	auto benter() const -> void;
 public:
 	unsigned selbank = 0;
 	bool showbank = false;
 
 	BanksView(DebugCore& core, DebugView& view);
 
-	auto benter() const -> void;
-	auto bup() -> void;
-	auto bdown() -> void;
 	auto editbank() const -> void;
 
-	auto dispatch_banks() const -> char;
+	auto dispatch() const -> char;
 	auto render() const -> void;
 };
 
@@ -69,6 +71,8 @@ class PortsView final
 
 	unsigned dbg_extport{};
 	u8 dgb_extval{}; // extended memory port like 1FFD or DFFD
+
+	auto subscrible() -> void;
 public:
 	PortsView(DebugCore& core, DebugView& view);
 
