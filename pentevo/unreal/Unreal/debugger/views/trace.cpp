@@ -8,7 +8,7 @@
 #include "debugger/libs/dbglabls.h"
 #include "memory.h"
 
-char str[80];
+static char str[80];
 
 auto TraceView::csave(unsigned n) -> void
 {
@@ -387,7 +387,7 @@ auto TraceView::center() -> void
 				for (unsigned i = 0; i < sz; i++)
 					cpu.DirectWm(cpu.trace_curs + i, asmresult[i]);
 				show_trace();
-				cdown();
+				ActionManager::invoke(ActionType::trace, "down");
 				break;
 			}
 		}

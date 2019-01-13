@@ -7,7 +7,7 @@
 #include "debugger/core.h"
 #include "debugger/libs/cpu_manager.h"
 
-char str[80];
+static char str[80];
 
 auto MemView::findsector(unsigned addr) -> void
 {
@@ -429,7 +429,7 @@ auto MemView::dispatch() -> char
 			return 0;
 
 		editwm(cpu.mem_curs, u8(k));
-		mright();
+		ActionManager::invoke(ActionType::memory, "right");
 		return 1;
 	}
 	else
@@ -442,7 +442,7 @@ auto MemView::dispatch() -> char
 				editwm(cpu.mem_curs, (c & 0xF0) | k);
 			else
 				editwm(cpu.mem_curs, (c & 0x0F) | (k << 4));
-			mright();
+			ActionManager::invoke(ActionType::memory, "right");
 			return 1;
 		}
 	}

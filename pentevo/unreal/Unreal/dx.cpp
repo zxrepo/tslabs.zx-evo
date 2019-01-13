@@ -17,6 +17,7 @@
 #include "snapshot.h"
 #include "funcs.h"
 #include "tape.h"
+#include "ui_action.h"
 
 const int size_x[3] = { 256, 320, 448 };
 const int size_y[3] = { 192, 240, 320 };
@@ -674,7 +675,7 @@ static INT_PTR CALLBACK WndProc(HWND hwnd,UINT uMessage,WPARAM wparam,LPARAM lpa
       case SCU_LOCK_MOUSE: main_mouse();  return 0;
       case SC_CLOSE:
           if (ConfirmExit())
-              correct_exit();
+              ActionManager::invoke(ActionType::main, "exit");
       return 0;
       case SC_MINIMIZE: temp.Minimized = true; break;
 
@@ -695,7 +696,7 @@ static INT_PTR CALLBACK WndProc(HWND hwnd,UINT uMessage,WPARAM wparam,LPARAM lpa
 		int disk = -1;
 		switch(wparam){
 			// File menu
-			case IDM_EXIT: correct_exit();
+			case IDM_EXIT: ActionManager::invoke(ActionType::main, "exit");
 
 			case IDM_LOAD: opensnap(); break;
 

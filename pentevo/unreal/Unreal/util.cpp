@@ -4,6 +4,7 @@
 #include "snapshot.h"
 #include "init.h"
 #include "util.h"
+#include "ui_action.h"
 
 static void cpuid(unsigned CpuInfo[4], unsigned _eax)
 {
@@ -205,11 +206,8 @@ void eat() // eat messages
 }
 
 static u8 kbd_vk[VK_MAX];
-char dispatch_more(action *table)
+char dispatch_more(ActionType type)
 {
-   if (!table)
-       return -1;
-
     GetKeyboardState( kbd_vk );
 	if (input.lastkey)
     {

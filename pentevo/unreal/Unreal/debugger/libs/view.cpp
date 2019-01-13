@@ -5,7 +5,7 @@
 #include "util.h"
 #include "debugger/consts.h"
 
-char str[80];
+static char str[80];
 
 auto DebugView::format_item(char* dst, unsigned width, const char* text, MenuItem::flags_t flags) -> void
 {

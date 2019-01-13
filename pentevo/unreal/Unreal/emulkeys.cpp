@@ -327,17 +327,11 @@ static void qsave(const char *fname) {
       fclose(ff);
    }
 }
-void qsave1() { qsave("qsave1.sna"); }
-void qsave2() { qsave("qsave2.sna"); }
-void qsave3() { qsave("qsave3.sna"); }
 
 static void qload(const char *fname) {
    char xx[0x200]; addpath(xx, fname);
    if (loadsnap(xx)) sprintf(statusline, "Quick load from %s", fname), statcnt = 30;
 }
-void qload1() { qload("qsave1.sna"); }
-void qload2() { qload("qsave2.sna"); }
-void qload3() { qload("qsave3.sna"); }
 
 void main_keystick()
 {
@@ -399,9 +393,6 @@ void main_mouse()
    adjust_mouse_cursor();
    sprintf(statusline, "mouse %slocked", conf.lockmouse? nil:"un"), statcnt = 30;
 }
-
-void main_help() { showhelp(); }
-void mon_help() { showhelp("monitor_keys"); }
 
 void main_atmkbd()
 {

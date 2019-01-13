@@ -89,7 +89,7 @@ class DebugCore final
 	auto mon_exitsub() const -> void;
 	auto mon_step() const -> void;
 	auto mon_stepover() const -> void;
-	auto mon_switch_cpu() -> void;
+	auto mon_switch_cpu() const -> void;
 	auto mon_nxt() -> void;
 	auto mon_aux() const -> void;
 	auto mon_prv() -> void;

@@ -169,9 +169,6 @@
     <ClCompile Include="io.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="keydefs.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="leds.cpp">
       <Filter>Sources</Filter>
     </ClCompile>

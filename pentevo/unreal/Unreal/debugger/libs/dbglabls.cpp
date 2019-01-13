@@ -431,7 +431,7 @@ INT_PTR CALLBACK LabelsDlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		unsigned address;
 		sscanf(zz, "%X", &address);
 
-		void push_pos(); push_pos();
+		//void push_pos(); push_pos();
 		TCpuMgr::get_cpu().trace_curs = TCpuMgr::get_cpu().trace_top = address;
 		DebugCore::get_instance()->activedbg = dbgwnd::trace;
 
@@ -444,7 +444,7 @@ INT_PTR CALLBACK LabelsDlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 void mon_show_labels()
 {
-	DialogBox(hIn, MAKEINTRESOURCE(IDD_LABELS), wnd, LabelsDlg);
+	
 }
 
 void init_labels(char* filename)

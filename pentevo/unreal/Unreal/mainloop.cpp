@@ -11,6 +11,7 @@
 #include "z80.h"
 #include "zxevo.h"
 #include "util.h"
+#include "ui_action.h"
 
 void spectrum_frame()
 {
@@ -139,5 +140,5 @@ void mainloop(const bool &Exit)
 				do_idle();
 		}
 	}
-   correct_exit();
+   ActionManager::invoke(ActionType::main, "exit");
 }

@@ -77,7 +77,7 @@ enum
     { 'R', &cpu.r_low, 1 },                       \
   }
 
-char str[80];
+static char str[80];
 
 Dialogs::Dialogs(DebugView& view, MemView& mem): view_(view), mem_(mem)
 {

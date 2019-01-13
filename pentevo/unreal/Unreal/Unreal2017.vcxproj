@@ -85,7 +85,6 @@
     <ClCompile Include="input.cpp" />
     <ClCompile Include="inputpc.cpp" />
     <ClCompile Include="io.cpp" />
-    <ClCompile Include="keydefs.cpp" />
     <ClCompile Include="leds.cpp" />
     <ClCompile Include="mainloop.cpp" />
     <ClCompile Include="memory.cpp" />
