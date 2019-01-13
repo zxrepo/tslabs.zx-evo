@@ -444,7 +444,7 @@ INT_PTR CALLBACK LabelsDlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 void mon_show_labels()
 {
-	
+	DialogBox(hIn, MAKEINTRESOURCE(IDD_LABELS), wnd, LabelsDlg);
 }
 
 void init_labels(char* filename)
