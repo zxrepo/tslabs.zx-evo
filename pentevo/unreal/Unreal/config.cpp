@@ -20,7 +20,7 @@
 char load_errors;
 const char* SSHOT_EXT[] = { "scr", "bmp", "png", "gif" };
 
-void loadkeys(action*);
+void loadkeys(ActionType);
 void loadzxkeys(CONFIG*);
 void load_arch(const char*);
 
@@ -820,14 +820,15 @@ void load_config(const char *fname)
 
    load_atm_font();
    load_arch(ininame);
-   loadkeys(ac_main);
-#ifdef MOD_MONITOR
-   loadkeys(ac_main_xt);
-   loadkeys(ac_regs);
-   loadkeys(ac_trace);
-   loadkeys(ac_mem);
-   loadkeys(ac_banks);
-#endif
+
+   loadkeys(ActionType::main);
+   loadkeys(ActionType::xt);
+   loadkeys(ActionType::monitor);
+   loadkeys(ActionType::reg);
+   loadkeys(ActionType::trace);
+   loadkeys(ActionType::memory);
+   loadkeys(ActionType::banks);
+
    temp.scale = GetPrivateProfileInt(video, "winscale", 1, ininame);
 }
 
@@ -1114,83 +1115,91 @@ ignore_line:
    }
 }
 
-void loadkeys(action *table)
+void loadkeys(ActionType type)
 {
    unsigned num[0x300], i = 0;
    unsigned j; //Alone Coder 0.36.7
-   if (!table->name)
-       return; // empty table (can't sort)
-   for (action *p = table; p->name; p++, i++)
+   
+   auto list = ActionManager::get_actions({ type });
+
+   for(auto item : list)
    {
-      char line[0x400];
-      GetPrivateProfileString("SYSTEM.KEYS", p->name, "`", line, sizeof line, ininame);
-      if (*line == '`')
-      {
-         errmsg("keydef for %s not found", p->name);
-         load_errors = 1;
-bad_key:
-         p->k1 = 0xFE, p->k2 = 0xFF, p->k3 = 0xFD;
-         continue;
-      }
-      char *s = strchr(line, ';');
-      if (s)
-          *s = 0;
-      p->k1 = p->k2 = p->k3 = p->k4 = 0; num[i] = 0;
-      for (s = line;;)
-      {
-         while (*s == ' ') s++;
-         if (!*s)
-             break;
-         char *s1 = s;
-         while (isalnum(*s))
-             s++;
-         for (j = 0; j < pckeys_count; j++)
-         {
-            if ((int)strlen(pckeys[j].name)==s-s1 && !strnicmp(s1, pckeys[j].name, s-s1))
-            {
-               switch (num[i])
-               {
-                  case 0: p->k1 = pckeys[j].virtkey; break;
-                  case 1: p->k2 = pckeys[j].virtkey; break;
-                  case 2: p->k3 = pckeys[j].virtkey; break;
-                  case 3: p->k4 = pckeys[j].virtkey; break;
-                  default:
-                     color(CONSCLR_ERROR);
-                     printf("warning: too many keys in %s=%s\n", p->name, line);
-                     load_errors = 1;
-               }
-               num[i]++;
-               break;
-            }
-         }
-         if (j == pckeys_count)
-         {
-            color(CONSCLR_ERROR);
-            char x = *s; *s = 0;
-            printf("bad key: %s\n", s1); *s = x;
-            load_errors = 1;
-         }
-      }
-      if (!num[i])
-          goto bad_key;
+	   i++;
+
+	   char line[0x400];
+	   GetPrivateProfileString("SYSTEM.KEYS", item->get_full_name().c_str(), "`", line, sizeof line, ininame);
+	   if (*line == '`')
+	   {
+		   errmsg("keydef for %s not found", item->get_full_name().c_str());
+		   load_errors = 1;
+	   bad_key:
+		   item->k1 = 0xFE, item->k2 = 0xFF, item->k3 = 0xFD;
+		   continue;
+	   }
+
+	   char *s = strchr(line, ';');
+	   if (s) *s = 0;
+
+	   item->k1 = item->k2 = item->k3 = item->k4 = 0;
+   	   num[i] = 0;
+
+	   for (s = line;;)
+	   {
+		   while (*s == ' ') s++;
+		   if (!*s)
+			   break;
+		   char *s1 = s;
+		   while (isalnum(*s))
+			   s++;
+		   for (j = 0; j < pckeys_count; j++)
+		   {
+			   if (int(strlen(pckeys[j].name)) == s - s1 && !strnicmp(s1, pckeys[j].name, s - s1))
+			   {
+				   switch (num[i])
+				   {
+				   case 0: item->k1 = pckeys[j].virtkey; break;
+				   case 1: item->k2 = pckeys[j].virtkey; break;
+				   case 2: item->k3 = pckeys[j].virtkey; break;
+				   case 3: item->k4 = pckeys[j].virtkey; break;
+				   default:
+					   color(CONSCLR_ERROR);
+					   printf("warning: too many keys in %s=%s\n", item->name.c_str(), line);
+					   load_errors = 1;
+				   }
+				   num[i]++;
+				   break;
+			   }
+		   }
+		   if (j == pckeys_count)
+		   {
+			   color(CONSCLR_ERROR);
+			   char x = *s; *s = 0;
+			   printf("bad key: %s\n", s1); *s = x;
+			   load_errors = 1;
+		   }
+
+		   if (!num[i])
+			   goto bad_key;
+	   }
    }
 
+	// what ??? 
    // sort keys
-   for (unsigned k = 0; k < i-1; k++)
-   {
-      unsigned max = k;
-      for (unsigned l = k+1; l < i; l++)
-         if (num[l] > num[max])
-             max = l;
-
-      action tmp = table[k];
-      table[k] = table[max];
-      table[max] = tmp;
-
-      unsigned tm = num[k];
-      num[k] = num[max];
-      num[max] = tm;
-   }
+   //for (unsigned k = 0; k < i-1; k++)
+   //{
+   //   unsigned max = k;
+   //   for (unsigned l = k+1; l < i; l++)
+   //      if (num[l] > num[max])
+   //          max = l;
+   //
+   //   action tmp = table[k];
+   //   table[k] = table[max];
+   //   table[max] = tmp;
+   //
+   //   unsigned tm = num[k];
+   //   num[k] = num[max];
+   //   num[max] = tm;
+   //}
 }
 
 void loadzxkeys(CONFIG *conf)
