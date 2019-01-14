@@ -208,6 +208,11 @@ void eat() // eat messages
 static u8 kbd_vk[VK_MAX];
 char dispatch_more(ActionType type)
 {
+	static auto action_types = std::vector<ActionType>();
+
+	if (type == ActionType::empty)
+		return  -1;
+
     GetKeyboardState( kbd_vk );
 	if (input.lastkey)
     {
@@ -215,25 +220,37 @@ char dispatch_more(ActionType type)
     }
 
    kbd_vk[0] = 0x80; // nil button is always pressed
+   action_types.clear();
 
-//   __debugbreak();
-   while (table->name)
+   if (type == ActionType::main)
+	   action_types.emplace_back(ActionType::main);
+   else if (type == ActionType::xt)
    {
-//      printf("%02X|%02X|%02X|%02X\n", table->k1, table->k2, table->k3, table->k4);
-
-	   if ( kbd_vk[table->k1] & kbd_vk[table->k2] &
-           kbd_vk[table->k3] & kbd_vk[table->k4] & 0x80 )
-      {
-         table->func();
-         return 1;
-      }
-
-      table++;
+	   action_types.emplace_back(type);
+	   action_types.emplace_back(ActionType::main);
    }
+   else // monitor
+   {
+	   action_types.emplace_back(type);
+	   action_types.emplace_back(ActionType::monitor);
+   }
+
+   auto list = ActionManager::get_actions(action_types);
+
+   for(auto item : list)
+   {
+	   if (kbd_vk[item->k1] & kbd_vk[item->k2] &
+		   kbd_vk[item->k3] & kbd_vk[item->k4] & 0x80)
+	   {
+		   item->invoke();
+		   return 1;
+	   }
+   }
+
    return -1;
 }
 
-char dispatch(action *table)
+char dispatch(ActionType type)
 {
    if (*droppedFile)
    {
@@ -250,7 +267,7 @@ char dispatch(action *table)
    else if (!input.readdevices())
        return 0;
 
-   dispatch_more(table);
+   dispatch_more(type);
    return 1;
 }
 

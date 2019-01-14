@@ -895,7 +895,7 @@ auto DebugCore::debug(Z80* cpu) -> void
 		view_->flip();
 
 	sleep:
-		while (!dispatch(nullptr))
+		while (!dispatch(ActionType::empty))
 		{
 			if (mousepos)
 				handle_mouse();

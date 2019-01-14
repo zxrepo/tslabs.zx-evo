@@ -1,5 +1,6 @@
 #pragma once
 #include "emul.h"
+#include "ui_action.h"
 
 class TCriticalSection
 {
@@ -43,8 +44,8 @@ u8 hex(char p);
 u8 hex(const char *p);
 
 unsigned process_msgs();
-char dispatch(action *table);
-char dispatch_more(action *table);
+char dispatch(ActionType type);
+char dispatch_more(ActionType type);
 
 void fillCpuString(char *dst);
 unsigned cpuid(unsigned _eax, int ext);

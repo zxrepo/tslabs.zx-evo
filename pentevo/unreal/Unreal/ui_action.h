@@ -98,4 +98,18 @@ public:
 		if (!item.is_empty())
 			item.invoke();
 	}
+
+	static auto get_actions(const std::vector<ActionType>& types) -> std::vector<UIAction*>
+	{
+		auto result = std::vector<UIAction*>();
+
+		for (auto& type : types)
+			for (auto& item : get_instance()->actions_)
+			{
+				if (item.type == type)
+					result.push_back(&item);
+			}
+
+		return result;
+	}
 };

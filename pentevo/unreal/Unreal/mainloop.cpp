@@ -120,7 +120,7 @@ void mainloop(const bool &Exit)
 		// message handling before flip (they paint to rbuf)
 		if (!temp.inputblock)
 		{
-			dispatch(conf.atm.xt_kbd ? ac_main_xt : ac_main);
+			dispatch(conf.atm.xt_kbd ? ActionType::xt : ActionType::main);
 		}
 
 		if (!temp.vidblock)
