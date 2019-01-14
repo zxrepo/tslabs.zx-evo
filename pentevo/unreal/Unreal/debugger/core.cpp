@@ -149,9 +149,9 @@ auto DebugCore::subscrible() -> void
 	ActionManager::subscrible(ActionType::monitor, "qsave1", []() { qsave("qsave1.sna"); });
 	ActionManager::subscrible(ActionType::monitor, "qsave2", []() { qsave("qsave2.sna"); });
 	ActionManager::subscrible(ActionType::monitor, "qsave3", []() { qsave("qsave3.sna"); });
-	ActionManager::subscrible(ActionType::monitor, "qload1", []() { qload("qsave1.sna"); });
-	ActionManager::subscrible(ActionType::monitor, "qload2", []() { qload("qsave2.sna"); });
-	ActionManager::subscrible(ActionType::monitor, "qload3", []() { qload("qsave3.sna"); });
+	ActionManager::subscrible(ActionType::monitor, "qload1", []() { qload("qload1.sna"); });
+	ActionManager::subscrible(ActionType::monitor, "qload2", []() { qload("qload2.sna"); });
+	ActionManager::subscrible(ActionType::monitor, "qload3", []() { qload("qload3.sna"); });
 	ActionManager::subscrible(ActionType::monitor, "labels", []() { mon_show_labels(); });
 	ActionManager::subscrible(ActionType::monitor, "memsearch", []() { main_cheat(); });
 
@@ -193,12 +193,12 @@ auto DebugCore::subscrible() -> void
 	ActionManager::subscrible(ActionType::main, "save", []() {savesnap(); });
 	ActionManager::subscrible(ActionType::main, "load", []() {opensnap(); });
 	ActionManager::subscrible(ActionType::main, "savesound", []() {savesnddialog(); });
-	ActionManager::subscrible(ActionType::main, "qsave1", []() {qsave1(); });
-	ActionManager::subscrible(ActionType::main, "qsave2", []() {qsave2(); });
-	ActionManager::subscrible(ActionType::main, "qsave3", []() {qsave3(); });
-	ActionManager::subscrible(ActionType::main, "qload1", []() {qload1(); });
-	ActionManager::subscrible(ActionType::main, "qload2", []() {qload2(); });
-	ActionManager::subscrible(ActionType::main, "qload3", []() {qload3(); });
+	ActionManager::subscrible(ActionType::main, "qsave1", []() { qsave("qsave1.sna"); });
+	ActionManager::subscrible(ActionType::main, "qsave2", []() { qsave("qsave2.sna"); });
+	ActionManager::subscrible(ActionType::main, "qsave3", []() { qsave("qsave3.sna"); });
+	ActionManager::subscrible(ActionType::main, "qload1", []() { qload("qsave1.sna"); });
+	ActionManager::subscrible(ActionType::main, "qload2", []() { qload("qsave2.sna"); });
+	ActionManager::subscrible(ActionType::main, "qload3", []() { qload("qsave3.sna"); });
 
 	ActionManager::subscrible(ActionType::main, "keystick", []() {main_keystick(); });
 	ActionManager::subscrible(ActionType::main, "autofire", []() {main_autofire(); });

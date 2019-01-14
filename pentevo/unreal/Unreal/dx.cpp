@@ -711,12 +711,12 @@ save_disk:
 				sound_play();
 				break;
 
-			case IDM_QUICKLOAD_1: qload1(); break;
-			case IDM_QUICKLOAD_2: qload2(); break;
-			case IDM_QUICKLOAD_3: qload3(); break;
-			case IDM_QUICKSAVE_1: qsave1(); break;
-			case IDM_QUICKSAVE_2: qsave2(); break;
-			case IDM_QUICKSAVE_3: qsave3(); break;
+			case IDM_QUICKLOAD_1: ActionManager::invoke(ActionType::main, "qload1"); break;
+			case IDM_QUICKLOAD_2: ActionManager::invoke(ActionType::main, "qload2"); break;
+			case IDM_QUICKLOAD_3: ActionManager::invoke(ActionType::main, "qload3"); break;
+			case IDM_QUICKSAVE_1: ActionManager::invoke(ActionType::main, "qsave1"); break;
+			case IDM_QUICKSAVE_2: ActionManager::invoke(ActionType::main, "qsave2"); break; 
+			case IDM_QUICKSAVE_3: ActionManager::invoke(ActionType::main, "qsave3"); break;
 
 			case IDM_RESET: main_reset(); break;
 			case IDM_RESET_128: main_reset128(); break;
@@ -749,7 +749,7 @@ save_disk:
 			case IDM_DEBUGGER: main_debug(); break;
 
 			// Help
-			case IDM_HELP_SHORTKEYS: main_help(); break;
+			case IDM_HELP_SHORTKEYS: ActionManager::invoke(ActionType::main, "help"); break;
 			//case IDM_HELP_ABOUT: DialogBox(hIn, MAKEINTRESOURCE(IDD_ABOUT), wnd, aboutdlg); break;
 		}
 		//needclr=1;

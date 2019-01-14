@@ -16,6 +16,7 @@
 #include "z80.h"
 #include "emulkeys.h"
 #include "util.h"
+#include "funcs.h"
 #include "debugger/libs/cpu_manager.h"
 
 extern VCTR vid;
@@ -319,7 +320,7 @@ void main_nmidos()
 
 void main_nmicache() { m_nmi(RM_CACHE); }
 
-static void qsave(const char *fname) {
+void qsave(const char *fname) {
    char xx[0x200]; addpath(xx, fname);
    FILE *ff = fopen(xx, "wb");
    if (ff) {
@@ -328,7 +329,7 @@ static void qsave(const char *fname) {
    }
 }
 
-static void qload(const char *fname) {
+void qload(const char *fname) {
    char xx[0x200]; addpath(xx, fname);
    if (loadsnap(xx)) sprintf(statusline, "Quick load from %s", fname), statcnt = 30;
 }

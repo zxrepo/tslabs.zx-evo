@@ -1,7 +1,7 @@
 void __declspec(noreturn) exit();
 
-void qsave(char*);
-void qload(char*);
+void qsave(const char*);
+void qload(const char*);
 void savesnap(int);
 
 
