@@ -36,7 +36,7 @@ class AyView final
 	DebugCore& core_;
 	DebugView& view_;
 
-	auto subscrible() -> void;
+	static auto subscrible() -> void;
 public:
 	AyView(DebugCore& core, DebugView& view);
 

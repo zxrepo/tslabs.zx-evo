@@ -45,8 +45,8 @@ void __cdecl BankNames(int i, char *name)
 
 auto WatchView::subsrible() -> void
 {
-	ActionManager::subscrible(ActionType::monitor, "setwatch", [this]() { mon_setwatch(); });
-	ActionManager::subscrible(ActionType::monitor, "scrshot", [this]() { mon_scrshot(); });
+	actions.MonSetWatch += [this](std::_Any_tag) { mon_setwatch(); };
+	actions.MonScreenShot += [this](std::_Any_tag) { mon_scrshot(); };
 }
 
 WatchView::WatchView(DebugCore& core, DebugView& view): core_(core), view_(view)
@@ -132,7 +132,7 @@ auto StackView::render() const -> void
 
 auto AyView::subscrible() -> void
 {
-	ActionManager::subscrible(ActionType::monitor, "switchay", [this]() { mon_switchay(); });
+	actions.MonSwitchAY += [](std::_Any_tag) { mon_switchay(); };
 }
 
 AyView::AyView(DebugCore& core, DebugView& view) : core_(core), view_(view)
@@ -164,20 +164,20 @@ auto AyView::render() const -> void
 
 auto BanksView::subscrible() -> void
 {
-	ActionManager::subscrible(ActionType::banks, "up", [this]()
+	actions.BanksUp += [this](std::_Any_tag)
 	{
 		selbank--;
 		selbank &= 3;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::banks, "down", [this]()
+	actions.BanksDown += [this](std::_Any_tag)
 	{
 		selbank++;
 		selbank &= 3;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::banks, "edit", [this]() { benter(); });
-	ActionManager::subscrible(ActionType::monitor, "setbank", [this]() { editbank(); });
+	actions.BanksEdit += [this](std::_Any_tag) { benter(); };
+	actions.MonSetBank += [this](std::_Any_tag) { editbank(); };
 }
 
 BanksView::BanksView(DebugCore& core, DebugView& view) : core_(core), view_(view)
@@ -246,8 +246,8 @@ auto BanksView::render() const -> void
 
 auto PortsView::subscrible() -> void
 {
-	ActionManager::subscrible(ActionType::monitor, "sethimem", [this]() { editextbank(); });
-	ActionManager::subscrible(ActionType::monitor, "exit", [this]() {});
+	actions.MonSetHiMem += [this](std::_Any_tag) { editextbank(); };
+	actions.MonExit += [](std::_Any_tag) {};
 }
 
 PortsView::PortsView(DebugCore& core, DebugView& view) : core_(core), view_(view)

@@ -9,6 +9,7 @@
 #include "sndcounter.h"
 #include "sound/ayx32.h"
 #include "ui_action.h"
+#include "debugger/core.h"
 
 namespace z80fast
 {
@@ -648,4 +649,7 @@ char presetbuf[0x4000], *setptr = presetbuf;
 
 const char * const ay_schemes[] = { "no soundchip", "single chip", "pseudo-turbo", "quadro-AY", "turbo-AY // POS", "turbo-sound // NedoPC", "AYX-32" };
 
-UIAction UIAction::empty = UIAction(ActionType::empty, "empty", []() {});
+//UIAction UIAction::empty = UIAction(ActionType::empty, "empty", []() {});
+Actions actions{};
+DebugCore* DebugCore::instance_ = nullptr;
+//ActionManager* ActionManager::instance_ = nullptr;
