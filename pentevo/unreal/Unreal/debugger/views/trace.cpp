@@ -431,7 +431,7 @@ auto TraceView::cdjump() -> void
 	unsigned addr; sscanf(ptr, "%04X", &addr);
 	auto& cpu = TCpuMgr::get_cpu();
 	cpu.mem_curs = addr;
-	core_.activedbg = dbgwnd::mem; 
+	view_.activedbg = dbgwnd::mem;
 	mem_.editor = ed_mem;
 }
 
@@ -450,7 +450,7 @@ auto TraceView::show_trace() -> void
 	cpu.nextpc = (cpu.pc + disasm_line(cpu.pc, line)) & 0xFFFF;
 	auto pc = cpu.trace_top;
 	asmii = -1;
-	const u8 atr0 = (core_.activedbg == dbgwnd::trace) ? w_sel : w_norm;
+	const u8 atr0 = (view_.activedbg == dbgwnd::trace) ? w_sel : w_norm;
 	unsigned ii; //Alone Coder 0.36.7
 	for (/*unsigned*/ ii = 0; ii < trace_size; ii++)
 	{
@@ -466,7 +466,7 @@ auto TraceView::show_trace() -> void
 		if (pc == cpu.trace_curs)
 		{
 			asmii = ii;
-			if (core_.activedbg == dbgwnd::trace)
+			if (view_.activedbg == dbgwnd::trace)
 				for (unsigned q = 0; q < cs[cpu.trace_mode][1]; q++)
 					view_.set_scr(debug_text_width * debug_text_height + (trace_y + ii) * debug_text_width + trace_x + cs[cpu.trace_mode][0] + q, w_curs);
 		}
@@ -477,7 +477,7 @@ auto TraceView::show_trace() -> void
 			{
 				const auto addr = cpu.pc_trflags & 0xFFFF;
 				unsigned arr = (addr <= cpu.pc) ? 0x18 : 0x19; // up/down arrow
-				const u8 color = (pc == cpu.trace_curs && core_.activedbg == dbgwnd::trace && cpu.trace_mode == 2) ? w_trace_jinfo_curs_fg : w_trace_jinfo_nocurs_fg;
+				const u8 color = (pc == cpu.trace_curs && view_.activedbg == dbgwnd::trace && cpu.trace_mode == 2) ? w_trace_jinfo_curs_fg : w_trace_jinfo_nocurs_fg;
 				if (cpu.pc_trflags & TWF_BRADDR)
 					sprintf(line, "%04X%c", addr, arr), view_.tprint_fg(trace_x + 32 - 5, trace_y + ii, line, color);
 				else view_.tprint_fg(trace_x + 32 - 1, trace_y + ii, reinterpret_cast<char*>(&arr), color);

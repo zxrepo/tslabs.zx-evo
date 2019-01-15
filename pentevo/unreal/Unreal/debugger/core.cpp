@@ -38,8 +38,11 @@ ActionManager* ActionManager::instance_ = nullptr;
 
 DebugCore::DebugCore() : ref_(*this)
 {
-	create_window();
-	view_ = new DebugView(wnd_);
+	instance_ = &ref_;
+
+	auto wnd = create_window();
+
+	view_ = new DebugView(wnd);
 	mem_ = new MemView(ref_, *view_);
 	dialogs_ = new Dialogs(*view_, *mem_);
 	regs_ = new RegView(ref_, *view_, *mem_);
@@ -218,7 +221,7 @@ auto DebugCore::subscrible() -> void
 	ActionManager::subscrible(ActionType::xt, "flictoggle", []() {main_atmkbd(); });
 }
 
-auto DebugCore::create_window() -> void
+auto DebugCore::create_window() -> HWND
 {
 	WNDCLASS  wc{};
 	RECT cl_rect;
@@ -233,26 +236,16 @@ auto DebugCore::create_window() -> void
 
 	menu_ = LoadMenu(hIn, MAKEINTRESOURCE(IDR_DEBUGMENU));
 
-	wnd_ = CreateWindow("DEBUG_WND", "UnrealSpeccy debugger", dw_style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, nullptr, menu_, hIn, NULL);
+	const auto wnd = CreateWindow("DEBUG_WND", "UnrealSpeccy debugger", dw_style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, nullptr, menu_, hIn, NULL);
 
 	cl_rect.left = 0;
 	cl_rect.top = 0;
 	cl_rect.right = DEBUG_WND_WIDTH - 1;
 	cl_rect.bottom = DEBUG_WND_HEIGHT - 1;
-	AdjustWindowRect(&cl_rect, dw_style, GetMenu(wnd_) != nullptr);
-	SetWindowPos(wnd_, nullptr, 0, 0, cl_rect.right - cl_rect.left + 1, cl_rect.bottom - cl_rect.top + 1, SWP_NOMOVE);
+	AdjustWindowRect(&cl_rect, dw_style, GetMenu(wnd) != nullptr);
+	SetWindowPos(wnd, nullptr, 0, 0, cl_rect.right - cl_rect.left + 1, cl_rect.bottom - cl_rect.top + 1, SWP_NOMOVE);
 
-	for (unsigned i = 0; i < 0x100; i++)
-	{
-		const unsigned y = (i & 8) ? 0xFF : 0xC0;
-		const unsigned r = (i & 2) ? y : 0;
-		const unsigned g = (i & 4) ? y : 0;
-		const unsigned b = (i & 1) ? y : 0;
-
-		gdibmp.header.bmiColors[i].rgbRed = r;
-		gdibmp.header.bmiColors[i].rgbGreen = g;
-		gdibmp.header.bmiColors[i].rgbBlue = b;
-	}
+	return wnd;
 }
 
 auto DebugCore::mon_emul() const -> void
@@ -260,7 +253,7 @@ auto DebugCore::mon_emul() const -> void
 	for (unsigned i = 0; i < TCpuMgr::get_count(); i++)
 	{
 		auto& cpu = TCpuMgr::get_cpu(i);
-		cpu.dbgchk = isbrk(cpu);
+		cpu.dbgchk = TCpuMgr::isbrk(cpu);
 		cpu.dbgbreak = 0;
 	}
 	dbgbreak = 0;
@@ -413,13 +406,13 @@ auto DebugCore::mon_switch_cpu() const -> void
 
 auto DebugCore::mon_nxt() -> void
 {
-	activedbg = (activedbg == dbgwnd::mem) ? dbgwnd::banks : dbgwnd(int(activedbg) - 1);
+	view_->activedbg = (view_->activedbg == dbgwnd::mem) ? dbgwnd::banks : dbgwnd(int(view_->activedbg) - 1);
 	mon_aux();
 }
 
 auto DebugCore::mon_aux() const -> void
 {
-	switch (activedbg)
+	switch (view_->activedbg)
 	{
 	case dbgwnd::banks:
 		banks_->showbank = true;
@@ -433,7 +426,7 @@ auto DebugCore::mon_aux() const -> void
 
 auto DebugCore::mon_prv() -> void
 {
-	activedbg = (activedbg == dbgwnd::banks) ? dbgwnd::mem : dbgwnd(int(activedbg) + 1);
+	view_->activedbg = (view_->activedbg == dbgwnd::banks) ? dbgwnd::mem : dbgwnd(int(view_->activedbg) + 1);
 	mon_aux();
 }
 
@@ -864,8 +857,8 @@ auto DebugCore::debug(Z80* cpu) -> void
 	flip();
 	const auto oldrflags = temp.rflags;
 	temp.rflags = RF_MONITOR;
-	//set_video();
-	ShowWindow(wnd_, SW_SHOW);
+
+	ShowWindow(view_->wnd_, SW_SHOW);
 
 	TCpuMgr::set_current_cpu(cpu->GetIdx());
 	auto prevcpu = &TCpuMgr::prev_cpu(cpu->GetIdx());
@@ -909,14 +902,15 @@ auto DebugCore::debug(Z80* cpu) -> void
 			Sleep(20);
 		}
 
-		if (activedbg == dbgwnd::regs && dispatch_more(ActionType::reg) > 0) continue;
-		if (activedbg == dbgwnd::trace && dispatch_more(ActionType::trace) > 0) continue;
-		if (activedbg == dbgwnd::mem && dispatch_more(ActionType::memory) > 0) continue;
-		if (activedbg == dbgwnd::banks && dispatch_more(ActionType::banks) > 0) continue;
-		if (activedbg == dbgwnd::regs &&  regs_->dispatch()) continue;
-		if (activedbg == dbgwnd::trace && trace_->dispatch_trace()) continue;
-		if (activedbg == dbgwnd::mem && mem_->dispatch()) continue;
-		if (activedbg == dbgwnd::banks && banks_->dispatch()) continue;
+		if (view_->activedbg == dbgwnd::regs && dispatch_more(ActionType::reg) > 0) continue;
+		if (view_->activedbg == dbgwnd::trace && dispatch_more(ActionType::trace) > 0) continue;
+		if (view_->activedbg == dbgwnd::mem && dispatch_more(ActionType::memory) > 0) continue;
+		if (view_->activedbg == dbgwnd::banks && dispatch_more(ActionType::banks) > 0) continue;
+		if (view_->activedbg == dbgwnd::regs &&  regs_->dispatch()) continue;
+		if (view_->activedbg == dbgwnd::trace && trace_->dispatch_trace()) continue;
+		if (view_->activedbg == dbgwnd::mem && mem_->dispatch()) continue;
+		if (view_->activedbg == dbgwnd::banks && banks_->dispatch()) continue;
+		
 		if (needclr)
 		{
 			needclr--;
@@ -933,7 +927,7 @@ leave_dbg:
 	//temp.rflags = RF_GDI; // facepalm.jpg
 	temp.rflags = oldrflags;
 	//apply_video();
-	ShowWindow(wnd_, SW_HIDE);
+	ShowWindow(view_->wnd_, SW_HIDE);
 	sound_play();
 	input.nokb = 20;
 }
@@ -983,7 +977,8 @@ auto DebugCore::handle_mouse() -> void
 
 	if (my >= trace_y && my < trace_y + trace_size && mx >= trace_x && mx < trace_x + 32)
 	{
-		needclr++; activedbg = dbgwnd::trace;
+		needclr++;
+		view_->activedbg = dbgwnd::trace;
 		cpu.trace_curs = cpu.trpc[my - trace_y];
 		if (mx - trace_x < trace_->cs[1][0]) cpu.trace_mode = 0;
 		else if (mx - trace_x < trace_->cs[2][0]) cpu.trace_mode = 1;
@@ -991,7 +986,8 @@ auto DebugCore::handle_mouse() -> void
 	}
 	if (my >= mem_y && my < mem_y + mem_size && mx >= mem_x && mx < mem_x + 37)
 	{
-		needclr++; activedbg = dbgwnd::mem;
+		needclr++;
+		view_->activedbg = dbgwnd::mem;
 		const auto dx = mx - mem_x;
 		if (mem_->mem_dump)
 		{
@@ -1008,7 +1004,9 @@ auto DebugCore::handle_mouse() -> void
 		}
 	}
 	if (mx >= regs_x && my >= regs_y && mx < regs_x + 32 && my < regs_y + 4) {
-		needclr++; activedbg = dbgwnd::regs;
+		needclr++;
+		view_->activedbg = dbgwnd::regs;
+
 		for (unsigned i = 0; i < regs_layout.size(); i++) {
 			unsigned delta = 1;
 			if (regs_layout[i].width == 16) delta = 4;
@@ -1020,7 +1018,7 @@ auto DebugCore::handle_mouse() -> void
 	}
 	if (mx >= banks_x && my >= banks_y + 1 && mx < banks_x + 7 && my < banks_y + 5) {
 		needclr++;
-		activedbg = dbgwnd::banks;
+		view_->activedbg = dbgwnd::banks;
 		banks_->selbank = my - (banks_y + 1);
 		banks_->showbank = true;
 	}
@@ -1029,7 +1027,7 @@ auto DebugCore::handle_mouse() -> void
 	if (mousepos & 0x80000000) { // right-click
 		enum { idm_bpx = 1, idm_some_other };
 		const auto menu = CreatePopupMenu();
-		if (activedbg == dbgwnd::trace) {
+		if (view_->activedbg == dbgwnd::trace) {
 			AppendMenu(menu, MF_STRING, idm_bpx, "breakpoint");
 		}
 		else {
@@ -1090,32 +1088,6 @@ auto DebugCore::get_trace() -> TraceView*
 	return get_instance()->trace_;
 }
 
-auto DebugCore::isbrk(const Z80& cpu) -> u8
-{
-#ifndef MOD_DEBUGCORE
-	return 0;
-#else
-
-#ifdef MOD_MEMBAND_LED
-	if (conf.led.memband & 0x80000000)
-		return 1;
-#endif
-
-	if (conf.mem_model == MM_PROFSCORP)
-		return 1; // breakpoint on read ROM switches ROM bank
-
-#ifdef MOD_MONITOR
-	if (cpu.cbpn)
-		return 1;
-	u8 res = 0;
-	for (auto i = 0; i < 0x10000; i++)
-		res |= cpu.membits[i];
-	return (res & (MEMBITS_BPR | MEMBITS_BPW | MEMBITS_BPX));
-#endif
-
-#endif
-}
-
 auto DebugCore::init_bpx(char* file) -> void
 {
 	addpath(bpx_file_name, file ? file : "bpx.ini");
@@ -1153,7 +1125,7 @@ auto DebugCore::init_bpx(char* file) -> void
 		auto& cpu = TCpuMgr::get_cpu(cpu_idx);
 		for (auto i = unsigned(start); i <= unsigned(end); i++)
 			cpu.membits[i] |= mask;
-		cpu.dbgchk = isbrk(cpu);
+		cpu.dbgchk = TCpuMgr::isbrk(cpu);
 	}
 	fclose(bpx_file);
 	}

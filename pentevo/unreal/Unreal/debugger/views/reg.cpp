@@ -204,11 +204,6 @@ auto RegView::subscrible() -> void
 
 	ActionManager::subscrible(ActionType::reg, "codejump", [this]() { rcodejump(); });
 	ActionManager::subscrible(ActionType::reg, "datajump", [this]() { rdatajump(); });
-	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
-	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
-	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
-	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
-	ActionManager::subscrible(ActionType::reg, "exit", [this]() {});
 }
 
 RegView::RegView(DebugCore& core, DebugView& view, MemView& mem) : core_(core), view_(view), mem_(mem)
@@ -221,7 +216,7 @@ auto RegView::rcodejump() const -> void
 	auto& cpu = TCpuMgr::get_cpu();
 	if (regs_layout[regs_curs].width == 16)
 	{
-		core_.activedbg = dbgwnd::trace;
+		view_.activedbg = dbgwnd::trace;
 		cpu.trace_curs = cpu.trace_top = *reinterpret_cast<u16*>(PCHAR(static_cast<TZ80State*>(&cpu)) + regs_layout[regs_curs].offs);
 	}
 }
@@ -231,7 +226,7 @@ auto RegView::rdatajump() const -> void
 	auto& cpu = TCpuMgr::get_cpu();
 	if (regs_layout[regs_curs].width == 16)
 	{
-		core_.activedbg = dbgwnd::mem;
+		view_.activedbg = dbgwnd::mem;
 		mem_.editor = ed_mem;
 		cpu.mem_curs = *reinterpret_cast<u16*>(PCHAR(static_cast<TZ80State*>(&cpu)) + regs_layout[regs_curs].offs);
 	}
@@ -274,7 +269,7 @@ auto RegView::render() const -> void
 	auto& cpu = TCpuMgr::get_cpu();
 	const auto& prevcpu = TCpuMgr::prev_cpu();
 
-	const u8 atr = (core_.activedbg == dbgwnd::regs) ? w_sel : w_norm;
+	const u8 atr = (view_.activedbg == dbgwnd::regs) ? w_sel : w_norm;
 	char line[40];
 	view_.tprint(regs_x, regs_y + 0, "af:**** af'**** sp:**** ir: ****", atr);
 	view_.tprint(regs_x, regs_y + 1, "bc:**** bc'**** pc:**** t:******", atr);
@@ -283,7 +278,7 @@ auto RegView::render() const -> void
 
 	if (cpu.halted && !cpu.iff1)
 	{
-		view_.tprint(regs_x + 26, regs_y + 1, "DiHALT", (core_.activedbg == dbgwnd::regs) ? w_dihalt1 : w_dihalt2);
+		view_.tprint(regs_x + 26, regs_y + 1, "DiHALT", (view_.activedbg == dbgwnd::regs) ? w_dihalt1 : w_dihalt2);
 	}
 	else
 	{
@@ -297,7 +292,7 @@ auto RegView::render() const -> void
 		const unsigned mask = (1 << reg.width) - 1;
 		const unsigned val = mask & *reinterpret_cast<unsigned*>(PCHAR(static_cast<TZ80State*>(&cpu)) + reg.offs);
 		auto atr1 = atr;
-		if (core_.activedbg == dbgwnd::regs && reg.offs == regs_layout[regs_curs].offs)
+		if (view_.activedbg == dbgwnd::regs && reg.offs == regs_layout[regs_curs].offs)
 			atr1 = w_curs;
 		if (val != (mask & *reinterpret_cast<unsigned*>(PCHAR(&prevcpu) + reg.offs)))
 			atr1 |= 0x08;
@@ -318,7 +313,7 @@ auto RegView::render() const -> void
 	{
 		unsigned ln;
 		auto atr1 = atr;
-		if (core_.activedbg == dbgwnd::regs && regs_curs == unsigned(q + 18)) atr1 = w_curs;
+		if (view_.activedbg == dbgwnd::regs && regs_curs == unsigned(q + 18)) atr1 = w_curs;
 		ln = flg[q + ((cpu.af & (0x80 >> q)) ? 0 : 8)];
 		if ((0x80 >> q)&(cpu.f^prevcpu.f)) atr1 |= 0x08;
 		view_.tprint(regs_x + 24 + q, regs_y + 3, reinterpret_cast<char*>(&ln), atr1);

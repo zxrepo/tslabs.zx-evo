@@ -52,7 +52,7 @@ public:
 
 	auto is_empty() const -> bool
 	{
-		return type != ActionType::empty && name != "empty";
+		return type == ActionType::empty && name == "empty";
 	}
 
 	auto get_full_name() const -> std::string

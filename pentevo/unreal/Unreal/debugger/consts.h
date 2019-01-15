@@ -89,4 +89,4 @@ constexpr auto file_dlg_x = 6;
 constexpr auto file_dlg_y = 10;
 constexpr auto file_dlg_dx = 25;
 
-#define DBG_GDIBUFSZ (DEBUG_WND_WIDTH*DEBUG_WND_HEIGHT)	// Quad size, 32 bit, 448x320 max
+constexpr auto dbg_gdibuf_size = (DEBUG_WND_WIDTH*DEBUG_WND_HEIGHT);

@@ -1026,7 +1026,7 @@ void apply_memory()
    for (unsigned i = 0; i < TCpuMgr::get_count(); i++)
    {
        Z80 &cpu = TCpuMgr::get_cpu(i);
-       cpu.dbgchk = DebugCore::isbrk(cpu);
+       cpu.dbgchk = TCpuMgr::isbrk(cpu);
    }
 }
 

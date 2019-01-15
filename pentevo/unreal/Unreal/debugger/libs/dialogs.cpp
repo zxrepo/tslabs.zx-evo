@@ -636,7 +636,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		SendDlgItemMessage(dlg, IDE_CBP, WM_SETTEXT, 0, 0);
 		fill_cond_box(dlg, cpu.cbpn++);
-		cpu.dbgchk = DebugCore::isbrk(cpu);
+		cpu.dbgchk = TCpuMgr::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -656,7 +656,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 			cpu.membits[i] |= MEMBITS_BPX;
 		SendDlgItemMessage(dlg, IDE_BPX, WM_SETTEXT, 0, 0);
 		fill_bpx_box(dlg, range.start);
-		cpu.dbgchk = DebugCore::isbrk(cpu);
+		cpu.dbgchk = TCpuMgr::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -682,7 +682,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		CheckDlgButton(dlg, IDC_MEM_R, BST_UNCHECKED);
 		CheckDlgButton(dlg, IDC_MEM_W, BST_UNCHECKED);
 		fill_mem_box(dlg, range.start);
-		cpu.dbgchk = DebugCore::isbrk(cpu);
+		cpu.dbgchk = TCpuMgr::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -700,7 +700,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		if (cur && cur == cpu.cbpn)
 			cur--;
 		fill_cond_box(dlg, cur);
-		cpu.dbgchk = DebugCore::isbrk(cpu);
+		cpu.dbgchk = TCpuMgr::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 
@@ -725,7 +725,7 @@ INT_PTR CALLBACK conddlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 		if (cur && cur == max)
 			cur--;
 		SendDlgItemMessage(dlg, id, LB_SETCURSEL, cur, 0);
-		cpu.dbgchk = DebugCore::isbrk(cpu);
+		cpu.dbgchk = TCpuMgr::isbrk(cpu);
 		goto set_buttons_and_return;
 	}
 

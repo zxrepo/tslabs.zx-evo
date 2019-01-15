@@ -233,11 +233,11 @@ auto BanksView::render() const -> void
 	for (unsigned i = 0; i < 4; i++)
 	{
 		char ln[64]; sprintf(ln, "%d:", i);
-		char attr = ((selbank == i) && (showbank) ? (w_otheroff & 0xF) | w_curs : w_otheroff | (core_.activedbg == dbgwnd::banks ? 0x10 : 0));
+		char attr = ((selbank == i) && (showbank) ? (w_otheroff & 0xF) | w_curs : w_otheroff | (view_.activedbg == dbgwnd::banks ? 0x10 : 0));
 		view_.tprint(banks_x, banks_y + i + 1, ln, attr);
 		strcpy(ln, "?????");
 		cpu.BankNames(i, ln);
-		attr = ((selbank == i) && (showbank) ? w_curs : ((bankr[i] != bankw[i] ? w_bankro : w_bank) | (core_.activedbg == dbgwnd::banks ? 0x10 : 0)));
+		attr = ((selbank == i) && (showbank) ? w_curs : ((bankr[i] != bankw[i] ? w_bankro : w_bank) | (view_.activedbg == dbgwnd::banks ? 0x10 : 0)));
 		view_.tprint(banks_x + 2, banks_y + i + 1, ln, attr);
 	}
 	view_.add_frame(banks_x, banks_y + 1, 7, 4, FRAME);

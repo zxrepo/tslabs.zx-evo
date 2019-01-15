@@ -433,7 +433,7 @@ INT_PTR CALLBACK LabelsDlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 		//void push_pos(); push_pos();
 		TCpuMgr::get_cpu().trace_curs = TCpuMgr::get_cpu().trace_top = address;
-		DebugCore::get_instance()->activedbg = dbgwnd::trace;
+		DebugCore::get_view()->activedbg = dbgwnd::trace;
 
 		EndDialog(dlg, 1);
 		return 1;

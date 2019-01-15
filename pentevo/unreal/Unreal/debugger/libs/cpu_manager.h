@@ -18,4 +18,6 @@ public:
 	static void set_current_cpu(u32 idx);
 	static void copy_to_prev();
 	static unsigned get_count();
+
+	static auto isbrk(const Z80& cpu)->u8;
 };

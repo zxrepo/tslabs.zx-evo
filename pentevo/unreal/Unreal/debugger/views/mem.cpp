@@ -321,7 +321,7 @@ auto MemView::render() -> void
 				sprintf(line, (ii == mem_size / 2) ?
 					"          track not found            " :
 					"                                     ");
-				view_.tprint(mem_x, mem_y + ii, line, (core_.activedbg == dbgwnd::mem) ? w_sel : w_norm);
+				view_.tprint(mem_x, mem_y + ii, line, (view_.activedbg == dbgwnd::mem) ? w_sel : w_norm);
 			}
 			mem_max = 0;
 			goto title;
@@ -372,9 +372,9 @@ redraw:
 		}
 
 		line[37] = 0;
-		view_.tprint(mem_x, mem_y + ii, line, (core_.activedbg == dbgwnd::mem) ? w_sel : w_norm);
+		view_.tprint(mem_x, mem_y + ii, line, (view_.activedbg == dbgwnd::mem) ? w_sel : w_norm);
 		cursor_found |= cx;
-		if (cx && (core_.activedbg == dbgwnd::mem))
+		if (cx && (view_.activedbg == dbgwnd::mem))
 			view_.set_scr((mem_y + ii) * debug_text_width + mem_x + cx + debug_text_width * debug_text_height, w_curs);
 	}
 

@@ -89,6 +89,7 @@ void init_all(int argc, char **argv)
 
    init_z80tables();
    init_ie_help();
+   DebugCore::get_instance();
    load_config(config);
    //make_samples();
    #ifdef MOD_GS
@@ -98,7 +99,6 @@ void init_all(int argc, char **argv)
    init_tape();
    init_hdd_cd();
    start_dx();
-   DebugCore::get_instance();
    applyconfig();
    main_reset();
    autoload();

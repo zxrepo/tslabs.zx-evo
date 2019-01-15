@@ -57,6 +57,32 @@ unsigned TCpuMgr::get_count()
 	return count;
 }
 
+auto TCpuMgr::isbrk(const Z80& cpu) -> u8
+{
+#ifndef MOD_DEBUGCORE
+	return 0;
+#else
+
+#ifdef MOD_MEMBAND_LED
+	if (conf.led.memband & 0x80000000)
+		return 1;
+#endif
+
+	if (conf.mem_model == MM_PROFSCORP)
+		return 1; // breakpoint on read ROM switches ROM bank
+
+#ifdef MOD_MONITOR
+	if (cpu.cbpn)
+		return 1;
+	u8 res = 0;
+	for (auto i = 0; i < 0x10000; i++)
+		res |= cpu.membits[i];
+	return (res & (MEMBITS_BPR | MEMBITS_BPW | MEMBITS_BPX));
+#endif
+
+#endif
+}
+
 void TCpuMgr::switch_cpu()
 {
 	current_cpu_++;

@@ -23,7 +23,7 @@ class RegView final
 	DebugCore &core_;
 	DebugView &view_;
 	MemView& mem_;
-
+	
 	auto subscrible() -> void;
 
 	auto rcodejump() const -> void;

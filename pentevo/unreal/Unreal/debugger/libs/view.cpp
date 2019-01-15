@@ -5,9 +5,9 @@
 #include "util.h"
 #include "debugger/consts.h"
 
-static char str[80];
+static char str[80]{};
 
-auto DebugView::format_item(char* dst, unsigned width, const char* text, MenuItem::flags_t flags) -> void
+auto DebugView::format_item(char* dst, const unsigned width, const char* text, const MenuItem::flags_t flags) -> void
 {
 	memset(dst, ' ', width + 2); dst[width + 2] = 0;
 	unsigned sz = strlen(text), left = 0;
@@ -17,7 +17,7 @@ auto DebugView::format_item(char* dst, unsigned width, const char* text, MenuIte
 	memcpy(dst + left + 1, text, sz);
 }
 
-auto DebugView::menu_move(MenuDef* menu, int dir) -> void
+auto DebugView::menu_move(MenuDef* menu, const int dir) -> void
 {
 	const unsigned start = menu->pos;
 	for (;;) {
@@ -33,9 +33,9 @@ auto DebugView::paint_items(MenuDef* menu) -> void
 {
 	char ln[debug_text_width]; unsigned item;
 
-	unsigned maxlen = strlen(menu->title);
+	auto maxlen = strlen(menu->title);
 	for (item = 0; item < menu->n_items; item++) {
-		unsigned sz = strlen(menu->items[item].text);
+		auto sz = strlen(menu->items[item].text);
 		maxlen = max(maxlen, sz);
 	}
 	const unsigned menu_dx = maxlen + 2;
@@ -57,9 +57,21 @@ auto DebugView::paint_items(MenuDef* menu) -> void
 
 DebugView::DebugView(HWND wnd) : wnd_(wnd)
 {
-	gdibuf_ = static_cast<u8*>(malloc(DBG_GDIBUFSZ));
+	gdibuf_ = static_cast<u8*>(malloc(dbg_gdibuf_size));
 	gdibmp_ = { { { sizeof(BITMAPINFOHEADER), DEBUG_WND_WIDTH, -DEBUG_WND_HEIGHT, 1, 8, BI_RGB, 0 } } };
 	txtscr_ = static_cast<u8*>(malloc(debug_text_width * debug_text_height * 2));
+
+	for (unsigned i = 0; i < 0x100; i++)
+	{
+		const unsigned y = (i & 8) ? 0xFF : 0xC0;
+		const unsigned r = (i & 2) ? y : 0;
+		const unsigned g = (i & 4) ? y : 0;
+		const unsigned b = (i & 1) ? y : 0;
+
+		gdibmp_.header.bmiColors[i].rgbRed = r;
+		gdibmp_.header.bmiColors[i].rgbGreen = g;
+		gdibmp_.header.bmiColors[i].rgbBlue = b;
+	}
 }
 
 auto DebugView::on_paint(HWND hwnd) const -> void
@@ -330,10 +342,10 @@ auto DebugView::inputhex(unsigned x, unsigned y, unsigned sz, bool hex) -> unsig
 		}
 		else
 		{
-			u8 Kbd[256];
-			GetKeyboardState(Kbd);
+			u8 kbd[256];
+			GetKeyboardState(kbd);
 			u16 k;
-			if (ToAscii(key, 0, Kbd, &k, 0) == 1)
+			if (ToAscii(key, 0, kbd, &k, 0) == 1)
 			{
 				char m;
 				if (CharToOemBuff(reinterpret_cast<char *>(&k), &m, 1))
