@@ -39,171 +39,171 @@ const std::vector<TRegLayout> regs_layout =
 
 auto RegView::subscrible() -> void
 {
-	ActionManager::subscrible(ActionType::reg, "left", [this]()
+	actions.RegLeft += [this]()
 	{
 		regs_curs = regs_layout[regs_curs].lf;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "right", [this]()
+	actions.RegRight += [this]()
 	{
 		regs_curs = regs_layout[regs_curs].rt;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "up", [this]()
+	actions.RegUp += [this]()
 	{
 		regs_curs = regs_layout[regs_curs].up;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "down", [this]()
+	actions.RegDown += [this]()
 	{
 		regs_curs = regs_layout[regs_curs].dn;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "edit", [this]() { renter(); });
+	actions.RegEdit += [this]() { renter(); };
 
-	ActionManager::subscrible(ActionType::reg, "a", [this]()
+	actions.RegA += [this]()
 	{
 		regs_curs = 0;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "f", [this]() {
+	actions.RegF += [this]() {
 		regs_curs = 1;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "bc", [this]() {
+	actions.RegBC += [this]() {
 		regs_curs = 2;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "de", [this]()
+	actions.RegDE += [this]()
 	{
 		regs_curs = 3;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "hl", [this]()
+	actions.RegHL += [this]()
 	{
 		regs_curs = 4;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "pc", [this]()
+	actions.RegPC += [this]()
 	{
 		regs_curs = 10;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "sp", [this]()
+	actions.RegSP += [this]()
 	{
 		regs_curs = 9;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "ix", [this]()
+	actions.RegIX += [this]()
 	{
 		regs_curs = 11;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "iy", [this]()
+	actions.RegIY += [this]()
 	{
 		regs_curs = 12;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "i", [this]()
+	actions.RegI += [this]()
 	{
 		regs_curs = 13;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "r", [this]()
+	actions.RegR += [this]()
 	{
 		regs_curs = 14;
 		input.lastkey = 0;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "im", [this]()
+	actions.RegIM += [this]()
 	{
 		regs_curs = 15;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "iff1", [this]()
+	actions.RegIFF1 += [this]()
 	{
 		regs_curs = 16;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "iff2", [this]()
+	actions.RegIFF2 += [this]()
 	{
 		regs_curs = 17;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "SF", [this]()
+	actions.RegSF += [this]()
 	{
 		regs_curs = 18;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "ZF", [this]()
+	actions.RegZF += [this]()
 	{
 		regs_curs = 19;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "F5", [this]()
+	actions.RegF5 += [this]()
 	{
 		regs_curs = 20;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "HF", [this]()
+	actions.RegHF += [this]()
 	{
 		regs_curs = 21;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "F3", [this]()
+	actions.RegF3 += [this]()
 	{
 		regs_curs = 22;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "PF", [this]()
+	actions.RegPF += [this]()
 	{
 		regs_curs = 23;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "NF", [this]()
+	actions.RegNF += [this]()
 	{
 		regs_curs = 24;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "CF", [this]()
+	actions.RegCF += [this]()
 	{
 		regs_curs = 25;
 		renter();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::reg, "codejump", [this]() { rcodejump(); });
-	ActionManager::subscrible(ActionType::reg, "datajump", [this]() { rdatajump(); });
+	actions.RegCodeJump += [this]() { rcodejump(); };
+	actions.RegDataJump += [this]() { rdatajump(); };
 }
 
 RegView::RegView(DebugCore& core, DebugView& view, MemView& mem) : core_(core), view_(view), mem_(mem)

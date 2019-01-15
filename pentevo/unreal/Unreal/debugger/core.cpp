@@ -37,7 +37,7 @@ DebugCore::DebugCore() : ref_(*this)
 {
 	instance_ = &ref_;
 
-	auto wnd = create_window();
+	const auto wnd = create_window();
 
 	view_ = new DebugView(wnd);
 	mem_ = new MemView(ref_, *view_);
@@ -59,11 +59,9 @@ DebugCore::DebugCore() : ref_(*this)
 
 auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam) -> LRESULT
 {
-	const auto core = get_instance();
-
 	if (uMessage == WM_CLOSE)
 	{
-		core->mon_emul();
+		actions.MonEmul();
 		return 0;
 	}
 
@@ -77,21 +75,21 @@ auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARA
 	if (uMessage == WM_COMMAND)
 	{
 		switch (wparam) {
-		case IDM_DEBUG_RUN: core->mon_emul(); break;
+		case IDM_DEBUG_RUN: actions.MonEmul(); break;
 
-		case IDM_DEBUG_STEP: core->mon_step(); break;
-		case IDM_DEBUG_STEPOVER: core->mon_stepover(); break;
-		case IDM_DEBUG_TILLRETURN: core->mon_exitsub(); break;
-		case IDM_DEBUG_RUNTOCURSOR: ActionManager::invoke(ActionType::trace, "here"); break;
+		case IDM_DEBUG_STEP: actions.MonStep(); break;
+		case IDM_DEBUG_STEPOVER: actions.MonStepOver(); break;
+		case IDM_DEBUG_TILLRETURN: actions.MonExitSub(); break;
+		case IDM_DEBUG_RUNTOCURSOR: actions.TraceHere(); break;
 
-		case IDM_BREAKPOINT_TOGGLE: ActionManager::invoke(ActionType::trace, "bpx"); break;
+		case IDM_BREAKPOINT_TOGGLE: actions.TraceBpx(); break;
 		case IDM_BREAKPOINT_MANAGER: get_dialogs()->mon_bpdialog(); break;
 
-		case IDM_MON_LOADBLOCK: core->mon_load(); break;
-		case IDM_MON_SAVEBLOCK: core->mon_save(); break;
-		case IDM_MON_FILLBLOCK: core->mon_fill(); break;
+		case IDM_MON_LOADBLOCK: actions.MonLoadBlock(); break;
+		case IDM_MON_SAVEBLOCK: actions.MonSaveBlock(); break;
+		case IDM_MON_FILLBLOCK: actions.MonFillBlock(); break;
 
-		case IDM_MON_RIPPER: core->mon_tool(); break;
+		case IDM_MON_RIPPER: actions.MonRipper(); break;
 		default:;
 		}
 		needclr = 1;
@@ -107,115 +105,115 @@ auto DebugCore::rw_err(const char* msg) -> void
 
 auto DebugCore::subscrible() -> void
 {
-	actions.MonEmul += [this](std::_Any_tag) { mon_emul(); };
-	actions.MonSaveBlock += [this](std::_Any_tag) { mon_save(); };
-	actions.MonLoadBlock += [this](std::_Any_tag) { mon_load(); };
-	actions.MonLoadBlock += [this](std::_Any_tag) { mon_fill(); };
-	actions.MonStep += [this](std::_Any_tag) { mon_step(); };
-	actions.MonStepOver += [this](std::_Any_tag) { mon_stepover(); };
-	actions.MonExitSub += [this](std::_Any_tag) { mon_exitsub(); };
+	actions.MonEmul += [this]() { mon_emul(); };
+	actions.MonSaveBlock += [this]() { mon_save(); };
+	actions.MonLoadBlock += [this]() { mon_load(); };
+	actions.MonLoadBlock += [this]() { mon_fill(); };
+	actions.MonStep += [this]() { mon_step(); };
+	actions.MonStepOver += [this]() { mon_stepover(); };
+	actions.MonExitSub += [this]() { mon_exitsub(); };
 
-	actions.MonDump += [this](std::_Any_tag)
+	actions.MonDump += [this]()
 	{
 		mem_->mem_dump = (mem_->mem_dump + 1) & 1;
 		mem_->mem_sz = mem_->mem_dump ? 32 : 8;
 	};
 
-	actions.MonSwitchDump += [this](std::_Any_tag) { mon_switch_dump(); };
-	actions.MonNext += [this](std::_Any_tag) { mon_nxt(); };
-	actions.MonPrev += [this](std::_Any_tag) { mon_prv(); };
-	actions.MonRipper += [this](std::_Any_tag) { mon_tool(); };
-	actions.MonHelp += [](std::_Any_tag) { showhelp("monitor_keys"); };
-	actions.MonCpu += [this](std::_Any_tag) { mon_switch_cpu(); };
-	actions.MonExit += [](std::_Any_tag) { correct_exit(); };
+	actions.MonSwitchDump += [this]() { mon_switch_dump(); };
+	actions.MonNext += [this]() { mon_nxt(); };
+	actions.MonPrev += [this]() { mon_prv(); };
+	actions.MonRipper += [this]() { mon_tool(); };
+	actions.MonHelp += []() { showhelp("monitor_keys"); };
+	actions.MonCpu += [this]() { mon_switch_cpu(); };
+	actions.MonExit += []() { correct_exit(); };
 
 	// global command 
 	// todo move out
-	actions.MonPokeDialog += [](std::_Any_tag) { main_poke(); };
-	actions.MonTapeBrowser += [](std::_Any_tag) { main_tapebrowser(); };
-	actions.MonReset += [](std::_Any_tag) { main_reset(); };
-	actions.MonReset128 += [](std::_Any_tag) { main_reset128(); };
-	actions.MonResetSys += [](std::_Any_tag) { main_resetsys(); };
-	actions.MonReset48 += [](std::_Any_tag) { main_reset48(); };
-	actions.MonResetBasic += [](std::_Any_tag) { main_resetbas(); };
-	actions.MonResetDos += [](std::_Any_tag) { main_resetdos(); };
-	actions.MonResetCache += [](std::_Any_tag) { main_resetcache(); };
-	actions.MonNmi += [](std::_Any_tag) { main_nmi(); };
-	actions.MonNmiDos += [](std::_Any_tag){ main_nmidos(); };
-	actions.MonNmiCache += [](std::_Any_tag) { main_nmicache(); };
-	actions.MonSaveSnap += [](std::_Any_tag) { savesnap(); };
-	actions.MonLoadSnap += [](std::_Any_tag) { opensnap(); };
-	actions.MonSaveSound += [](std::_Any_tag) { savesnddialog(); };
-	actions.MonQSave1 += [](std::_Any_tag) { qsave("qsave1.sna"); };
-	actions.MonQSave2 += [](std::_Any_tag) { qsave("qsave2.sna"); };
-	actions.MonQSave3 += [](std::_Any_tag) { qsave("qsave3.sna"); };
-	actions.MonQLoad1 += [](std::_Any_tag) { qload("qload1.sna"); };
-	actions.MonQLoad2 += [](std::_Any_tag) { qload("qload2.sna"); };
-	actions.MonQLoad3 += [](std::_Any_tag) { qload("qload3.sna"); };
-	actions.MonLabels += [](std::_Any_tag) { mon_show_labels(); };
-	actions.MonMemSearch += [](std::_Any_tag) { main_cheat(); };
+	actions.MonPokeDialog += []() { main_poke(); };
+	actions.MonTapeBrowser += []() { main_tapebrowser(); };
+	actions.MonReset += []() { main_reset(); };
+	actions.MonReset128 += []() { main_reset128(); };
+	actions.MonResetSys += []() { main_resetsys(); };
+	actions.MonReset48 += []() { main_reset48(); };
+	actions.MonResetBasic += []() { main_resetbas(); };
+	actions.MonResetDos += []() { main_resetdos(); };
+	actions.MonResetCache += []() { main_resetcache(); };
+	actions.MonNmi += []() { main_nmi(); };
+	actions.MonNmiDos += [](){ main_nmidos(); };
+	actions.MonNmiCache += []() { main_nmicache(); };
+	actions.MonSaveSnap += []() { savesnap(); };
+	actions.MonLoadSnap += []() { opensnap(); };
+	actions.MonSaveSound += []() { savesnddialog(); };
+	actions.MonQSave1 += []() { qsave("qsave1.sna"); };
+	actions.MonQSave2 += []() { qsave("qsave2.sna"); };
+	actions.MonQSave3 += []() { qsave("qsave3.sna"); };
+	actions.MonQLoad1 += []() { qload("qload1.sna"); };
+	actions.MonQLoad2 += []() { qload("qload2.sna"); };
+	actions.MonQLoad3 += []() { qload("qload3.sna"); };
+	actions.MonLabels += []() { mon_show_labels(); };
+	actions.MonMemSearch += []() { main_cheat(); };
 
-	actions.MainExit += [](std::_Any_tag) { correct_exit(); };
-	actions.MainMonitor += [](std::_Any_tag) { main_debug(); };
-	actions.MainFullSceen += [](std::_Any_tag) { main_fullscr(); };
-	actions.MainPause += [](std::_Any_tag) { main_pause(); };
-	actions.MainSelectFix += [](std::_Any_tag) { main_selectfix(); };
-	actions.MainSelectSnd += [](std::_Any_tag) { main_selectsnd(); };
-	actions.MainIncFix += [](std::_Any_tag) { main_incfix(); };
-	actions.MainDecFix += [](std::_Any_tag) { main_decfix(); };
-	actions.MainIncFix10 += [](std::_Any_tag) { main_incfix10(); };
-	actions.MainDecFix10 += [](std::_Any_tag) { main_decfix10(); };
+	actions.MainExit += []() { correct_exit(); };
+	actions.MainMonitor += []() { main_debug(); };
+	actions.MainFullSceen += []() { main_fullscr(); };
+	actions.MainPause += []() { main_pause(); };
+	actions.MainSelectFix += []() { main_selectfix(); };
+	actions.MainSelectSnd += []() { main_selectsnd(); };
+	actions.MainIncFix += []() { main_incfix(); };
+	actions.MainDecFix += []() { main_decfix(); };
+	actions.MainIncFix10 += []() { main_incfix10(); };
+	actions.MainDecFix10 += []() { main_decfix10(); };
 
-	actions.MainLeds += [](std::_Any_tag) { main_leds(); };
-	actions.MainStatus += [](std::_Any_tag) { main_status(); };
-	actions.MainMaxSpeed += [](std::_Any_tag) { main_maxspeed(); };
-	actions.MainSelectFilter += [](std::_Any_tag) { main_selectfilter(); };
-	actions.MainSelectDriver += [](std::_Any_tag) { main_selectdriver(); };
-	actions.MainPokeDialog += [](std::_Any_tag) { main_poke(); };
-	actions.MainStartTape += [](std::_Any_tag) { main_starttape(); };
-	actions.MainScreenShoot += [](std::_Any_tag) { main_scrshot(); };
-	actions.MainSaveVideo += [](std::_Any_tag) { main_savevideo(); };
+	actions.MainLeds += []() { main_leds(); };
+	actions.MainStatus += []() { main_status(); };
+	actions.MainMaxSpeed += []() { main_maxspeed(); };
+	actions.MainSelectFilter += []() { main_selectfilter(); };
+	actions.MainSelectDriver += []() { main_selectdriver(); };
+	actions.MainPokeDialog += []() { main_poke(); };
+	actions.MainStartTape += []() { main_starttape(); };
+	actions.MainScreenShoot += []() { main_scrshot(); };
+	actions.MainSaveVideo += []() { main_savevideo(); };
 
-	actions.MainReset += [](std::_Any_tag) { main_reset(); };
-	actions.MainReset128 += [](std::_Any_tag) { main_reset128(); };
-	actions.MainResetSys += [](std::_Any_tag) { main_resetsys(); };
-	actions.MainReset48 += [](std::_Any_tag) {main_reset48(); };
-	actions.MainResetBasic += [](std::_Any_tag) {main_resetbas(); };
-	actions.MainResetDos += [](std::_Any_tag) {main_resetdos(); };
-	actions.MainResetCache += [](std::_Any_tag) {main_resetcache(); };
+	actions.MainReset += []() { main_reset(); };
+	actions.MainReset128 += []() { main_reset128(); };
+	actions.MainResetSys += []() { main_resetsys(); };
+	actions.MainReset48 += []() {main_reset48(); };
+	actions.MainResetBasic += []() {main_resetbas(); };
+	actions.MainResetDos += []() {main_resetdos(); };
+	actions.MainResetCache += []() {main_resetcache(); };
 
-	actions.MainNmi += [](std::_Any_tag) { main_nmi(); };
-	actions.MainNmiDos += [](std::_Any_tag) { main_nmidos(); };
-	actions.MainNmiCache += [](std::_Any_tag) { main_nmicache(); };
+	actions.MainNmi += []() { main_nmi(); };
+	actions.MainNmiDos += []() { main_nmidos(); };
+	actions.MainNmiCache += []() { main_nmicache(); };
 
-	actions.MainTapeBrowser += [](std::_Any_tag) { main_tapebrowser(); };
-	actions.MainSettings += [](std::_Any_tag) { setup_dlg(); };
-	actions.MainSaveSnap += [](std::_Any_tag) {savesnap(); };
-	actions.MainLoadSnap += [](std::_Any_tag) {opensnap(); };
-	actions.MainSaveSound += [](std::_Any_tag) {savesnddialog(); };
-	actions.MainQSave1 += [](std::_Any_tag) { qsave("qsave1.sna"); };
-	actions.MainQSave2 += [](std::_Any_tag) { qsave("qsave2.sna"); };
-	actions.MainQSave3 += [](std::_Any_tag) { qsave("qsave3.sna"); };
-	actions.MainQLoad1 += [](std::_Any_tag) { qload("qsave1.sna"); };
-	actions.MainQLoad2 += [](std::_Any_tag) { qload("qsave2.sna"); };
-	actions.MainQLoad3 += [](std::_Any_tag) { qload("qsave3.sna"); };
+	actions.MainTapeBrowser += []() { main_tapebrowser(); };
+	actions.MainSettings += []() { setup_dlg(); };
+	actions.MainSaveSnap += []() {savesnap(); };
+	actions.MainLoadSnap += []() {opensnap(); };
+	actions.MainSaveSound += []() {savesnddialog(); };
+	actions.MainQSave1 += []() { qsave("qsave1.sna"); };
+	actions.MainQSave2 += []() { qsave("qsave2.sna"); };
+	actions.MainQSave3 += []() { qsave("qsave3.sna"); };
+	actions.MainQLoad1 += []() { qload("qsave1.sna"); };
+	actions.MainQLoad2 += []() { qload("qsave2.sna"); };
+	actions.MainQLoad3 += []() { qload("qsave3.sna"); };
 
-	actions.MainKeyStick += [](std::_Any_tag) {main_keystick(); };
-	actions.MainAutoFire += [](std::_Any_tag) {main_autofire(); };
-	actions.MainSaveRam += [](std::_Any_tag) {main_save_ram(); };
-	actions.MainSaveAll += [](std::_Any_tag) {main_save(); };
-	actions.MainLockMouse += [](std::_Any_tag) {main_mouse(); };
-	actions.MainAtmKeyboard += [](std::_Any_tag) {main_atmkbd(); };
-	actions.MainPasteText += [](std::_Any_tag) {main_pastetext(); };
-	actions.MainSize1 += [](std::_Any_tag) {main_size1(); };
-	actions.MainSize2 += [](std::_Any_tag) {main_size2(); };
-	actions.MainSizeMax += [](std::_Any_tag) {main_sizem(); };
-	actions.MainMemSearch += [](std::_Any_tag) {main_cheat(); };
-	actions.MainHelp += [](std::_Any_tag) { showhelp(); };
-	actions.MainTsuToggle += [](std::_Any_tag) {main_tsutoggle(); };
-	actions.MainFlicToggle += [](std::_Any_tag) {main_flictoggle(); };
+	actions.MainKeyStick += []() {main_keystick(); };
+	actions.MainAutoFire += []() {main_autofire(); };
+	actions.MainSaveRam += []() {main_save_ram(); };
+	actions.MainSaveAll += []() {main_save(); };
+	actions.MainLockMouse += []() {main_mouse(); };
+	actions.MainAtmKeyboard += []() {main_atmkbd(); };
+	actions.MainPasteText += []() {main_pastetext(); };
+	actions.MainSize1 += []() {main_size1(); };
+	actions.MainSize2 += []() {main_size2(); };
+	actions.MainSizeMax += []() {main_sizem(); };
+	actions.MainMemSearch += []() {main_cheat(); };
+	actions.MainHelp += []() { showhelp(); };
+	actions.MainTsuToggle += []() {main_tsutoggle(); };
+	actions.MainFlicToggle += []() {main_flictoggle(); };
 
-	actions.AtmKeyboard += [](std::_Any_tag) {main_atmkbd(); };
+	actions.AtmKeyboard += []() {main_atmkbd(); };
 }
 
 auto DebugCore::create_window() -> HWND
@@ -1038,7 +1036,7 @@ auto DebugCore::handle_mouse() -> void
 			globalpos.x,
 			globalpos.y, 0, wnd, nullptr);
 		DestroyMenu(menu);
-		if (cmd == idm_bpx) ActionManager::invoke(ActionType::trace, "bpx");
+		if (cmd == idm_bpx) actions.TraceBpx();
 	}
 	mousepos = 0;
 }

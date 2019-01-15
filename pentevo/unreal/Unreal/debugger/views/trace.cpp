@@ -149,47 +149,47 @@ auto TraceView::tracewndflags() const -> unsigned
 
 auto TraceView::subscrible() -> void
 {
-	ActionManager::subscrible(ActionType::trace, "findpc", [this]()
+	actions.TraceFindPC += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.trace_top = cpu.trace_curs = cpu.pc;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "here", [this]()
+	actions.TraceHere += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.dbgbreak = 0;
 		dbgbreak = 0;
 		cpu.dbgchk = 1;
 		cpu.dbg_stophere = cpu.trace_curs;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "findtext", [this]() { cfindtext(); });
-	ActionManager::subscrible(ActionType::trace, "findcode", [this]() { cfindcode(); });
+	actions.TraceFindText += [this]() { cfindtext(); };
+	actions.TraceFindCode += [this]() { cfindcode(); };
 
-	ActionManager::subscrible(ActionType::trace, "goto", [this]()
+	actions.TraceGoto += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		const auto v = view_.input4(trace_x, trace_y, cpu.trace_top);
 		if (v != UINT_MAX)
 			cpu.trace_top = cpu.trace_curs = v;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "bpx", [this]()
+	actions.TraceBpx += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.membits[cpu.trace_curs] ^= MEMBITS_BPX;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "asm", [this]() { center(); });
+	actions.TraceAsm += [this]() { center(); };
 
-	ActionManager::subscrible(ActionType::trace, "setpc", [this]()
+	actions.TraceSetPC += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.pc = cpu.trace_curs;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "up", [this]()
+	actions.TraceUp += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		if (cpu.trace_curs > cpu.trace_top)
@@ -200,9 +200,9 @@ auto TraceView::subscrible() -> void
 		}
 		else
 			cpu.trace_top = cpu.trace_curs = cpu_up(cpu.trace_curs);
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "down", [this]()
+	actions.TraceDown += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		for (unsigned i = 0; i < trace_size; i++)
@@ -213,19 +213,19 @@ auto TraceView::subscrible() -> void
 					cpu.trace_top = cpu.trpc[1];
 				break;
 			}
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "left", [this]()
+	actions.TraceLeft += []()
 	{
 		TCpuMgr::get_cpu().trace_mode--;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "right", [this]()
+	actions.TraceRight += []()
 	{
 		TCpuMgr::get_cpu().trace_mode++;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "pgdn", [this]()
+	actions.TracePgDown += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		unsigned curs = 0;
@@ -234,9 +234,9 @@ auto TraceView::subscrible() -> void
 		cpu.trace_top = cpu.trpc[trace_size];
 		show_trace();
 		cpu.trace_curs = cpu.trpc[curs];
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "pgup", [this]()
+	actions.TracePgUp += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		unsigned curs = 0;
@@ -247,40 +247,40 @@ auto TraceView::subscrible() -> void
 
 		show_trace();
 		cpu.trace_curs = cpu.trpc[curs];
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "save1", [this]() { csave(0); });
-	ActionManager::subscrible(ActionType::trace, "save2", [this]() { csave(1); });
-	ActionManager::subscrible(ActionType::trace, "save3", [this]() { csave(2); });
-	ActionManager::subscrible(ActionType::trace, "save4", [this]() { csave(3); });
-	ActionManager::subscrible(ActionType::trace, "save5", [this]() { csave(4); });
-	ActionManager::subscrible(ActionType::trace, "save6", [this]() { csave(5); });
-	ActionManager::subscrible(ActionType::trace, "save7", [this]() { csave(6); });
-	ActionManager::subscrible(ActionType::trace, "save8", [this]() { csave(7); });
+	actions.TraceSave1 += [this]() { csave(0); };
+	actions.TraceSave2 += [this]() { csave(1); };
+	actions.TraceSave3 += [this]() { csave(2); };
+	actions.TraceSave4 += [this]() { csave(3); };
+	actions.TraceSave5 += [this]() { csave(4); };
+	actions.TraceSave6 += [this]() { csave(5); };
+	actions.TraceSave7 += [this]() { csave(6); };
+	actions.TraceSave8 += [this]() { csave(7); };
 
-	ActionManager::subscrible(ActionType::trace, "crest1", [this]() { crest(0); });
-	ActionManager::subscrible(ActionType::trace, "crest2", [this]() { crest(1); });
-	ActionManager::subscrible(ActionType::trace, "crest3", [this]() { crest(2); });
-	ActionManager::subscrible(ActionType::trace, "crest4", [this]() { crest(3); });
-	ActionManager::subscrible(ActionType::trace, "crest5", [this]() { crest(4); });
-	ActionManager::subscrible(ActionType::trace, "crest6", [this]() { crest(5); });
-	ActionManager::subscrible(ActionType::trace, "crest7", [this]() { crest(6); });
-	ActionManager::subscrible(ActionType::trace, "crest8", [this]() { crest(7); });
+	actions.TraceRestore1 += [this]() { crest(0); };
+	actions.TraceRestore2 += [this]() { crest(1); };
+	actions.TraceRestore3 += [this]() { crest(2); };
+	actions.TraceRestore4 += [this]() { crest(3); };
+	actions.TraceRestore5 += [this]() { crest(4); };
+	actions.TraceRestore6 += [this]() { crest(5); };
+	actions.TraceRestore7 += [this]() { crest(6); };
+	actions.TraceRestore8 += [this]() { crest(7); };
 
-	ActionManager::subscrible(ActionType::trace, "back", [this]() { pop_pos(); });
-	ActionManager::subscrible(ActionType::trace, "context", [this]() { cjump(); });
-	ActionManager::subscrible(ActionType::trace, "datajump", [this]() { cdjump(); });
+	actions.TraceBack += [this]() { pop_pos(); };
+	actions.TraceContext += [this]() { cjump(); };
+	actions.TraceDataJump += [this]() { cdjump(); };
 
-	ActionManager::subscrible(ActionType::trace, "labels", [this]()
+	actions.TraceLabels += [this]()
 	{
 		trace_labels = !trace_labels;
 		show_trace();
-	});
+	};
 
-	ActionManager::subscrible(ActionType::trace, "importl", [this]()
+	actions.TraceImportLabels += []()
 	{
 		mon_labels.import_menu();
-	});
+	};
 }
 
 auto TraceView::disasm_line(unsigned addr, char* line) const -> int
@@ -387,7 +387,7 @@ auto TraceView::center() -> void
 				for (unsigned i = 0; i < sz; i++)
 					cpu.DirectWm(cpu.trace_curs + i, asmresult[i]);
 				show_trace();
-				ActionManager::invoke(ActionType::trace, "down");
+				actions.TraceDown();
 				break;
 			}
 		}

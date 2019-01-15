@@ -29,8 +29,6 @@ namespace z80dbg
 	void __cdecl SetLastT();
 }
 
-extern ActionManager action_manager;
-
 // debug breakpoints format descriptor
 struct BPXR
 {

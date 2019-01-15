@@ -67,7 +67,7 @@ auto MemView::editwm(unsigned addr, u8 byte) -> void
 
 auto MemView::subscrible() -> void
 {
-	ActionManager::subscrible(ActionType::memory, "left", [this]()
+	actions.MemLeft += [this]()
 	{
 		if (!mem_max)
 			return;
@@ -77,9 +77,9 @@ auto MemView::subscrible() -> void
 			cpu.mem_curs--;
 		if (!mem_ascii)
 			cpu.mem_second ^= 1;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "right", [this]()
+	actions.MemRight += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
@@ -92,17 +92,17 @@ auto MemView::subscrible() -> void
 			cpu.mem_second ^= 1;
 		if (((cpu.mem_curs - cpu.mem_top + mem_max) % mem_max) / mem_sz >= mem_size)
 			cpu.mem_top += mem_sz;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "up", [this]()
+	actions.MemUp += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
 		if (mem_max)
 			cpu.mem_curs -= mem_sz;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "down", [this]()
+	actions.MemDown += [this]()
 	{
 		if (!mem_max)
 			return;
@@ -111,119 +111,119 @@ auto MemView::subscrible() -> void
 		cpu.mem_curs += mem_sz;
 		if (((cpu.mem_curs - cpu.mem_top + mem_max) % mem_max) / mem_sz >= mem_size)
 			cpu.mem_top += mem_sz;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "pgup", [this]()
+	actions.MemPgUp += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
 		if (mem_max)
 			cpu.mem_curs -= mem_size * mem_sz, cpu.mem_top -= mem_size * mem_sz;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "pgdn", [this]()
+	actions.MemPgDown += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
 		if (mem_max)
 			cpu.mem_curs += mem_size * mem_sz, cpu.mem_top += mem_size * mem_sz;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "switch", [this]()
+	actions.MemSwitch += [this]()
 	{
 		mem_ascii ^= 1;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "stline", [this]()
+	actions.MemStartLine += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
 		if (mem_max)
 			cpu.mem_curs &= ~(mem_sz - 1), cpu.mem_second = 0;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "endline", [this]()
+	actions.MemEndLine += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
 		if (mem_max)
 			cpu.mem_curs |= (mem_sz - 1), cpu.mem_second = 1;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "findtext", [this]()
+	actions.MemFindText += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		const unsigned rs = DebugCore::get_dialogs()->find1dlg(cpu.mem_curs);
 
 		if (rs != UINT_MAX)
 			cpu.mem_curs = rs;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "findcode", [this]()
+	actions.MemFindCode += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		const auto rs = DebugCore::get_dialogs()->find2dlg(cpu.mem_curs);
 
 		if (rs != UINT_MAX)
 			cpu.mem_curs = rs;
-	});
+	};
 
 
-	ActionManager::subscrible(ActionType::memory, "goto", [this]()
+	actions.MemGoto += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		const unsigned v = view_.input4(mem_x, mem_y, cpu.mem_top);
 
 		if (v != UINT_MAX)
 			cpu.mem_top = (v & ~(mem_sz - 1)), cpu.mem_curs = v;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "mem", [this]() { editor = ed_mem; });
-	ActionManager::subscrible(ActionType::memory, "diskphys", [this]() { editor = ed_phys; });
-	ActionManager::subscrible(ActionType::memory, "disklog", [this]() { editor = ed_log; });
-	ActionManager::subscrible(ActionType::memory, "diskgo", [this]() { mdiskgo(); });
+	actions.MemView += [this]() { editor = ed_mem; };
+	actions.MemDiskPhys += [this]() { editor = ed_phys; };
+	actions.MemDiskLog += [this]() { editor = ed_log; };
+	actions.MemDiskGo += [this]() { mdiskgo(); };
 
-	ActionManager::subscrible(ActionType::memory, "pc", [this]()
+	actions.MemViewPC += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.pc;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "sp", [this]()
+	actions.MemViewSP += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.sp;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "bc", [this]()
+	actions.MemViewBC += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.bc;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "de", [this]()
+	actions.MemViewDE += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.de;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "hl", [this]()
+	actions.MemViewHL += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.hl;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "ix", [this]()
+	actions.MemViewIX += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.ix;
-	});
+	};
 
-	ActionManager::subscrible(ActionType::memory, "iy", [this]()
+	actions.MemViewIY += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.iy;
-	});
+	};
 }
 
 auto MemView::memadr(unsigned addr) const -> unsigned
@@ -429,7 +429,7 @@ auto MemView::dispatch() -> char
 			return 0;
 
 		editwm(cpu.mem_curs, u8(k));
-		ActionManager::invoke(ActionType::memory, "right");
+		actions.MemRight();
 		return 1;
 	}
 	else
@@ -442,7 +442,7 @@ auto MemView::dispatch() -> char
 				editwm(cpu.mem_curs, (c & 0xF0) | k);
 			else
 				editwm(cpu.mem_curs, (c & 0x0F) | (k << 4));
-			ActionManager::invoke(ActionType::memory, "right");
+			actions.MemRight();
 			return 1;
 		}
 	}

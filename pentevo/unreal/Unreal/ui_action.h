@@ -1,12 +1,9 @@
 #pragma once
 
-#include "sysdefs.h"
-#include <initializer_list>
 #include <string>
 #include <functional>
 #include <utility>
 #include <vector>
-#include <unordered_map>
 
 enum class ActionType
 {
@@ -26,7 +23,7 @@ class UIAction final
 {
 	std::vector<std::function<void(Arg&)>> actions_{};
 public:
-	static UIAction empty;
+	static UIAction<> empty;
 	const ActionType type;
 	const std::string name;
 
@@ -66,10 +63,15 @@ public:
 		return prefix + name;
 	}
 
-	auto invoke(Arg &arg) const
+	auto invoke(Arg& arg) const
 	{
 		for (auto& item : actions_)
 			item(arg);
+	}
+
+	auto subscrible(const std::function<void(Arg)> action)
+	{
+		actions_.push_back(action);
 	}
 
 	auto operator +=(const std::function<void(Arg)>& action)
@@ -77,9 +79,77 @@ public:
 		subscrible(action);
 	}
 
-	auto subscrible(const std::function<void(Arg)>& action)
+	auto operator() (Arg& arg)
+	{
+		invoke(arg);
+	}
+	
+};
+
+template<>
+class UIAction<> final
+{
+	std::vector<std::function<void()>> actions_{};
+public:
+	static UIAction<> empty;
+	const ActionType type;
+	const std::string name;
+
+	UIAction(const ActionType type, std::string name) : type(type), name(std::move(name)) {}
+
+	auto is_empty() const -> bool
+	{
+		return type == ActionType::empty && name == "empty";
+	}
+
+	auto get_full_name() const -> std::string
+	{
+		std::string prefix;
+		switch (type)
+		{
+		case ActionType::memory:
+		case ActionType::banks:
+			prefix = "mem.";
+			break;
+		case ActionType::xt:
+		case ActionType::main:
+			prefix = "main.";
+			break;
+		case ActionType::monitor:
+			prefix = "mon.";
+			break;
+		case ActionType::reg:
+			prefix = "reg.";
+			break;
+		case ActionType::trace:
+			prefix = "cpu.";
+			break;
+		default:
+			prefix = "`error#";
+		}
+
+		return prefix + name;
+	}
+
+	auto invoke() const
+	{
+		for (auto& item : actions_)
+			item();
+	}
+
+	auto subscrible(const std::function<void()> action)
 	{
 		actions_.push_back(action);
+	}
+
+	auto operator +=(const std::function<void()>& action)
+	{
+		subscrible(action);
+	}
+
+	auto operator() () const
+	{
+		invoke();
 	}
 };
 
@@ -195,52 +265,114 @@ public:
 
 	UIAction<> AtmKeyboard = UIAction<>(ActionType::xt, "xtkbd");
 
-	UIAction<> Mon = UIAction<>(ActionType::monitor, "emul");
-	UIAction<> Mon = UIAction<>(ActionType::monitor, "emul");
-	UIAction<> Mon = UIAction<>(ActionType::monitor, "emul");
-	UIAction<> Mon = UIAction<>(ActionType::monitor, "emul");
-	UIAction<> Mon = UIAction<>(ActionType::monitor, "emul");
-
-
 	UIAction<> BanksUp = UIAction<>(ActionType::banks, "up");
 	UIAction<> BanksDown = UIAction<>(ActionType::banks, "down ");
 	UIAction<> BanksEdit = UIAction<>(ActionType::banks, "edit");
 
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
-	UIAction<> Mem = UIAction<>(ActionType::memory, "emul");
+	UIAction<> MemLeft = UIAction<>(ActionType::memory, "left");
+	UIAction<> MemRight = UIAction<>(ActionType::memory, "right");
+	UIAction<> MemUp = UIAction<>(ActionType::memory, "up");
+	UIAction<> MemDown = UIAction<>(ActionType::memory, "down");
+	UIAction<> MemPgUp = UIAction<>(ActionType::memory, "pgup");
+	UIAction<> MemPgDown = UIAction<>(ActionType::memory, "pgdn");
 
+	UIAction<> MemSwitch = UIAction<>(ActionType::memory, "switch");
+	UIAction<> MemStartLine = UIAction<>(ActionType::memory, "stline");
+	UIAction<> MemEndLine = UIAction<>(ActionType::memory, "endline");
+	UIAction<> MemFindText = UIAction<>(ActionType::memory, "findtext");
+	UIAction<> MemFindCode = UIAction<>(ActionType::memory, "findcode");
 
-	ActionManager::subscrible(ActionType::memory, "left", );
-	ActionManager::subscrible(ActionType::memory, "right", );
-	ActionManager::subscrible(ActionType::memory, "up", );
-	ActionManager::subscrible(ActionType::memory, "down", );
-	ActionManager::subscrible(ActionType::memory, "pgup", );
-	ActionManager::subscrible(ActionType::memory, "pgdn", );
-	ActionManager::subscrible(ActionType::memory, "switch",);
-	ActionManager::subscrible(ActionType::memory, "stline", );
-	ActionManager::subscrible(ActionType::memory, "endline", );
-	ActionManager::subscrible(ActionType::memory, "findtext", );
-	ActionManager::subscrible(ActionType::memory, "findcode", );
-	ActionManager::subscrible(ActionType::memory, "goto", );
-	ActionManager::subscrible(ActionType::memory, "mem", [this]() { editor = ed_mem; });
-	ActionManager::subscrible(ActionType::memory, "diskphys", [this]() { editor = ed_phys; });
-	ActionManager::subscrible(ActionType::memory, "disklog", [this]() { editor = ed_log; });
-	ActionManager::subscrible(ActionType::memory, "diskgo", [this]() { mdiskgo(); });
-	ActionManager::subscrible(ActionType::memory, "pc", );
-	ActionManager::subscrible(ActionType::memory, "sp", );
-	ActionManager::subscrible(ActionType::memory, "bc", );
-	ActionManager::subscrible(ActionType::memory, "de", );
-	ActionManager::subscrible(ActionType::memory, "hl", );
-	ActionManager::subscrible(ActionType::memory, "ix", );
-	ActionManager::subscrible(ActionType::memory, "iy", );
+	UIAction<> MemGoto = UIAction<>(ActionType::memory, "goto");
+	UIAction<> MemView = UIAction<>(ActionType::memory, "mem");
+	UIAction<> MemDiskPhys = UIAction<>(ActionType::memory, "diskphys");
+	UIAction<> MemDiskLog = UIAction<>(ActionType::memory, "disklog");
+	UIAction<> MemDiskGo = UIAction<>(ActionType::memory, "diskgo");
+
+	UIAction<> MemViewPC = UIAction<>(ActionType::memory, "pc");
+	UIAction<> MemViewSP = UIAction<>(ActionType::memory, "sp");
+	UIAction<> MemViewBC = UIAction<>(ActionType::memory, "bc");
+	UIAction<> MemViewDE = UIAction<>(ActionType::memory, "de");
+	UIAction<> MemViewHL = UIAction<>(ActionType::memory, "hl");
+	UIAction<> MemViewIX = UIAction<>(ActionType::memory, "ix");
+	UIAction<> MemViewIY = UIAction<>(ActionType::memory, "iy");
+
+	UIAction<> RegLeft = UIAction<>(ActionType::reg, "left");
+	UIAction<> RegRight = UIAction<>(ActionType::reg, "right");
+	UIAction<> RegUp = UIAction<>(ActionType::reg, "up");
+	UIAction<> RegDown = UIAction<>(ActionType::reg, "down");
+	UIAction<> RegEdit = UIAction<>(ActionType::reg, "edit");
+
+	UIAction<> RegA = UIAction<>(ActionType::reg, "a");
+	UIAction<> RegF = UIAction<>(ActionType::reg, "f");
+	UIAction<> RegBC = UIAction<>(ActionType::reg, "bc");
+	UIAction<> RegDE = UIAction<>(ActionType::reg, "de");
+	UIAction<> RegHL = UIAction<>(ActionType::reg, "hl");
+	UIAction<> RegPC = UIAction<>(ActionType::reg, "pc");
+	UIAction<> RegSP = UIAction<>(ActionType::reg, "sp");
+	UIAction<> RegIX = UIAction<>(ActionType::reg, "ix");
+	UIAction<> RegIY = UIAction<>(ActionType::reg, "iy");
+	UIAction<> RegI = UIAction<>(ActionType::reg, "i");
+	UIAction<> RegR = UIAction<>(ActionType::reg, "r");
+
+	UIAction<> RegIM = UIAction<>(ActionType::reg, "im");
+	UIAction<> RegIFF1 = UIAction<>(ActionType::reg, "iff1");
+	UIAction<> RegIFF2 = UIAction<>(ActionType::reg, "iff2");
+
+	UIAction<> RegSF = UIAction<>(ActionType::reg, "SF");
+	UIAction<> RegZF = UIAction<>(ActionType::reg, "ZF");
+	UIAction<> RegF5 = UIAction<>(ActionType::reg, "F5");
+	UIAction<> RegHF = UIAction<>(ActionType::reg, "HF");
+	UIAction<> RegF3 = UIAction<>(ActionType::reg, "F3");
+	UIAction<> RegPF = UIAction<>(ActionType::reg, "PF");
+	UIAction<> RegNF = UIAction<>(ActionType::reg, "NF");
+	UIAction<> RegCF = UIAction<>(ActionType::reg, "CF");
+
+	UIAction<> RegCodeJump = UIAction<>(ActionType::reg, "codejump");
+	UIAction<> RegDataJump = UIAction<>(ActionType::reg, "datajump");
+
+	UIAction<> TraceFindPC = UIAction<>(ActionType::trace, "findpc");
+	UIAction<> TraceHere = UIAction<>(ActionType::trace, "here");
+	UIAction<> TraceFindText = UIAction<>(ActionType::trace, "findtext");
+	UIAction<> TraceFindCode = UIAction<>(ActionType::trace, "findcode");
+	UIAction<> TraceGoto = UIAction<>(ActionType::trace, "goto");
+	UIAction<> TraceBpx = UIAction<>(ActionType::trace, "bpx");
+	UIAction<> TraceAsm = UIAction<>(ActionType::trace, "asm");
+	UIAction<> TraceSetPC = UIAction<>(ActionType::trace, "setpc");
+
+	UIAction<> TraceUp = UIAction<>(ActionType::trace, "up");
+	UIAction<> TraceDown = UIAction<>(ActionType::trace, "down");
+	UIAction<> TraceLeft = UIAction<>(ActionType::trace, "left");
+	UIAction<> TraceRight = UIAction<>(ActionType::trace, "right");
+	UIAction<> TracePgUp = UIAction<>(ActionType::trace, "pgdn");
+	UIAction<> TracePgDown = UIAction<>(ActionType::trace, "pgup");
+
+	UIAction<> TraceSave1 = UIAction<>(ActionType::trace, "save1");
+	UIAction<> TraceSave2 = UIAction<>(ActionType::trace, "save2");
+	UIAction<> TraceSave3 = UIAction<>(ActionType::trace, "save3");
+	UIAction<> TraceSave4 = UIAction<>(ActionType::trace, "save4");
+	UIAction<> TraceSave5 = UIAction<>(ActionType::trace, "save5");
+	UIAction<> TraceSave6 = UIAction<>(ActionType::trace, "save6");
+	UIAction<> TraceSave7 = UIAction<>(ActionType::trace, "save7");
+	UIAction<> TraceSave8 = UIAction<>(ActionType::trace, "save8");
+
+	UIAction<> TraceRestore1 = UIAction<>(ActionType::trace, "crest1");
+	UIAction<> TraceRestore2 = UIAction<>(ActionType::trace, "crest2");
+	UIAction<> TraceRestore3 = UIAction<>(ActionType::trace, "crest3");
+	UIAction<> TraceRestore4 = UIAction<>(ActionType::trace, "crest4");
+	UIAction<> TraceRestore5 = UIAction<>(ActionType::trace, "crest5");
+	UIAction<> TraceRestore6 = UIAction<>(ActionType::trace, "crest6");
+	UIAction<> TraceRestore7 = UIAction<>(ActionType::trace, "crest7");
+	UIAction<> TraceRestore8 = UIAction<>(ActionType::trace, "crest8");
+
+	UIAction<> TraceBack = UIAction<>(ActionType::trace, "back");
+	UIAction<> TraceContext = UIAction<>(ActionType::trace, "context");
+	UIAction<> TraceDataJump = UIAction<>(ActionType::trace, "datajump");
+	UIAction<> TraceLabels = UIAction<>(ActionType::trace, "labels");
+	UIAction<> TraceImportLabels = UIAction<>(ActionType::trace, "importl");
+
+	//UIAction<> Trace = UIAction<>(ActionType::trace, "emul");
+	//UIAction<> Trace = UIAction<>(ActionType::trace, "emul");
+	//UIAction<> Trace = UIAction<>(ActionType::trace, "emul");
 };
 
 /*
