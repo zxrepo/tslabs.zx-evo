@@ -192,9 +192,9 @@ auto DebugView::handle_menu(MenuDef* menu) -> char
 
 auto DebugView::clear_canvas() -> void
 {
-	memset(txtscr_, backgr_ch, sizeof txtscr_ / 2);
-	memset(txtscr_ + sizeof txtscr_ / 2, backgr, sizeof txtscr_ / 2);
-
+	memset(txtscr_, backgr_ch, debug_text_size);
+	memset(txtscr_ + debug_text_size, backgr, debug_text_size);
+	
 	frames_.clear();
 }
 
