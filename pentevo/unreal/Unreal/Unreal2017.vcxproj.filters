@@ -346,6 +346,7 @@
       <Filter>debugger</Filter>
     </ClCompile>
     <ClCompile Include="dxguid.cpp" />
+    <ClCompile Include="core\actions\actions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="atm.h">
@@ -649,7 +650,8 @@
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="dxerrors.h" />
-    <ClInclude Include="ui_action.h" />
+    <ClInclude Include="core\actions\ui_action.h" />
+    <ClInclude Include="core\actions\actions.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

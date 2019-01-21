@@ -15,6 +15,7 @@
 #include "wd93dat.h"
 #include "cheat.h"
 #include "snapshot.h"
+#include "core/actions/actions.h"
 
 char bpx_file_name[FILENAME_MAX];
 char str[80]{};
@@ -61,35 +62,34 @@ auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARA
 {
 	if (uMessage == WM_CLOSE)
 	{
-		actions.MonEmul();
+		actions.mon_emul();
 		return 0;
 	}
 
 	if (uMessage == WM_PAINT)
 	{
-		const auto view = get_view();
-		view->on_paint(hwnd);
+		actions.on_paint(hwnd);
 		return 0L;
 	}
 
 	if (uMessage == WM_COMMAND)
 	{
 		switch (wparam) {
-		case IDM_DEBUG_RUN: actions.MonEmul(); break;
+		case IDM_DEBUG_RUN: actions.mon_emul(); break;
 
-		case IDM_DEBUG_STEP: actions.MonStep(); break;
-		case IDM_DEBUG_STEPOVER: actions.MonStepOver(); break;
-		case IDM_DEBUG_TILLRETURN: actions.MonExitSub(); break;
-		case IDM_DEBUG_RUNTOCURSOR: actions.TraceHere(); break;
+		case IDM_DEBUG_STEP: actions.mon_step(); break;
+		case IDM_DEBUG_STEPOVER: actions.mon_step_over(); break;
+		case IDM_DEBUG_TILLRETURN: actions.mon_exit_sub(); break;
+		case IDM_DEBUG_RUNTOCURSOR: actions.trace_here(); break;
 
-		case IDM_BREAKPOINT_TOGGLE: actions.TraceBpx(); break;
-		case IDM_BREAKPOINT_MANAGER: get_dialogs()->mon_bpdialog(); break;
+		case IDM_BREAKPOINT_TOGGLE: actions.trace_bpx(); break;
+		case IDM_BREAKPOINT_MANAGER: actions.mon_bp_dialog(); break;
 
-		case IDM_MON_LOADBLOCK: actions.MonLoadBlock(); break;
-		case IDM_MON_SAVEBLOCK: actions.MonSaveBlock(); break;
-		case IDM_MON_FILLBLOCK: actions.MonFillBlock(); break;
+		case IDM_MON_LOADBLOCK: actions.mon_load_block(); break;
+		case IDM_MON_SAVEBLOCK: actions.mon_save_block(); break;
+		case IDM_MON_FILLBLOCK: actions.mon_fill_block(); break;
 
-		case IDM_MON_RIPPER: actions.MonRipper(); break;
+		case IDM_MON_RIPPER: actions.mon_ripper(); break;
 		default:;
 		}
 		needclr = 1;
@@ -105,115 +105,115 @@ auto DebugCore::rw_err(const char* msg) -> void
 
 auto DebugCore::subscrible() -> void
 {
-	actions.MonEmul += [this]() { mon_emul(); };
-	actions.MonSaveBlock += [this]() { mon_save(); };
-	actions.MonLoadBlock += [this]() { mon_load(); };
-	actions.MonLoadBlock += [this]() { mon_fill(); };
-	actions.MonStep += [this]() { mon_step(); };
-	actions.MonStepOver += [this]() { mon_stepover(); };
-	actions.MonExitSub += [this]() { mon_exitsub(); };
+	actions.mon_emul += [this]() { mon_emul(); };
+	actions.mon_save_block += [this]() { mon_save(); };
+	actions.mon_load_block += [this]() { mon_load(); };
+	actions.mon_load_block += [this]() { mon_fill(); };
+	actions.mon_step += [this]() { mon_step(); };
+	actions.mon_step_over += [this]() { mon_stepover(); };
+	actions.mon_exit_sub += [this]() { mon_exitsub(); };
 
-	actions.MonDump += [this]()
+	actions.mon_dump += [this]()
 	{
 		mem_->mem_dump = (mem_->mem_dump + 1) & 1;
 		mem_->mem_sz = mem_->mem_dump ? 32 : 8;
 	};
 
-	actions.MonSwitchDump += [this]() { mon_switch_dump(); };
-	actions.MonNext += [this]() { mon_nxt(); };
-	actions.MonPrev += [this]() { mon_prv(); };
-	actions.MonRipper += [this]() { mon_tool(); };
-	actions.MonHelp += []() { showhelp("monitor_keys"); };
-	actions.MonCpu += [this]() { mon_switch_cpu(); };
-	actions.MonExit += []() { correct_exit(); };
+	actions.mon_switch_dump += [this]() { mon_switch_dump(); };
+	actions.mon_next += [this]() { mon_nxt(); };
+	actions.mon_prev += [this]() { mon_prv(); };
+	actions.mon_ripper += [this]() { mon_tool(); };
+	actions.mon_help += []() { showhelp("monitor_keys"); };
+	actions.mon_cpu += [this]() { mon_switch_cpu(); };
+	actions.mon_exit += []() { correct_exit(); };
 
 	// global command 
 	// todo move out
-	actions.MonPokeDialog += []() { main_poke(); };
-	actions.MonTapeBrowser += []() { main_tapebrowser(); };
-	actions.MonReset += []() { main_reset(); };
-	actions.MonReset128 += []() { main_reset128(); };
-	actions.MonResetSys += []() { main_resetsys(); };
-	actions.MonReset48 += []() { main_reset48(); };
-	actions.MonResetBasic += []() { main_resetbas(); };
-	actions.MonResetDos += []() { main_resetdos(); };
-	actions.MonResetCache += []() { main_resetcache(); };
-	actions.MonNmi += []() { main_nmi(); };
-	actions.MonNmiDos += [](){ main_nmidos(); };
-	actions.MonNmiCache += []() { main_nmicache(); };
-	actions.MonSaveSnap += []() { savesnap(); };
-	actions.MonLoadSnap += []() { opensnap(); };
-	actions.MonSaveSound += []() { savesnddialog(); };
-	actions.MonQSave1 += []() { qsave("qsave1.sna"); };
-	actions.MonQSave2 += []() { qsave("qsave2.sna"); };
-	actions.MonQSave3 += []() { qsave("qsave3.sna"); };
-	actions.MonQLoad1 += []() { qload("qload1.sna"); };
-	actions.MonQLoad2 += []() { qload("qload2.sna"); };
-	actions.MonQLoad3 += []() { qload("qload3.sna"); };
-	actions.MonLabels += []() { mon_show_labels(); };
-	actions.MonMemSearch += []() { main_cheat(); };
+	actions.mon_poke_dialog += []() { main_poke(); };
+	actions.mon_tape_browser += []() { main_tapebrowser(); };
+	actions.mon_reset += []() { main_reset(); };
+	actions.mon_reset128 += []() { main_reset128(); };
+	actions.mon_reset_sys += []() { main_resetsys(); };
+	actions.mon_reset48 += []() { main_reset48(); };
+	actions.mon_reset_basic += []() { main_resetbas(); };
+	actions.mon_reset_dos += []() { main_resetdos(); };
+	actions.mon_reset_cache += []() { main_resetcache(); };
+	actions.mon_nmi += []() { main_nmi(); };
+	actions.mon_nmi_dos += [](){ main_nmidos(); };
+	actions.mon_nmi_cache += []() { main_nmicache(); };
+	actions.mon_save_snap += []() { savesnap(); };
+	actions.mon_load_snap += []() { opensnap(); };
+	actions.mon_save_sound += []() { savesnddialog(); };
+	actions.mon_qsave1 += []() { qsave("qsave1.sna"); };
+	actions.mon_qsave2 += []() { qsave("qsave2.sna"); };
+	actions.mon_qsave3 += []() { qsave("qsave3.sna"); };
+	actions.mon_qload1 += []() { qload("qload1.sna"); };
+	actions.mon_qload2 += []() { qload("qload2.sna"); };
+	actions.mon_qload3 += []() { qload("qload3.sna"); };
+	actions.mon_labels += []() { mon_show_labels(); };
+	actions.mon_mem_search += []() { main_cheat(); };
 
-	actions.MainExit += []() { correct_exit(); };
-	actions.MainMonitor += []() { main_debug(); };
-	actions.MainFullSceen += []() { main_fullscr(); };
-	actions.MainPause += []() { main_pause(); };
-	actions.MainSelectFix += []() { main_selectfix(); };
-	actions.MainSelectSnd += []() { main_selectsnd(); };
-	actions.MainIncFix += []() { main_incfix(); };
-	actions.MainDecFix += []() { main_decfix(); };
-	actions.MainIncFix10 += []() { main_incfix10(); };
-	actions.MainDecFix10 += []() { main_decfix10(); };
+	actions.main_exit += []() { correct_exit(); };
+	actions.main_monitor += []() { main_debug(); };
+	actions.main_fullsceen += []() { main_fullscr(); };
+	actions.main_pause += []() { main_pause(); };
+	actions.main_select_fix += []() { main_selectfix(); };
+	actions.main_select_snd += []() { main_selectsnd(); };
+	actions.main_inc_fix += []() { main_incfix(); };
+	actions.main_dec_fix += []() { main_decfix(); };
+	actions.main_inc_fix10 += []() { main_incfix10(); };
+	actions.main_dec_fix10 += []() { main_decfix10(); };
 
-	actions.MainLeds += []() { main_leds(); };
-	actions.MainStatus += []() { main_status(); };
-	actions.MainMaxSpeed += []() { main_maxspeed(); };
-	actions.MainSelectFilter += []() { main_selectfilter(); };
-	actions.MainSelectDriver += []() { main_selectdriver(); };
-	actions.MainPokeDialog += []() { main_poke(); };
-	actions.MainStartTape += []() { main_starttape(); };
-	actions.MainScreenShoot += []() { main_scrshot(); };
-	actions.MainSaveVideo += []() { main_savevideo(); };
+	actions.main_leds += []() { main_leds(); };
+	actions.main_status += []() { main_status(); };
+	actions.main_max_speed += []() { main_maxspeed(); };
+	actions.main_select_filter += []() { main_selectfilter(); };
+	actions.main_select_driver += []() { main_selectdriver(); };
+	actions.main_poke_dialog += []() { main_poke(); };
+	actions.main_start_tape += []() { main_starttape(); };
+	actions.main_screenshoot += []() { main_scrshot(); };
+	actions.main_save_video += []() { main_savevideo(); };
 
-	actions.MainReset += []() { main_reset(); };
-	actions.MainReset128 += []() { main_reset128(); };
-	actions.MainResetSys += []() { main_resetsys(); };
-	actions.MainReset48 += []() {main_reset48(); };
-	actions.MainResetBasic += []() {main_resetbas(); };
-	actions.MainResetDos += []() {main_resetdos(); };
-	actions.MainResetCache += []() {main_resetcache(); };
+	actions.main_reset += []() { main_reset(); };
+	actions.main_reset128 += []() { main_reset128(); };
+	actions.main_reset_sys += []() { main_resetsys(); };
+	actions.main_reset48 += []() {main_reset48(); };
+	actions.main_reset_basic += []() {main_resetbas(); };
+	actions.main_reset_dos += []() {main_resetdos(); };
+	actions.main_reset_cache += []() {main_resetcache(); };
 
-	actions.MainNmi += []() { main_nmi(); };
-	actions.MainNmiDos += []() { main_nmidos(); };
-	actions.MainNmiCache += []() { main_nmicache(); };
+	actions.main_nmi += []() { main_nmi(); };
+	actions.main_nmi_dos += []() { main_nmidos(); };
+	actions.main_nmi_cache += []() { main_nmicache(); };
 
-	actions.MainTapeBrowser += []() { main_tapebrowser(); };
-	actions.MainSettings += []() { setup_dlg(); };
-	actions.MainSaveSnap += []() {savesnap(); };
-	actions.MainLoadSnap += []() {opensnap(); };
-	actions.MainSaveSound += []() {savesnddialog(); };
-	actions.MainQSave1 += []() { qsave("qsave1.sna"); };
-	actions.MainQSave2 += []() { qsave("qsave2.sna"); };
-	actions.MainQSave3 += []() { qsave("qsave3.sna"); };
-	actions.MainQLoad1 += []() { qload("qsave1.sna"); };
-	actions.MainQLoad2 += []() { qload("qsave2.sna"); };
-	actions.MainQLoad3 += []() { qload("qsave3.sna"); };
+	actions.main_tape_browser += []() { main_tapebrowser(); };
+	actions.main_settings += []() { setup_dlg(); };
+	actions.main_save_snap += []() {savesnap(); };
+	actions.main_load_snap += []() {opensnap(); };
+	actions.main_save_sound += []() {savesnddialog(); };
+	actions.main_qsave1 += []() { qsave("qsave1.sna"); };
+	actions.main_qsave2 += []() { qsave("qsave2.sna"); };
+	actions.main_qsave3 += []() { qsave("qsave3.sna"); };
+	actions.main_qload1 += []() { qload("qsave1.sna"); };
+	actions.main_qload2 += []() { qload("qsave2.sna"); };
+	actions.main_qload3 += []() { qload("qsave3.sna"); };
 
-	actions.MainKeyStick += []() {main_keystick(); };
-	actions.MainAutoFire += []() {main_autofire(); };
-	actions.MainSaveRam += []() {main_save_ram(); };
-	actions.MainSaveAll += []() {main_save(); };
-	actions.MainLockMouse += []() {main_mouse(); };
-	actions.MainAtmKeyboard += []() {main_atmkbd(); };
-	actions.MainPasteText += []() {main_pastetext(); };
-	actions.MainSize1 += []() {main_size1(); };
-	actions.MainSize2 += []() {main_size2(); };
-	actions.MainSizeMax += []() {main_sizem(); };
-	actions.MainMemSearch += []() {main_cheat(); };
-	actions.MainHelp += []() { showhelp(); };
-	actions.MainTsuToggle += []() {main_tsutoggle(); };
-	actions.MainFlicToggle += []() {main_flictoggle(); };
+	actions.main_key_stick += []() {main_keystick(); };
+	actions.main_auto_fire += []() {main_autofire(); };
+	actions.main_save_ram += []() {main_save_ram(); };
+	actions.main_save_all += []() {main_save(); };
+	actions.main_lock_mouse += []() {main_mouse(); };
+	actions.main_atm_keyboard += []() {main_atmkbd(); };
+	actions.main_paste_text += []() {main_pastetext(); };
+	actions.main_size1 += []() {main_size1(); };
+	actions.main_size2 += []() {main_size2(); };
+	actions.main_size_max += []() {main_sizem(); };
+	actions.main_mem_search += []() {main_cheat(); };
+	actions.main_help += []() { showhelp(); };
+	actions.main_tsu_toggle += []() {main_tsutoggle(); };
+	actions.main_flic_toggle += []() {main_flictoggle(); };
 
-	actions.AtmKeyboard += []() {main_atmkbd(); };
+	actions.atm_keyboard += []() {main_atmkbd(); };
 }
 
 auto DebugCore::create_window() -> HWND
@@ -529,10 +529,10 @@ auto DebugCore::mon_load() -> void
 	  { "from TR-DOS file", MenuItem::left },
 	  { "from TR-DOS sectors", MenuItem::left },
 	  { "from raw sectors of FDD image", MenuItem::left } };
-	static MenuDef menu = { items, 3, "Load data to memory...", 0 };
 
-	if (!view_->handle_menu(&menu))
-		return;
+	static MenuDef menu = { items, 3, "Load data to memory...", 0 };
+	
+	if (!actions.handle_menu(menu)) return;
 
 	u8 bf[0x10000];
 
@@ -583,7 +583,7 @@ auto DebugCore::mon_save() -> void
 	  { "to raw sectors of FDD image", MenuItem::flags_t(MenuItem::left | MenuItem::disabled) } };
 	static MenuDef menu = { items, 4, "Save data from memory...", 0 };
 
-	if (!view_->handle_menu(&menu)) return;
+	if (!actions.handle_menu(menu)) return;
 
 	u8 bf[0x10000];
 
@@ -1036,7 +1036,7 @@ auto DebugCore::handle_mouse() -> void
 			globalpos.x,
 			globalpos.y, 0, wnd, nullptr);
 		DestroyMenu(menu);
-		if (cmd == idm_bpx) actions.TraceBpx();
+		if (cmd == idm_bpx) actions.trace_bpx();
 	}
 	mousepos = 0;
 }
@@ -1066,21 +1066,6 @@ auto DebugCore::get_instance() -> DebugCore*
 	}
 
 	return instance_;
-}
-
-auto DebugCore::get_view() -> DebugView*
-{
-	return get_instance()->view_;
-}
-
-auto DebugCore::get_dialogs() -> Dialogs*
-{
-	return get_instance()->dialogs_;
-}
-
-auto DebugCore::get_trace() -> TraceView*
-{
-	return get_instance()->trace_;
 }
 
 auto DebugCore::init_bpx(char* file) -> void

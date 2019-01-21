@@ -4,6 +4,7 @@
 #include "vars.h"
 #include "debugger/consts.h"
 #include "debugger/libs/cpu_manager.h"
+#include "core/actions/actions.h"
 
 //const size_t regs_layout_count = _countof(regs_layout);
 
@@ -39,171 +40,171 @@ const std::vector<TRegLayout> regs_layout =
 
 auto RegView::subscrible() -> void
 {
-	actions.RegLeft += [this]()
+	actions.reg_left += [this]()
 	{
 		regs_curs = regs_layout[regs_curs].lf;
 	};
 
-	actions.RegRight += [this]()
+	actions.reg_right += [this]()
 	{
 		regs_curs = regs_layout[regs_curs].rt;
 	};
 
-	actions.RegUp += [this]()
+	actions.reg_up += [this]()
 	{
 		regs_curs = regs_layout[regs_curs].up;
 	};
 
-	actions.RegDown += [this]()
+	actions.reg_down += [this]()
 	{
 		regs_curs = regs_layout[regs_curs].dn;
 	};
 
-	actions.RegEdit += [this]() { renter(); };
+	actions.reg_edit += [this]() { renter(); };
 
-	actions.RegA += [this]()
+	actions.reg_a += [this]()
 	{
 		regs_curs = 0;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegF += [this]() {
+	actions.reg_f += [this]() {
 		regs_curs = 1;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegBC += [this]() {
+	actions.reg_bc += [this]() {
 		regs_curs = 2;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegDE += [this]()
+	actions.reg_de += [this]()
 	{
 		regs_curs = 3;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegHL += [this]()
+	actions.reg_hl += [this]()
 	{
 		regs_curs = 4;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegPC += [this]()
+	actions.reg_pc += [this]()
 	{
 		regs_curs = 10;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegSP += [this]()
+	actions.reg_sp += [this]()
 	{
 		regs_curs = 9;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegIX += [this]()
+	actions.reg_ix += [this]()
 	{
 		regs_curs = 11;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegIY += [this]()
+	actions.reg_iy += [this]()
 	{
 		regs_curs = 12;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegI += [this]()
+	actions.reg_i += [this]()
 	{
 		regs_curs = 13;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegR += [this]()
+	actions.reg_r += [this]()
 	{
 		regs_curs = 14;
 		input.lastkey = 0;
 		renter();
 	};
 
-	actions.RegIM += [this]()
+	actions.reg_im += [this]()
 	{
 		regs_curs = 15;
 		renter();
 	};
 
-	actions.RegIFF1 += [this]()
+	actions.reg_iff1 += [this]()
 	{
 		regs_curs = 16;
 		renter();
 	};
 
-	actions.RegIFF2 += [this]()
+	actions.reg_iff2 += [this]()
 	{
 		regs_curs = 17;
 		renter();
 	};
 
-	actions.RegSF += [this]()
+	actions.reg_sf += [this]()
 	{
 		regs_curs = 18;
 		renter();
 	};
 
-	actions.RegZF += [this]()
+	actions.reg_zf += [this]()
 	{
 		regs_curs = 19;
 		renter();
 	};
 
-	actions.RegF5 += [this]()
+	actions.reg_f5 += [this]()
 	{
 		regs_curs = 20;
 		renter();
 	};
 
-	actions.RegHF += [this]()
+	actions.reg_hf += [this]()
 	{
 		regs_curs = 21;
 		renter();
 	};
 
-	actions.RegF3 += [this]()
+	actions.reg_f3 += [this]()
 	{
 		regs_curs = 22;
 		renter();
 	};
 
-	actions.RegPF += [this]()
+	actions.reg_pf += [this]()
 	{
 		regs_curs = 23;
 		renter();
 	};
 
-	actions.RegNF += [this]()
+	actions.reg_nf += [this]()
 	{
 		regs_curs = 24;
 		renter();
 	};
 
-	actions.RegCF += [this]()
+	actions.reg_cf += [this]()
 	{
 		regs_curs = 25;
 		renter();
 	};
 
-	actions.RegCodeJump += [this]() { rcodejump(); };
-	actions.RegDataJump += [this]() { rdatajump(); };
+	actions.reg_code_jump += [this]() { rcodejump(); };
+	actions.reg_data_jump += [this]() { rdatajump(); };
 }
 
 RegView::RegView(DebugCore& core, DebugView& view, MemView& mem) : core_(core), view_(view), mem_(mem)

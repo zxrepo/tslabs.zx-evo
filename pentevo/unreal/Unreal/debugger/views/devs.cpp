@@ -5,6 +5,7 @@
 #include "funcs.h"
 #include "debugger/consts.h"
 #include "debugger/libs/cpu_manager.h"
+#include "core/actions/actions.h"
 
 void __cdecl BankNames(int i, char *name)
 {
@@ -45,8 +46,8 @@ void __cdecl BankNames(int i, char *name)
 
 auto WatchView::subsrible() -> void
 {
-	actions.MonSetWatch += [this]() { mon_setwatch(); };
-	actions.MonScreenShot += [this]() { mon_scrshot(); };
+	actions.mon_set_watch += [this]() { mon_setwatch(); };
+	actions.mon_screenshot += [this]() { mon_scrshot(); };
 }
 
 WatchView::WatchView(DebugCore& core, DebugView& view): core_(core), view_(view)
@@ -132,7 +133,7 @@ auto StackView::render() const -> void
 
 auto AyView::subscrible() -> void
 {
-	actions.MonSwitchAY += []() { mon_switchay(); };
+	actions.mon_switch_ay += []() { mon_switchay(); };
 }
 
 AyView::AyView(DebugCore& core, DebugView& view) : core_(core), view_(view)
@@ -164,20 +165,20 @@ auto AyView::render() const -> void
 
 auto BanksView::subscrible() -> void
 {
-	actions.BanksUp += [this]()
+	actions.banks_up += [this]()
 	{
 		selbank--;
 		selbank &= 3;
 	};
 
-	actions.BanksDown += [this]()
+	actions.banks_down += [this]()
 	{
 		selbank++;
 		selbank &= 3;
 	};
 
-	actions.BanksEdit += [this]() { benter(); };
-	actions.MonSetBank += [this]() { editbank(); };
+	actions.banks_edit += [this]() { benter(); };
+	actions.mon_set_bank += [this]() { editbank(); };
 }
 
 BanksView::BanksView(DebugCore& core, DebugView& view) : core_(core), view_(view)
@@ -246,8 +247,8 @@ auto BanksView::render() const -> void
 
 auto PortsView::subscrible() -> void
 {
-	actions.MonSetHiMem += [this]() { editextbank(); };
-	actions.MonExit += []() {};
+	actions.mon_set_himem += [this]() { editextbank(); };
+	actions.mon_exit += []() {};
 }
 
 PortsView::PortsView(DebugCore& core, DebugView& view) : core_(core), view_(view)

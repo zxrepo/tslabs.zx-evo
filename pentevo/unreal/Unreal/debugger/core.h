@@ -1,6 +1,5 @@
 #pragma once
 #include "defs.h"
-#include "ui_action.h"
 
 class DebugCore;
 class DebugView;
@@ -110,9 +109,6 @@ public:
 	static auto debug_events(Z80 *cpu) -> void;
 
 	static auto get_instance()->DebugCore*;
-	static auto get_view()->DebugView*;
-	static auto get_dialogs()->Dialogs*;
-	static auto get_trace()->TraceView*;
 
 	static auto init_bpx(char* file) -> void;
 	static auto done_bpx() -> void;

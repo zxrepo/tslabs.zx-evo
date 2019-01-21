@@ -1,6 +1,7 @@
 #pragma once
 #include "sysdefs.h"
 #include "hddio.h"
+#include "emul.h"
 
 struct ATA_DEVICE
 {

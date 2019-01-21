@@ -7,7 +7,6 @@
 #include "gshle.h"
 #include "input.h"
 #include "hdd.h"
-#include "ui_action.h"
 
 #define ROMLED_TIME 16
 
@@ -261,5 +260,3 @@ extern unsigned vtxbuffilled;
 extern unsigned snapsize;
 
 extern u8 kbdpcEX[6]; //Dexus
-
-extern Actions actions;

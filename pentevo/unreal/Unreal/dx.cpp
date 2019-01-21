@@ -17,7 +17,7 @@
 #include "snapshot.h"
 #include "funcs.h"
 #include "tape.h"
-#include "ui_action.h"
+#include "core/actions/actions.h"
 
 const int size_x[3] = { 256, 320, 448 };
 const int size_y[3] = { 192, 240, 320 };
@@ -675,7 +675,7 @@ static INT_PTR CALLBACK WndProc(HWND hwnd,UINT uMessage,WPARAM wparam,LPARAM lpa
       case SCU_LOCK_MOUSE: main_mouse();  return 0;
       case SC_CLOSE:
           if (ConfirmExit())
-              ActionManager::invoke(ActionType::main, "exit");
+			  actions.main_exit();
       return 0;
       case SC_MINIMIZE: temp.Minimized = true; break;
 
@@ -696,8 +696,7 @@ static INT_PTR CALLBACK WndProc(HWND hwnd,UINT uMessage,WPARAM wparam,LPARAM lpa
 		int disk = -1;
 		switch(wparam){
 			// File menu
-			case IDM_EXIT: ActionManager::invoke(ActionType::main, "exit");
-
+			case IDM_EXIT: actions.main_exit();
 			case IDM_LOAD: opensnap(); break;
 
 			case IDM_SAVE: savesnap(); break;
@@ -711,12 +710,12 @@ save_disk:
 				sound_play();
 				break;
 
-			case IDM_QUICKLOAD_1: ActionManager::invoke(ActionType::main, "qload1"); break;
-			case IDM_QUICKLOAD_2: ActionManager::invoke(ActionType::main, "qload2"); break;
-			case IDM_QUICKLOAD_3: ActionManager::invoke(ActionType::main, "qload3"); break;
-			case IDM_QUICKSAVE_1: ActionManager::invoke(ActionType::main, "qsave1"); break;
-			case IDM_QUICKSAVE_2: ActionManager::invoke(ActionType::main, "qsave2"); break; 
-			case IDM_QUICKSAVE_3: ActionManager::invoke(ActionType::main, "qsave3"); break;
+			case IDM_QUICKLOAD_1: actions.main_qload1(); break;
+			case IDM_QUICKLOAD_2: actions.main_qload2(); break;
+			case IDM_QUICKLOAD_3: actions.main_qload3(); break;
+			case IDM_QUICKSAVE_1: actions.main_qsave1(); break;
+			case IDM_QUICKSAVE_2: actions.main_qsave2(); break;
+			case IDM_QUICKSAVE_3: actions.main_qsave3(); break;
 
 			case IDM_RESET: main_reset(); break;
 			case IDM_RESET_128: main_reset128(); break;
@@ -749,7 +748,7 @@ save_disk:
 			case IDM_DEBUGGER: main_debug(); break;
 
 			// Help
-			case IDM_HELP_SHORTKEYS: ActionManager::invoke(ActionType::main, "help"); break;
+			case IDM_HELP_SHORTKEYS: actions.main_help(); break;
 			//case IDM_HELP_ABOUT: DialogBox(hIn, MAKEINTRESOURCE(IDD_ABOUT), wnd, aboutdlg); break;
 		}
 		//needclr=1;

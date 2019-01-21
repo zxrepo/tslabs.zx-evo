@@ -9,6 +9,7 @@
 #include "view.h"
 #include "cpu_manager.h"
 #include "debugger/core.h"
+#include "core/actions/actions.h"
 
 MonLabelsT mon_labels;
 
@@ -329,7 +330,7 @@ void MonLabelsT::import_menu()
 	menuptr++;
 
 	MenuDef menu = { items, menuptr, "import labels", 0 };
-	if (!DebugCore::get_view()->handle_menu(&menu)) return;
+	if (!actions.handle_menu(menu)) return;
 	if (menu.pos == 0) import_xas();
 	menu.pos--;
 	if (unsigned(menu.pos) < alasm_found_tables) import_alasm(alasm_offset[menu.pos], alasm_text[menu.pos]);
@@ -433,7 +434,7 @@ INT_PTR CALLBACK LabelsDlg(HWND dlg, UINT msg, WPARAM wp, LPARAM lp)
 
 		//void push_pos(); push_pos();
 		TCpuMgr::get_cpu().trace_curs = TCpuMgr::get_cpu().trace_top = address;
-		DebugCore::get_view()->activedbg = dbgwnd::trace;
+		actions.set_active_dbg(dbgwnd::trace);
 
 		EndDialog(dlg, 1);
 		return 1;

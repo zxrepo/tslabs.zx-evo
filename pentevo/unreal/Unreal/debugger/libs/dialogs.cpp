@@ -9,6 +9,7 @@
 #include "cpu_manager.h"
 #include "funcs.h"
 #include "leds.h"
+#include "core/actions/actions.h"
 
 static bool __cdecl get_dos_flag()
 {
@@ -793,10 +794,13 @@ auto Dialogs::mon_watchdialog() const -> void
 
 auto Dialogs::subscrible() -> void
 {
-	ActionManager::subscrible(ActionType::monitor, "gs",		[this]() { mon_gsdialog(); });
-	ActionManager::subscrible(ActionType::monitor, "osw",		[this]() { mon_watchdialog(); });
-	ActionManager::subscrible(ActionType::monitor, "settings",	[this]() { mon_setup_dlg(); });
-	ActionManager::subscrible(ActionType::monitor, "bpdialog",	[this]() { mon_bpdialog(); });
+	actions.mon_gs += [this]() { mon_gsdialog(); };
+	actions.mon_osw += [this]() { mon_watchdialog(); };
+	actions.mon_settings += []() { mon_setup_dlg(); };
+	actions.mon_bp_dialog += [this]() { mon_bpdialog(); };
+
+	actions.dialog_find1 += [this](auto addr) { return find1dlg(addr); };
+	actions.dialog_find2 += [this](auto addr) { return find2dlg(addr); };
 }
 
 auto Dialogs::mon_setup_dlg() -> void

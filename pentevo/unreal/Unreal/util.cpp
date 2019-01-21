@@ -4,7 +4,7 @@
 #include "snapshot.h"
 #include "init.h"
 #include "util.h"
-#include "ui_action.h"
+#include "core/actions/actions.h"
 
 static void cpuid(unsigned CpuInfo[4], unsigned _eax)
 {
@@ -235,7 +235,7 @@ char dispatch_more(ActionType type)
 	   action_types.emplace_back(ActionType::monitor);
    }
 
-   auto list = ActionManager::get_actions(action_types);
+   auto list = get_actions(action_types);
 
    for(auto item : list)
    {

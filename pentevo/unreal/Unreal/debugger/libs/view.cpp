@@ -4,8 +4,13 @@
 #include "cpu_manager.h"
 #include "util.h"
 #include "debugger/consts.h"
+#include "core/actions/actions.h"
 
-static char str[80]{};
+auto DebugView::subscrible() -> void
+{
+	actions.handle_menu += [this](auto menu) { return handle_menu(menu); };
+	actions.on_paint += [this](auto hwnd) { on_paint(hwnd); };
+}
 
 auto DebugView::format_item(char* dst, const unsigned width, const char* text, const MenuItem::flags_t flags) -> void
 {
@@ -17,40 +22,40 @@ auto DebugView::format_item(char* dst, const unsigned width, const char* text, c
 	memcpy(dst + left + 1, text, sz);
 }
 
-auto DebugView::menu_move(MenuDef* menu, const int dir) -> void
+auto DebugView::menu_move(MenuDef& menu, const int dir) -> void
 {
-	const unsigned start = menu->pos;
+	const unsigned start = menu.pos;
 	for (;;) {
-		menu->pos += dir;
-		if (int(menu->pos) == -1) menu->pos = menu->n_items - 1;
-		if (menu->pos >= menu->n_items) menu->pos = 0;
-		if (!(menu->items[menu->pos].flags & MenuItem::disabled)) return;
-		if (menu->pos == start) return;
+		menu.pos += dir;
+		if (int(menu.pos) == -1) menu.pos = menu.n_items - 1;
+		if (menu.pos >= menu.n_items) menu.pos = 0;
+		if (!(menu.items[menu.pos].flags & MenuItem::disabled)) return;
+		if (menu.pos == start) return;
 	}
 }
 
-auto DebugView::paint_items(MenuDef* menu) -> void
+auto DebugView::paint_items(MenuDef &menu) -> void
 {
 	char ln[debug_text_width]; unsigned item;
 
-	auto maxlen = strlen(menu->title);
-	for (item = 0; item < menu->n_items; item++) {
-		auto sz = strlen(menu->items[item].text);
+	auto maxlen = strlen(menu.title);
+	for (item = 0; item < menu.n_items; item++) {
+		auto sz = strlen(menu.items[item].text);
 		maxlen = max(maxlen, sz);
 	}
 	const unsigned menu_dx = maxlen + 2;
-	const unsigned menu_dy = menu->n_items + 3;
+	const unsigned menu_dy = menu.n_items + 3;
 	const unsigned menu_x = (debug_text_width - menu_dx) / 2;
 	const unsigned menu_y = (debug_text_height - menu_dy) / 2;
 	filledframe(menu_x, menu_y, menu_dx, menu_dy, menu_inside);
-	format_item(ln, maxlen, menu->title, MenuItem::center);
+	format_item(ln, maxlen, menu.title, MenuItem::center);
 	tprint(menu_x, menu_y, ln, menu_header);
 
-	for (/*unsigned*/ item = 0; item < menu->n_items; item++) {
+	for (/*unsigned*/ item = 0; item < menu.n_items; item++) {
 		u8 color = menu_item;
-		if (menu->items[item].flags & MenuItem::disabled) color = menu_item_dis;
-		else if (item == menu->pos) color = menu_cursor;
-		format_item(ln, maxlen, menu->items[item].text, menu->items[item].flags);
+		if (menu.items[item].flags & MenuItem::disabled) color = menu_item_dis;
+		else if (item == menu.pos) color = menu_cursor;
+		format_item(ln, maxlen, menu.items[item].text, menu.items[item].flags);
 		tprint(menu_x, menu_y + item + 2, ln, color);
 	}
 }
@@ -72,6 +77,8 @@ DebugView::DebugView(HWND wnd) : wnd_(wnd)
 		gdibmp_.header.bmiColors[i].rgbGreen = g;
 		gdibmp_.header.bmiColors[i].rgbBlue = b;
 	}
+
+	subscrible();
 }
 
 auto DebugView::on_paint(HWND hwnd) const -> void
@@ -148,9 +155,9 @@ auto DebugView::add_frame(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 a
 	frames_.push_back(TFrame{ x, y, dx, dy, attr });
 }
 
-auto DebugView::handle_menu(MenuDef* menu) -> char
+auto DebugView::handle_menu(MenuDef& menu) -> char
 {
-	if (menu->items[menu->pos].flags & MenuItem::disabled)
+	if (menu.items[menu.pos].flags & MenuItem::disabled)
 		menu_move(menu, 1);
 	for (;;)
 	{
@@ -179,12 +186,12 @@ auto DebugView::handle_menu(MenuDef* menu) -> char
 			menu_move(menu, 1);
 		if (key == VK_HOME || key == VK_PRIOR)
 		{
-			menu->pos = -1;
+			menu.pos = -1;
 			menu_move(menu, 1);
 		}
 		if (key == VK_END || key == VK_NEXT)
 		{
-			menu->pos = menu->n_items;
+			menu.pos = menu.n_items;
 			menu_move(menu, -1);
 		}
 	}

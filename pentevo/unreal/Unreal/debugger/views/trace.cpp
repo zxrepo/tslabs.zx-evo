@@ -7,6 +7,7 @@
 #include "debugger/libs/cpu_manager.h"
 #include "debugger/libs/dbglabls.h"
 #include "memory.h"
+#include "core/actions/actions.h"
 
 static char str[80];
 
@@ -149,13 +150,13 @@ auto TraceView::tracewndflags() const -> unsigned
 
 auto TraceView::subscrible() -> void
 {
-	actions.TraceFindPC += []()
+	actions.trace_find_pc += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.trace_top = cpu.trace_curs = cpu.pc;
 	};
 
-	actions.TraceHere += []()
+	actions.trace_here += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.dbgbreak = 0;
@@ -164,10 +165,10 @@ auto TraceView::subscrible() -> void
 		cpu.dbg_stophere = cpu.trace_curs;
 	};
 
-	actions.TraceFindText += [this]() { cfindtext(); };
-	actions.TraceFindCode += [this]() { cfindcode(); };
+	actions.trace_find_text += [this]() { cfindtext(); };
+	actions.trace_find_code += [this]() { cfindcode(); };
 
-	actions.TraceGoto += [this]()
+	actions.trace_goto += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		const auto v = view_.input4(trace_x, trace_y, cpu.trace_top);
@@ -175,21 +176,21 @@ auto TraceView::subscrible() -> void
 			cpu.trace_top = cpu.trace_curs = v;
 	};
 
-	actions.TraceBpx += []()
+	actions.trace_bpx += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.membits[cpu.trace_curs] ^= MEMBITS_BPX;
 	};
 
-	actions.TraceAsm += [this]() { center(); };
+	actions.trace_asm += [this]() { center(); };
 
-	actions.TraceSetPC += []()
+	actions.trace_set_pc += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.pc = cpu.trace_curs;
 	};
 
-	actions.TraceUp += [this]()
+	actions.trace_up += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		if (cpu.trace_curs > cpu.trace_top)
@@ -202,7 +203,7 @@ auto TraceView::subscrible() -> void
 			cpu.trace_top = cpu.trace_curs = cpu_up(cpu.trace_curs);
 	};
 
-	actions.TraceDown += []()
+	actions.trace_down += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		for (unsigned i = 0; i < trace_size; i++)
@@ -215,17 +216,17 @@ auto TraceView::subscrible() -> void
 			}
 	};
 
-	actions.TraceLeft += []()
+	actions.trace_left += []()
 	{
 		TCpuMgr::get_cpu().trace_mode--;
 	};
 
-	actions.TraceRight += []()
+	actions.trace_right += []()
 	{
 		TCpuMgr::get_cpu().trace_mode++;
 	};
 
-	actions.TracePgDown += [this]()
+	actions.trace_pg_down += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		unsigned curs = 0;
@@ -236,7 +237,7 @@ auto TraceView::subscrible() -> void
 		cpu.trace_curs = cpu.trpc[curs];
 	};
 
-	actions.TracePgUp += [this]()
+	actions.trace_pg_up += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		unsigned curs = 0;
@@ -249,35 +250,35 @@ auto TraceView::subscrible() -> void
 		cpu.trace_curs = cpu.trpc[curs];
 	};
 
-	actions.TraceSave1 += [this]() { csave(0); };
-	actions.TraceSave2 += [this]() { csave(1); };
-	actions.TraceSave3 += [this]() { csave(2); };
-	actions.TraceSave4 += [this]() { csave(3); };
-	actions.TraceSave5 += [this]() { csave(4); };
-	actions.TraceSave6 += [this]() { csave(5); };
-	actions.TraceSave7 += [this]() { csave(6); };
-	actions.TraceSave8 += [this]() { csave(7); };
+	actions.trace_save1 += [this]() { csave(0); };
+	actions.trace_save2 += [this]() { csave(1); };
+	actions.trace_save3 += [this]() { csave(2); };
+	actions.trace_save4 += [this]() { csave(3); };
+	actions.trace_save5 += [this]() { csave(4); };
+	actions.trace_save6 += [this]() { csave(5); };
+	actions.trace_save7 += [this]() { csave(6); };
+	actions.trace_save8 += [this]() { csave(7); };
 
-	actions.TraceRestore1 += [this]() { crest(0); };
-	actions.TraceRestore2 += [this]() { crest(1); };
-	actions.TraceRestore3 += [this]() { crest(2); };
-	actions.TraceRestore4 += [this]() { crest(3); };
-	actions.TraceRestore5 += [this]() { crest(4); };
-	actions.TraceRestore6 += [this]() { crest(5); };
-	actions.TraceRestore7 += [this]() { crest(6); };
-	actions.TraceRestore8 += [this]() { crest(7); };
+	actions.trace_restore1 += [this]() { crest(0); };
+	actions.trace_restore2 += [this]() { crest(1); };
+	actions.trace_restore3 += [this]() { crest(2); };
+	actions.trace_restore4 += [this]() { crest(3); };
+	actions.trace_restore5 += [this]() { crest(4); };
+	actions.trace_restore6 += [this]() { crest(5); };
+	actions.trace_restore7 += [this]() { crest(6); };
+	actions.trace_restore8 += [this]() { crest(7); };
 
-	actions.TraceBack += [this]() { pop_pos(); };
-	actions.TraceContext += [this]() { cjump(); };
-	actions.TraceDataJump += [this]() { cdjump(); };
+	actions.trace_back += [this]() { pop_pos(); };
+	actions.trace_context += [this]() { cjump(); };
+	actions.trace_data_jump += [this]() { cdjump(); };
 
-	actions.TraceLabels += [this]()
+	actions.trace_labels += [this]()
 	{
 		trace_labels = !trace_labels;
 		show_trace();
 	};
 
-	actions.TraceImportLabels += []()
+	actions.trace_import_labels += []()
 	{
 		mon_labels.import_menu();
 	};
@@ -321,7 +322,7 @@ auto TraceView::cfindtext() const -> void
 	auto& cpu = TCpuMgr::get_cpu();
 	const auto oldmode = mem_.editor;
 	mem_.editor = ed_mem;
-	const auto rs = DebugCore::get_dialogs()->find1dlg(cpu.trace_curs);
+	const auto rs = actions.dialog_find1(cpu.trace_curs);
 	mem_.editor = oldmode;
 	if (rs != UINT_MAX)
 		cpu.trace_top = cpu.trace_curs = rs;
@@ -332,7 +333,7 @@ auto TraceView::cfindcode() const -> void
 	auto& cpu = TCpuMgr::get_cpu();
 	const auto oldmode = mem_.editor;
 	mem_.editor = ed_mem;
-	const auto rs = DebugCore::get_dialogs()->find2dlg(cpu.trace_curs);
+	const auto rs = actions.dialog_find2(cpu.trace_curs);
 	mem_.editor = oldmode;
 	if (rs != UINT_MAX)
 		cpu.trace_top = cpu.trace_curs = rs;
@@ -387,7 +388,7 @@ auto TraceView::center() -> void
 				for (unsigned i = 0; i < sz; i++)
 					cpu.DirectWm(cpu.trace_curs + i, asmresult[i]);
 				show_trace();
-				actions.TraceDown();
+				actions.trace_down();
 				break;
 			}
 		}

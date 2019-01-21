@@ -14,8 +14,8 @@
 #include "config.h"
 #include "debugger/libs/dbglabls.h"
 #include "debugger/libs/cpu_manager.h"
-#include "debugger/core.h"
 #include "sound/dev_moonsound.h"
+#include "core/actions/actions.h"
 
 char load_errors;
 const char* SSHOT_EXT[] = { "scr", "bmp", "png", "gif" };
@@ -1120,7 +1120,7 @@ void loadkeys(ActionType type)
    unsigned num[0x300], i = 0;
    unsigned j; //Alone Coder 0.36.7
    
-   auto list = ActionManager::get_actions({ type });
+   auto list = get_actions({ type });
 
    for(auto item : list)
    {

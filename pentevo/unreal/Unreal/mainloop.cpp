@@ -6,12 +6,11 @@
 #include "dx.h"
 #include "leds.h"
 #include "memory.h"
-#include "emulkeys.h"
 #include "vs1001.h"
 #include "z80.h"
 #include "zxevo.h"
 #include "util.h"
-#include "ui_action.h"
+#include "core/actions/actions.h"
 
 void spectrum_frame()
 {
@@ -140,5 +139,5 @@ void mainloop(const bool &Exit)
 				do_idle();
 		}
 	}
-   ActionManager::invoke(ActionType::main, "exit");
+   actions.main_exit();
 }

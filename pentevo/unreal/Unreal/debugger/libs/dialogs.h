@@ -11,6 +11,10 @@ class Dialogs final
 
 	auto subscrible() -> void;
 
+	auto mon_gsdialog() const -> void;
+	auto mon_bpdialog() const -> void;
+	auto mon_watchdialog() const -> void;
+
 public:
 	static auto mon_setup_dlg() -> void;
 
@@ -18,8 +22,5 @@ public:
 
 	auto find1dlg(unsigned start) const -> unsigned;
 	auto find2dlg(unsigned start) const -> unsigned;
-	auto mon_gsdialog() const -> void;
-	auto mon_bpdialog() const -> void;
-	auto mon_watchdialog() const -> void;
 
 };

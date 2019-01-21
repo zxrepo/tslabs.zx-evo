@@ -6,6 +6,7 @@
 #include "wd93crc.h"
 #include "debugger/core.h"
 #include "debugger/libs/cpu_manager.h"
+#include "core/actions/actions.h"
 
 static char str[80];
 
@@ -67,7 +68,7 @@ auto MemView::editwm(unsigned addr, u8 byte) -> void
 
 auto MemView::subscrible() -> void
 {
-	actions.MemLeft += [this]()
+	actions.mem_left += [this]()
 	{
 		if (!mem_max)
 			return;
@@ -79,7 +80,7 @@ auto MemView::subscrible() -> void
 			cpu.mem_second ^= 1;
 	};
 
-	actions.MemRight += [this]()
+	actions.mem_right += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
@@ -94,7 +95,7 @@ auto MemView::subscrible() -> void
 			cpu.mem_top += mem_sz;
 	};
 
-	actions.MemUp += [this]()
+	actions.mem_up += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
@@ -102,7 +103,7 @@ auto MemView::subscrible() -> void
 			cpu.mem_curs -= mem_sz;
 	};
 
-	actions.MemDown += [this]()
+	actions.mem_down += [this]()
 	{
 		if (!mem_max)
 			return;
@@ -113,7 +114,7 @@ auto MemView::subscrible() -> void
 			cpu.mem_top += mem_sz;
 	};
 
-	actions.MemPgUp += [this]()
+	actions.mem_pg_up += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
@@ -121,7 +122,7 @@ auto MemView::subscrible() -> void
 			cpu.mem_curs -= mem_size * mem_sz, cpu.mem_top -= mem_size * mem_sz;
 	};
 
-	actions.MemPgDown += [this]()
+	actions.mem_pg_down += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
@@ -129,12 +130,12 @@ auto MemView::subscrible() -> void
 			cpu.mem_curs += mem_size * mem_sz, cpu.mem_top += mem_size * mem_sz;
 	};
 
-	actions.MemSwitch += [this]()
+	actions.mem_switch += [this]()
 	{
 		mem_ascii ^= 1;
 	};
 
-	actions.MemStartLine += [this]()
+	actions.mem_start_line += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
@@ -142,7 +143,7 @@ auto MemView::subscrible() -> void
 			cpu.mem_curs &= ~(mem_sz - 1), cpu.mem_second = 0;
 	};
 
-	actions.MemEndLine += [this]()
+	actions.mem_end_line += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 
@@ -150,26 +151,26 @@ auto MemView::subscrible() -> void
 			cpu.mem_curs |= (mem_sz - 1), cpu.mem_second = 1;
 	};
 
-	actions.MemFindText += []()
+	actions.mem_find_text += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
-		const unsigned rs = DebugCore::get_dialogs()->find1dlg(cpu.mem_curs);
+		const unsigned rs = actions.dialog_find1(cpu.mem_curs);
 
 		if (rs != UINT_MAX)
 			cpu.mem_curs = rs;
 	};
 
-	actions.MemFindCode += []()
+	actions.mem_find_code += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
-		const auto rs = DebugCore::get_dialogs()->find2dlg(cpu.mem_curs);
+		const unsigned rs = actions.dialog_find2(cpu.mem_curs);
 
 		if (rs != UINT_MAX)
 			cpu.mem_curs = rs;
 	};
 
 
-	actions.MemGoto += [this]()
+	actions.mem_goto += [this]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		const unsigned v = view_.input4(mem_x, mem_y, cpu.mem_top);
@@ -178,48 +179,48 @@ auto MemView::subscrible() -> void
 			cpu.mem_top = (v & ~(mem_sz - 1)), cpu.mem_curs = v;
 	};
 
-	actions.MemView += [this]() { editor = ed_mem; };
-	actions.MemDiskPhys += [this]() { editor = ed_phys; };
-	actions.MemDiskLog += [this]() { editor = ed_log; };
-	actions.MemDiskGo += [this]() { mdiskgo(); };
+	actions.mem_view += [this]() { editor = ed_mem; };
+	actions.mem_disk_phys += [this]() { editor = ed_phys; };
+	actions.mem_disk_log += [this]() { editor = ed_log; };
+	actions.mem_disk_go += [this]() { mdiskgo(); };
 
-	actions.MemViewPC += []()
+	actions.mem_view_pc += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.pc;
 	};
 
-	actions.MemViewSP += []()
+	actions.mem_view_sp += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.sp;
 	};
 
-	actions.MemViewBC += []()
+	actions.mem_view_bc += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.bc;
 	};
 
-	actions.MemViewDE += []()
+	actions.mem_view_de += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.de;
 	};
 
-	actions.MemViewHL += []()
+	actions.mem_view_hl += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.hl;
 	};
 
-	actions.MemViewIX += []()
+	actions.mem_view_ix += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.ix;
 	};
 
-	actions.MemViewIY += []()
+	actions.mem_view_iy += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.mem_curs = cpu.iy;
@@ -429,7 +430,7 @@ auto MemView::dispatch() -> char
 			return 0;
 
 		editwm(cpu.mem_curs, u8(k));
-		actions.MemRight();
+		actions.mem_right();
 		return 1;
 	}
 	else
@@ -442,7 +443,7 @@ auto MemView::dispatch() -> char
 				editwm(cpu.mem_curs, (c & 0xF0) | k);
 			else
 				editwm(cpu.mem_curs, (c & 0x0F) | (k << 4));
-			actions.MemRight();
+			actions.mem_right();
 			return 1;
 		}
 	}

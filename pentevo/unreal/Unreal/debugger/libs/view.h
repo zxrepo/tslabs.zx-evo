@@ -46,9 +46,13 @@ class DebugView final
 	char str_[0x80]{};
 
 	static auto format_item(char *dst, unsigned width, const char *text, MenuItem::flags_t flags) -> void;
-	static auto menu_move(MenuDef *menu, int dir) -> void;
+	static auto menu_move(MenuDef &menu, int dir) -> void;
 
-	auto paint_items(MenuDef *menu) -> void;
+	auto subscrible() -> void;
+
+	auto handle_menu(MenuDef& menu) -> char;
+	auto paint_items(MenuDef& menu) -> void;
+	auto on_paint(HWND hwnd) const ->void;
 
 public:
 	HWND wnd_{};
@@ -57,14 +61,14 @@ public:
 
 	explicit DebugView(HWND wnd);
 
-	auto on_paint(HWND hwnd) const ->void;
+	
 	auto show_dialog(__in LPCSTR lpTemplateName, __in_opt DLGPROC lpDialogFunc) const -> void;
 
 	auto set_scr(u32 addr, u8 val) const -> void;
 
 	auto flip() -> void;
 	auto add_frame(unsigned x, unsigned y, unsigned dx, unsigned dy, u8 attr) -> void;
-	auto handle_menu(MenuDef *menu) -> char;
+	
 
 	auto clear_canvas() -> void;
 
