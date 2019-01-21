@@ -15,15 +15,15 @@ using namespace std;
 
 
 
-class dbg_column;
-class dbg_canvas;
+class DbgColumn;
+class DbgCanvas;
 
-class dbg_control
+class DbgControl
 {
 	int h_ = 0;
 	int y_ = 0;	
-	dbg_column* column_ = nullptr;
-	dbg_canvas* canvas_ = nullptr;	
+	DbgColumn* column_ = nullptr;
+	DbgCanvas* canvas_ = nullptr;	
 
 	void check_parent() const;	
 
@@ -47,29 +47,29 @@ protected:
 	void draw_text_on_line(const char* text, int x, u8 attr) const;
 
 public:
-	virtual ~dbg_control() = default;
-	explicit dbg_control(int h);
+	virtual ~DbgControl() = default;
+	explicit DbgControl(int h);
 
 	int get_h() const;
 	int get_y() const { return y_; }
-	const dbg_column& get_column() const;
+	const DbgColumn& get_column() const;
 
 	void set_y(int y);
-	void set_parent(dbg_column *column, dbg_canvas *canvas, int y);
+	void set_parent(DbgColumn *column, DbgCanvas *canvas, int y);
 	
 	virtual void on_paint() {};
 };
 
-class dbg_column
+class DbgColumn
 {
 	int y_ = 0;
 	const int w_;
 	const int x_;
 
-	vector<dbg_control*> controls_ = vector<dbg_control*>();
-	dbg_canvas &canvas_;
+	vector<DbgControl*> controls_ = vector<DbgControl*>();
+	DbgCanvas &canvas_;
 public:
-	dbg_column(int w, int x, dbg_canvas& canvas);
+	DbgColumn(int w, int x, DbgCanvas& canvas);
 
 	int get_w() const;
 	int get_x() const;
@@ -78,7 +78,7 @@ public:
 	void reset();
 	void move_y(int dy);
 
-	void add_item(dbg_control * control)
+	void add_item(DbgControl * control)
 	{
 		controls_.push_back(control);
 
@@ -89,7 +89,7 @@ public:
 	void paint();
 };
 
-class dbg_canvas final
+class DbgCanvas final
 {
 	DebugView& view_;
 
@@ -102,34 +102,34 @@ class dbg_canvas final
 	int curr_col_ = 0;
 	int last_len_ = 0;
 
-	vector<dbg_column*> columns_ = vector<dbg_column*>();
-	vector<dbg_control*> controls_ = vector<dbg_control*>();
+	vector<DbgColumn*> columns_ = vector<DbgColumn*>();
+	vector<DbgControl*> controls_ = vector<DbgControl*>();
 
 	void print_dbg(char* line, int color);
 
 public:
-	dbg_canvas(DebugView& view, int base_x, int base_y);
-	~dbg_canvas();
+	DbgCanvas(DebugView& view, int base_x, int base_y);
+	~DbgCanvas();
 
-	dbg_canvas& set_attr(const u8 color);
-	dbg_canvas& set_xy(int x, int y);
-	dbg_canvas& set_cols(int col0 = -1, int col1 = -1, int col2 = -1, int col3 = -1);
-	dbg_canvas& next_row();
-	dbg_canvas& next_col();
-	dbg_canvas& move_x_to_len();
-	dbg_canvas& draw_frame(const int w, int h);
-	dbg_canvas& fill_rect(const int w, const int h);
-	dbg_canvas& draw_text(const char *msg, int color = -1);
-	dbg_canvas& draw_number(const int value, int color = -1);
-	dbg_canvas& draw_hex(const unsigned value, int len = 2, int color = -1);
+	DbgCanvas& set_attr(const u8 color);
+	DbgCanvas& set_xy(int x, int y);
+	DbgCanvas& set_cols(int col0 = -1, int col1 = -1, int col2 = -1, int col3 = -1);
+	DbgCanvas& next_row();
+	DbgCanvas& next_col();
+	DbgCanvas& move_x_to_len();
+	DbgCanvas& draw_frame(const int w, int h);
+	DbgCanvas& fill_rect(const int w, const int h);
+	DbgCanvas& draw_text(const char *msg, int color = -1);
+	DbgCanvas& draw_number(const int value, int color = -1);
+	DbgCanvas& draw_hex(const unsigned value, int len = 2, int color = -1);
 
-	dbg_canvas& move(int dx, int dy);
-	dbg_canvas& set_x(int x);
+	DbgCanvas& move(int dx, int dy);
+	DbgCanvas& set_x(int x);
 
-	void draw_reg_frame(const dbg_control& control, int h, const char* title, const u8 *regval = nullptr);
+	void draw_reg_frame(const DbgControl& control, int h, const char* title, const u8 *regval = nullptr);
 
-	dbg_column& create_column(int w);
-	void add_item(dbg_control* control);
+	DbgColumn& create_column(int w);
+	void add_item(DbgControl* control);
 	
 	void paint();
 

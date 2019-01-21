@@ -4,21 +4,21 @@
 #include <memory>
 #include "debugger/consts.h"
 
-dbg_control::dbg_control(int h):h_(h) { }
+DbgControl::DbgControl(int h):h_(h) { }
 
-void dbg_control::check_parent() const
+void DbgControl::check_parent() const
 {
 	if (column_ == nullptr || canvas_ == nullptr)
 		throw exception("parent not assigned");
 }
 
-void dbg_control::draw_reg_frame(const char *title, const u8 *value) const
+void DbgControl::draw_reg_frame(const char *title, const u8 *value) const
 {
 	check_parent();
 	canvas_->draw_reg_frame(*this, get_h(), title, value);
 }
 
-void dbg_control::draw_bits_range(int bits) const
+void DbgControl::draw_bits_range(int bits) const
 {
 	check_parent();
 
@@ -45,7 +45,7 @@ void dbg_control::draw_bits_range(int bits) const
 	(*canvas_).next_col();
 }
 
-void dbg_control::draw_bit(char* title, int bits, const char* val_set[], int val) const
+void DbgControl::draw_bit(char* title, int bits, const char* val_set[], int val) const
 {
 	check_parent();
 	draw_bits_range(bits);
@@ -62,7 +62,7 @@ void dbg_control::draw_bit(char* title, int bits, const char* val_set[], int val
 	next_row();
 }
 
-void dbg_control::draw_bit(char* title, int bits, u8 val) const
+void DbgControl::draw_bit(char* title, int bits, u8 val) const
 {
 	check_parent();
 	draw_bits_range(bits);
@@ -78,7 +78,7 @@ void dbg_control::draw_bit(char* title, int bits, u8 val) const
   next_row();
 }
 
-void dbg_control::draw_hex8_inline(char* title, u8 val) const
+void DbgControl::draw_hex8_inline(char* title, u8 val) const
 {
 	check_parent();
 	(*canvas_)
@@ -88,7 +88,7 @@ void dbg_control::draw_hex8_inline(char* title, u8 val) const
 		.draw_text(" ", w_norm).move_x_to_len();
 }
 
-void dbg_control::draw_dec_inline(char* title, u16 val) const
+void DbgControl::draw_dec_inline(char* title, u16 val) const
 {
 	check_parent();
 	(*canvas_)
@@ -98,7 +98,7 @@ void dbg_control::draw_dec_inline(char* title, u16 val) const
 		.draw_text(" ", w_norm).move_x_to_len();
 }
 
-void dbg_control::draw_hex16(char* title, int bits, u16 val) const
+void DbgControl::draw_hex16(char* title, int bits, u16 val) const
 {
 	check_parent();
 	draw_bits_range(bits);
@@ -115,7 +115,7 @@ void dbg_control::draw_hex16(char* title, int bits, u16 val) const
 	next_row();
 }
 
-void dbg_control::draw_hex24(char* title, int bits, u32 val) const
+void DbgControl::draw_hex24(char* title, int bits, u32 val) const
 {
 	check_parent();
 
@@ -134,7 +134,7 @@ void dbg_control::draw_hex24(char* title, int bits, u32 val) const
 	next_row();
 }
 
-void dbg_control::draw_bit_d(char* title, int bits, u8 val) const
+void DbgControl::draw_bit_d(char* title, int bits, u8 val) const
 {
 	check_parent();
 	draw_bits_range(bits);
@@ -151,7 +151,7 @@ void dbg_control::draw_bit_d(char* title, int bits, u8 val) const
 	next_row();
 }
 
-void dbg_control::draw_bit_h(char* title, int bits, u8 val) const
+void DbgControl::draw_bit_h(char* title, int bits, u8 val) const
 {
     check_parent();
     draw_bits_range(bits);
@@ -168,7 +168,7 @@ void dbg_control::draw_bit_h(char* title, int bits, u8 val) const
     next_row();
 }
 
-void dbg_control::draw_port(char* title, u8 val) const
+void DbgControl::draw_port(char* title, u8 val) const
 {
 	check_parent();
 
@@ -185,7 +185,7 @@ void dbg_control::draw_port(char* title, u8 val) const
 	next_row();
 }
 
-void dbg_control::draw_hl_port(char prefix, u8 hval, u8 lval, u16 val) const
+void DbgControl::draw_hl_port(char prefix, u8 hval, u8 lval, u16 val) const
 {
 	check_parent();
 
@@ -217,7 +217,7 @@ void dbg_control::draw_hl_port(char prefix, u8 hval, u8 lval, u16 val) const
 	next_row();
 }
 
-void dbg_control::draw_xhl_port(char prefix, u8 xval, u8 hval, u8 lval) const
+void DbgControl::draw_xhl_port(char prefix, u8 xval, u8 hval, u8 lval) const
 {
 	check_parent();
 
@@ -248,7 +248,7 @@ void dbg_control::draw_xhl_port(char prefix, u8 xval, u8 hval, u8 lval) const
 	next_row();
 }
 
-void dbg_control::draw_led(char* title, u8 on) const
+void DbgControl::draw_led(char* title, u8 on) const
 {
 	check_parent();
 
@@ -260,38 +260,38 @@ void dbg_control::draw_led(char* title, u8 on) const
 		(*canvas_).move(strlen(title), 0);
 }
 
-void dbg_control::set_xy(int x, int y) const
+void DbgControl::set_xy(int x, int y) const
 {
 	canvas_->set_xy(column_->get_x() + x, get_y() + y);
 }
 
-void dbg_control::next_row() const
+void DbgControl::next_row() const
 {
 	canvas_->next_row();
 }
 
-void dbg_control::draw_text_on_line(const char* text, int x, u8 attr) const
+void DbgControl::draw_text_on_line(const char* text, int x, u8 attr) const
 {
 	canvas_->set_x(column_->get_x() + x);
 	canvas_->draw_text(text, attr);
 }
 
-int dbg_control::get_h() const
+int DbgControl::get_h() const
 {
 	return h_;
 }
 
-void dbg_control::set_y(int y)
+void DbgControl::set_y(int y)
 {
 	y_ = y;
 }
 
-const dbg_column& dbg_control::get_column() const
+const DbgColumn& DbgControl::get_column() const
 {
 	return *column_;
 }
 
-void dbg_control::set_parent(dbg_column *column, dbg_canvas *canvas, int y)
+void DbgControl::set_parent(DbgColumn *column, DbgCanvas *canvas, int y)
 {
 	if (column_ != nullptr || canvas_ != nullptr)
 		throw exception("already inited");
@@ -303,39 +303,39 @@ void dbg_control::set_parent(dbg_column *column, dbg_canvas *canvas, int y)
 }
 
 
-void dbg_column::move_y(int dy)
+void DbgColumn::move_y(int dy)
 {
 	y_ += dy;
 }
 
-dbg_column::dbg_column(int w, int x, dbg_canvas& canvas)
+DbgColumn::DbgColumn(int w, int x, DbgCanvas& canvas)
 : w_(w), x_(x), canvas_(canvas)
 { }
 
-int dbg_column::get_w() const
+int DbgColumn::get_w() const
 {
 	return w_;
 }
 
-int dbg_column::get_x() const
+int DbgColumn::get_x() const
 {
 	return x_;
 }
 
-int dbg_column::get_y() const
+int DbgColumn::get_y() const
 {
 	return y_;
 }
 
 
-void dbg_column::reset()
+void DbgColumn::reset()
 {
 	y_ = 0;
 }
 
-void dbg_column::paint()
+void DbgColumn::paint()
 {
-	for_each(controls_.begin(), controls_.end(), [](dbg_control* item)
+	for_each(controls_.begin(), controls_.end(), [](DbgControl* item)
 	{
 		item->on_paint();
 	});
@@ -346,7 +346,7 @@ void dbg_column::paint()
 
 
 
-void dbg_canvas::print_dbg(char* line, int color)
+void DbgCanvas::print_dbg(char* line, int color)
 {
 	if (color == -1)
 		view_.tprint(base_x_ + x_, base_y_ + y_, line, attr_);
@@ -356,23 +356,23 @@ void dbg_canvas::print_dbg(char* line, int color)
 	last_len_ = strlen(line);
 }
 
-dbg_canvas::dbg_canvas(DebugView& view, int base_x, int base_y) : view_(view), base_x_(base_x), base_y_(base_y)
+DbgCanvas::DbgCanvas(DebugView& view, int base_x, int base_y) : view_(view), base_x_(base_x), base_y_(base_y)
 { }
 
-dbg_canvas::~dbg_canvas()
+DbgCanvas::~DbgCanvas()
 {
-	for_each(columns_.begin(), columns_.end(), default_delete<dbg_column>());
-	for_each(controls_.begin(), controls_.end(), default_delete<dbg_control>());
+	for_each(columns_.begin(), columns_.end(), default_delete<DbgColumn>());
+	for_each(controls_.begin(), controls_.end(), default_delete<DbgControl>());
 }
 
-dbg_canvas& dbg_canvas::set_attr(const u8 color)
+DbgCanvas& DbgCanvas::set_attr(const u8 color)
 {
 	attr_ = color;
 
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::set_xy(int x, int y)
+DbgCanvas& DbgCanvas::set_xy(int x, int y)
 {
 	x_ = x;
 	y_ = y;
@@ -380,7 +380,7 @@ dbg_canvas& dbg_canvas::set_xy(int x, int y)
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::set_cols(int col0, int col1, int col2, int col3)
+DbgCanvas& DbgCanvas::set_cols(int col0, int col1, int col2, int col3)
 {
 	cols_[0] = col0;
 	cols_[1] = col1;
@@ -390,7 +390,7 @@ dbg_canvas& dbg_canvas::set_cols(int col0, int col1, int col2, int col3)
 	return  *this;
 }
 
-dbg_canvas& dbg_canvas::next_row()
+DbgCanvas& DbgCanvas::next_row()
 {
 	curr_col_ = 0;
 	const auto x = cols_[curr_col_];
@@ -402,7 +402,7 @@ dbg_canvas& dbg_canvas::next_row()
 	return  *this;
 }
 
-dbg_canvas& dbg_canvas::next_col()
+DbgCanvas& DbgCanvas::next_col()
 {
 	curr_col_ = (curr_col_ + 1) & 3;
 	const auto x = cols_[curr_col_];
@@ -414,27 +414,27 @@ dbg_canvas& dbg_canvas::next_col()
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::move_x_to_len()
+DbgCanvas& DbgCanvas::move_x_to_len()
 {
 	set_xy(x_ + last_len_, y_);
 
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::draw_frame(const int w, int h)
+DbgCanvas& DbgCanvas::draw_frame(const int w, int h)
 {
 	view_.add_frame(base_x_ + x_, base_y_ + y_, w, h, FRAME);
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::fill_rect(const int w, const int h)
+DbgCanvas& DbgCanvas::fill_rect(const int w, const int h)
 {
 	view_.fillrect(base_x_ + x_, base_y_ + y_, w, h, w_norm);
 
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::draw_text(const char *msg, int color)
+DbgCanvas& DbgCanvas::draw_text(const char *msg, int color)
 {
 	char line[0x20];
 	sprintf(line, "%s", msg);
@@ -443,7 +443,7 @@ dbg_canvas& dbg_canvas::draw_text(const char *msg, int color)
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::draw_number(const int value, int color)
+DbgCanvas& DbgCanvas::draw_number(const int value, int color)
 {
 	char line[0x20];
 	sprintf(line, "%03d", value);
@@ -452,7 +452,7 @@ dbg_canvas& dbg_canvas::draw_number(const int value, int color)
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::draw_hex(const unsigned value, int len, int color)
+DbgCanvas& DbgCanvas::draw_hex(const unsigned value, int len, int color)
 {
 	char line[0x20];
 	char fstr[5] = "%0_X";
@@ -464,7 +464,7 @@ dbg_canvas& dbg_canvas::draw_hex(const unsigned value, int len, int color)
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::move(int dx, int dy)
+DbgCanvas& DbgCanvas::move(int dx, int dy)
 {
 	x_ += dx;
 	y_ += dy;
@@ -472,14 +472,14 @@ dbg_canvas& dbg_canvas::move(int dx, int dy)
 	return *this;
 }
 
-dbg_canvas& dbg_canvas::set_x(int x)
+DbgCanvas& DbgCanvas::set_x(int x)
 {
 	x_ = x;
 
 	return *this;
 }
 
-void dbg_canvas::draw_reg_frame(const dbg_control& control, int h, const char* title, const u8 *regval)
+void DbgCanvas::draw_reg_frame(const DbgControl& control, int h, const char* title, const u8 *regval)
 {
 	const auto x = control.get_column().get_x();
 	const auto y = control.get_y();
@@ -503,30 +503,30 @@ void dbg_canvas::draw_reg_frame(const dbg_control& control, int h, const char* t
 	fill_rect(w - 1, h);
 }
 
-dbg_column& dbg_canvas::create_column(int w)
+DbgColumn& DbgCanvas::create_column(int w)
 {
 	auto x = 0;
 
-	for_each(columns_.begin(), columns_.end(), [&x](dbg_column* item)
+	for_each(columns_.begin(), columns_.end(), [&x](DbgColumn* item)
 	{
 		x += item->get_w();
 	});
 
-	const auto new_item = new dbg_column(w, x, *this);
+	const auto new_item = new DbgColumn(w, x, *this);
 	columns_.push_back(new_item);
 
 	return *new_item;
 }
 
-void dbg_canvas::paint()
+void DbgCanvas::paint()
 {
-	for_each(columns_.begin(), columns_.end(), [](dbg_column* column)
+	for_each(columns_.begin(), columns_.end(), [](DbgColumn* column)
 	{
 		column->paint();
 	});
 }
 
-void dbg_canvas::add_item(dbg_control* control)
+void DbgCanvas::add_item(DbgControl* control)
 {
 	if (&control->get_column() == nullptr)
 		throw exception("column not assigned");

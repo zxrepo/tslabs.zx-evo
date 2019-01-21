@@ -48,10 +48,10 @@ const char *d_dmast[] =
 	"NOP  "
 };
 
-class vconfig_control: public dbg_control
+class vconfig_control: public DbgControl
 {
 public:
-	explicit vconfig_control() : dbg_control(6) { }
+	explicit vconfig_control() : DbgControl(6) { }
 
 	void on_paint() override
 	{
@@ -65,10 +65,10 @@ public:
 	}
 };
 
-class tsconfig_control : public dbg_control
+class tsconfig_control : public DbgControl
 {
 public:
-	explicit tsconfig_control() : dbg_control(6) { }
+	explicit tsconfig_control() : DbgControl(6) { }
 
 	void on_paint() override
 	{
@@ -82,10 +82,10 @@ public:
 	}
 };
 
-class sysconfig_control : public dbg_control
+class sysconfig_control : public DbgControl
 {
 public:
-	explicit sysconfig_control() : dbg_control(2) { }
+	explicit sysconfig_control() : DbgControl(2) { }
 
 	void on_paint() override
 	{
@@ -95,10 +95,10 @@ public:
 	}
 };
 
-class cache_config_control : public dbg_control
+class cache_config_control : public DbgControl
 {
 public:
-	explicit cache_config_control() : dbg_control(4) { }
+	explicit cache_config_control() : DbgControl(4) { }
 
 	void on_paint() override
 	{
@@ -110,10 +110,10 @@ public:
 	}
 };
 
-class memconfig_control : public dbg_control
+class memconfig_control : public DbgControl
 {
 public:
-	explicit memconfig_control() : dbg_control(5) { }
+	explicit memconfig_control() : DbgControl(5) { }
 
 	void on_paint() override
 	{
@@ -126,10 +126,10 @@ public:
 	}
 };
 
-class bitmap_control : public dbg_control
+class bitmap_control : public DbgControl
 {
 public:
-	explicit bitmap_control() : dbg_control(3) { }
+	explicit bitmap_control() : DbgControl(3) { }
 
 	void on_paint() override
 	{
@@ -143,10 +143,10 @@ public:
 	}
 };
 
-class sprites_control : public dbg_control
+class sprites_control : public DbgControl
 {
 public:
-	explicit sprites_control() : dbg_control(1) { }
+	explicit sprites_control() : DbgControl(1) { }
 
 	void on_paint() override
 	{
@@ -155,10 +155,10 @@ public:
 	}
 };
 
-class tiles0_control : public dbg_control
+class tiles0_control : public DbgControl
 {
 public:
-	explicit tiles0_control() : dbg_control(3) { }
+	explicit tiles0_control() : DbgControl(3) { }
 
 	void on_paint() override
 	{
@@ -174,10 +174,10 @@ public:
 	}
 };
 
-class tiles1_control : public dbg_control
+class tiles1_control : public DbgControl
 {
 public:
-	explicit tiles1_control() : dbg_control(3) { }
+	explicit tiles1_control() : DbgControl(3) { }
 
 	void on_paint() override
 	{
@@ -194,10 +194,10 @@ public:
 	}
 };
 
-class palsel_control : public dbg_control
+class palsel_control : public DbgControl
 {
 public:
-	explicit palsel_control() : dbg_control(3) { }
+	explicit palsel_control() : DbgControl(3) { }
 
 	void on_paint() override
 	{
@@ -208,10 +208,10 @@ public:
 	}
 };
 
-class fmaddr_control : public dbg_control
+class fmaddr_control : public DbgControl
 {
 public:
-	explicit fmaddr_control() : dbg_control(2) { }
+	explicit fmaddr_control() : DbgControl(2) { }
 
 	void on_paint() override
 	{
@@ -221,10 +221,10 @@ public:
 	}
 };
 
-class misc_control : public dbg_control
+class misc_control : public DbgControl
 {
 public:
-	explicit misc_control() : dbg_control(3) { }
+	explicit misc_control() : DbgControl(3) { }
 
 	void on_paint() override
 	{
@@ -238,10 +238,10 @@ public:
 	}
 };
 
-class mempages_control : public dbg_control
+class mempages_control : public DbgControl
 {
 public:
-	explicit mempages_control() : dbg_control(4) { }
+	explicit mempages_control() : DbgControl(4) { }
 
 	void on_paint() override
 	{
@@ -253,10 +253,10 @@ public:
 	}
 };
 
-class dma_control : public dbg_control
+class dma_control : public DbgControl
 {
 public:
-	explicit dma_control() : dbg_control(15) { }
+	explicit dma_control() : DbgControl(15) { }
 
 	void on_paint() override
 	{
@@ -292,10 +292,10 @@ public:
 	}
 };
 
-class interrupt_control : public dbg_control
+class interrupt_control : public DbgControl
 {
 public:
-	explicit interrupt_control() : dbg_control(5) { }
+	explicit interrupt_control() : DbgControl(5) { }
 
 	void on_paint() override
 	{
@@ -313,10 +313,10 @@ public:
 	}
 };
 
-class intmask_control : public dbg_control
+class intmask_control : public DbgControl
 {
 public:
-	explicit intmask_control() : dbg_control(3) { }
+	explicit intmask_control() : DbgControl(3) { }
 
 	void on_paint() override
 	{
@@ -355,7 +355,7 @@ auto TsconfView::init() const -> void
 
 TsconfView::TsconfView(DebugView& view)
 {
-	canvas_ = new dbg_canvas(view, 81, 0);
+	canvas_ = new DbgCanvas(view, 81, 0);
 	init();
 }
 

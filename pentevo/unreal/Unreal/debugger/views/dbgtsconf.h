@@ -4,7 +4,7 @@
 
 class TsconfView
 {
-	dbg_canvas* canvas_{};
+	DbgCanvas* canvas_{};
 
 	auto init() const -> void;
 public:
