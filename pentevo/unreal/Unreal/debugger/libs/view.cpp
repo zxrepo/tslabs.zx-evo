@@ -4,7 +4,6 @@
 #include "cpu_manager.h"
 #include "util.h"
 #include "debugger/consts.h"
-#include "core/actions/actions.h"
 
 auto DebugView::subscrible() -> void
 {

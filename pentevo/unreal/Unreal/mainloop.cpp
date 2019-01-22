@@ -10,7 +10,6 @@
 #include "z80.h"
 #include "zxevo.h"
 #include "util.h"
-#include "core/actions/actions.h"
 
 void spectrum_frame()
 {

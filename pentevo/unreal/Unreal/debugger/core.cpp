@@ -15,7 +15,7 @@
 #include "wd93dat.h"
 #include "cheat.h"
 #include "snapshot.h"
-#include "core/actions/actions.h"
+#include "core/ui/actions.h"
 
 char bpx_file_name[FILENAME_MAX];
 char str[80]{};

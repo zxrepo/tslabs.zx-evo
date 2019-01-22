@@ -6,7 +6,7 @@
 #include "wd93crc.h"
 #include "debugger/core.h"
 #include "debugger/libs/cpu_manager.h"
-#include "core/actions/actions.h"
+#include "core/ui/actions.h"
 
 static char str[80];
 

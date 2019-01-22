@@ -5,7 +5,7 @@
 #include "funcs.h"
 #include "debugger/consts.h"
 #include "debugger/libs/cpu_manager.h"
-#include "core/actions/actions.h"
+#include "core/ui/actions.h"
 
 void __cdecl BankNames(int i, char *name)
 {

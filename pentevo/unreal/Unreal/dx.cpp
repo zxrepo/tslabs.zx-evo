@@ -17,7 +17,6 @@
 #include "snapshot.h"
 #include "funcs.h"
 #include "tape.h"
-#include "core/actions/actions.h"
 
 const int size_x[3] = { 256, 320, 448 };
 const int size_y[3] = { 192, 240, 320 };

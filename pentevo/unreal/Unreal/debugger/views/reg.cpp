@@ -4,7 +4,7 @@
 #include "vars.h"
 #include "debugger/consts.h"
 #include "debugger/libs/cpu_manager.h"
-#include "core/actions/actions.h"
+#include "core/ui/actions.h"
 
 //const size_t regs_layout_count = _countof(regs_layout);
 

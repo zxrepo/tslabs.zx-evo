@@ -15,7 +15,6 @@
 #include "debugger/libs/dbglabls.h"
 #include "debugger/libs/cpu_manager.h"
 #include "sound/dev_moonsound.h"
-#include "core/actions/actions.h"
 
 char load_errors;
 const char* SSHOT_EXT[] = { "scr", "bmp", "png", "gif" };

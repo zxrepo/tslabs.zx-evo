@@ -4,7 +4,6 @@
 #include "snapshot.h"
 #include "init.h"
 #include "util.h"
-#include "core/actions/actions.h"
 
 static void cpuid(unsigned CpuInfo[4], unsigned _eax)
 {

@@ -8,8 +8,7 @@
 #include "util.h"
 #include "view.h"
 #include "cpu_manager.h"
-#include "debugger/core.h"
-#include "core/actions/actions.h"
+#include "core/ui/actions.h"
 
 MonLabelsT mon_labels;
 

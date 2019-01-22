@@ -7,7 +7,7 @@
 #include "debugger/libs/cpu_manager.h"
 #include "debugger/libs/dbglabls.h"
 #include "memory.h"
-#include "core/actions/actions.h"
+#include "core/ui/actions.h"
 
 static char str[80];
 
@@ -150,11 +150,11 @@ auto TraceView::tracewndflags() const -> unsigned
 
 auto TraceView::subscrible() -> void
 {
-	actions.trace_find_pc += []()
+	actions.trace_find_pc.subscrible([]()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.trace_top = cpu.trace_curs = cpu.pc;
-	};
+	});
 
 	actions.trace_here += []()
 	{

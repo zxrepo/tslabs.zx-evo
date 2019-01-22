@@ -1,6 +1,6 @@
 #pragma once
 #include "emul.h"
-#include "core/actions/ui_action.h"
+#include "core/ui/actions.h"
 
 class TCriticalSection
 {

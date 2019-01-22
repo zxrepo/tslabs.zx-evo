@@ -138,7 +138,7 @@
     </ClCompile>
     <ClCompile Include="tape.cpp" />
     <ClCompile Include="tsconf.cpp" />
-    <ClCompile Include="core\actions\actions.cpp" />
+    <ClCompile Include="core\ui\actions.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vars.cpp" />
     <ClCompile Include="vs1001.cpp" />
@@ -163,7 +163,7 @@
     <ClInclude Include="bass.h" />
     <ClInclude Include="cheat.h" />
     <ClInclude Include="config.h" />
-    <ClInclude Include="core\actions\actions.h" />
+    <ClInclude Include="core\ui\actions.h" />
     <ClInclude Include="daa_tabs.h" />
     <ClInclude Include="debugger\consts.h" />
     <ClInclude Include="debugger\core.h" />
@@ -259,7 +259,6 @@
     <ClInclude Include="tables.h" />
     <ClInclude Include="tape.h" />
     <ClInclude Include="tsconf.h" />
-    <ClInclude Include="core\actions\ui_action.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="vars.h" />
     <ClInclude Include="vs1001.h" />
