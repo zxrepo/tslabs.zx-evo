@@ -105,7 +105,8 @@ auto DebugCore::rw_err(const char* msg) -> void
 
 auto DebugCore::subscrible() -> void
 {
-	actions.mon_emul += [this]() { mon_emul(); };
+	auto r = [this]() { mon_emul(); };
+	actions.mon_emul += r;
 	actions.mon_save_block += [this]() { mon_save(); };
 	actions.mon_load_block += [this]() { mon_load(); };
 	actions.mon_load_block += [this]() { mon_fill(); };
@@ -963,7 +964,7 @@ auto DebugCore::debug_events(Z80* cpu) -> void
 		get_instance()->debug(cpu);
 }
 
-auto DebugCore::handle_mouse() -> void
+auto DebugCore::handle_mouse() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
 

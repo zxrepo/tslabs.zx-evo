@@ -164,6 +164,7 @@
     <ClInclude Include="cheat.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="core\ui\actions.h" />
+    <ClInclude Include="debugger\debugger.h" />
     <ClInclude Include="daa_tabs.h" />
     <ClInclude Include="debugger\consts.h" />
     <ClInclude Include="debugger\core.h" />

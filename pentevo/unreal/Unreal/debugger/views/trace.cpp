@@ -150,11 +150,11 @@ auto TraceView::tracewndflags() const -> unsigned
 
 auto TraceView::subscrible() -> void
 {
-	actions.trace_find_pc.subscrible([]()
+	actions.trace_find_pc += []()
 	{
 		auto& cpu = TCpuMgr::get_cpu();
 		cpu.trace_top = cpu.trace_curs = cpu.pc;
-	});
+	};
 
 	actions.trace_here += []()
 	{

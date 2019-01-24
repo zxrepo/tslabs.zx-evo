@@ -3,6 +3,7 @@
 #include "sysdefs.h"
 #include "vars.h"
 #include "debugger/consts.h"
+#include "debugger/debugger.h"
 
 struct MenuItem final
 {
@@ -37,7 +38,7 @@ enum class dbgwnd
 	banks
 };
 
-class DebugView final
+class DebugView final: IDebugView
 {
 	u8 *gdibuf_{};
 	u8 *txtscr_{};

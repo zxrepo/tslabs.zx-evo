@@ -3,8 +3,6 @@
 #include <functional>
 #include "debugger/libs/view.h"
 
-//#include "debugger/libs/view.h"
-
 enum class ActionType
 {
 	main,
@@ -19,26 +17,45 @@ enum class ActionType
 	empty,
 };
 
-template<class InType, class OutType>
-class UIActionBase
+class UIKeyBind {
+public:
+	unsigned k1{}, k2{}, k3{}, k4{};
+};
+
+template<class OutType = void, class ...InType>
+class TFunc final : public std::conditional <sizeof...(InType) == 0, UIKeyBind, std::_Any_tag>::type
 {
-protected:
-	std::vector<std::function<OutType(InType)>> actions_{};
+	enum { arg_count = sizeof...(InType) };
+	using action_method = std::function<OutType(InType...)>;
+	std::vector<action_method> actions_{};
 
 public:
 	const ActionType type;
 	const std::string name;
 
-	UIActionBase(const ActionType type, std::string name) : type(type), name(std::move(name)) { }
+	//template<const ActionType Type, typename Flag = std::enable_if<true, void>::type>
+	TFunc(const ActionType type, std::string name) : type(type), name(std::move(name)) { }
 
-	auto subscrible(const std::function<OutType(InType)>& action) -> void
+	auto operator +=(action_method action) -> void
 	{
-		actions_.push_back(action);
+		actions_.push_back(std::move(action));
 	}
 
-	auto operator +=(const std::function<OutType(InType)>& action) -> void
+	template<class OT = OutType>
+	typename std::enable_if<std::is_void<OT>::value, void>::type operator() (InType... args)
 	{
-		subscrible(action);
+		for (auto& item : actions_)
+			item(args...);
+	}
+
+	template<class OT = OutType>
+	typename std::enable_if<!std::is_void<OT>::value, OT>::type operator() (InType... args)
+	{
+		static OutType result{};
+		for (auto& item : actions_)
+			result = item(args...);
+
+		return result;
 	}
 
 	auto is_empty() const -> bool
@@ -76,299 +93,241 @@ public:
 	}
 };
 
-template<class InType = void, typename OutType = void>
-class UIAction final : public UIActionBase<InType, OutType>
-{
-public:
-	UIAction(ActionType type, const std::string& name) : UIActionBase<InType, OutType>(type, name) {}
+template<class ...Args>
+using TAction = TFunc<void, Args...>;
 
-	auto invoke(InType arg) -> OutType
-	{
-		static OutType result{};
-		for (auto& item : actions_)
-			result = item(arg);
-
-		return result;
-	}
-
-	auto operator() (InType arg) -> OutType
-	{
-		return invoke(arg);
-	}
-};
-
-extern std::vector<UIAction<>*> actions_registry;
-
-template<class InType>
-class UIAction<InType, void> final : public UIActionBase<InType, void>
-{
-public:
-	UIAction(ActionType type, const std::string& name) : UIActionBase(type, name) { }
-
-	auto invoke(InType arg) -> void
-	{
-		for (auto& item : actions_) item(arg);
-	}
-
-	auto operator() (InType arg) -> void
-	{
-		invoke(arg);
-	}
-};
-
-template<>
-class UIAction<void, void> final : public UIActionBase<void, void>
-{
-public:
-	// only void(void) action may be binded to keyboard
-	unsigned k1{}, k2{}, k3{}, k4{};
-
-	UIAction(ActionType type, const std::string& name) : UIActionBase(type, name)
-	{
-		actions_registry.push_back(this);
-	}
-
-	auto invoke() -> void
-	{
-		for (auto& item : actions_) item();
-	}
-
-	auto operator() () -> void
-	{
-		invoke();
-	}
-};
+extern std::vector<TAction<>*> actions_registry;
 
 class Actions final
 {
 public:
-	UIAction<> mon_emul = UIAction<>(ActionType::monitor, "emul");
-	UIAction<> mon_save_block = UIAction<>(ActionType::monitor, "saveblock");
-	UIAction<> mon_load_block = UIAction<>(ActionType::monitor, "loadblock");
-	UIAction<> mon_fill_block = UIAction<>(ActionType::monitor, "fillblock");
-	UIAction<> mon_step = UIAction<>(ActionType::monitor, "step");
-	UIAction<> mon_step_over = UIAction<>(ActionType::monitor, "stepover");
-	UIAction<> mon_exit_sub = UIAction<>(ActionType::monitor, "exitsub");
-	UIAction<> mon_dump = UIAction<>(ActionType::monitor, "dump");
+	TAction<> mon_emul = TAction<>(ActionType::monitor, "emul");
+	TAction<> mon_save_block = TAction<>(ActionType::monitor, "saveblock");
+	TAction<> mon_load_block = TAction<>(ActionType::monitor, "loadblock");
+	TAction<> mon_fill_block = TAction<>(ActionType::monitor, "fillblock");
+	TAction<> mon_step = TAction<>(ActionType::monitor, "step");
+	TAction<> mon_step_over = TAction<>(ActionType::monitor, "stepover");
+	TAction<> mon_exit_sub = TAction<>(ActionType::monitor, "exitsub");
+	TAction<> mon_dump = TAction<>(ActionType::monitor, "dump");
 
-	UIAction<> mon_switch_dump = UIAction<>(ActionType::monitor, "switchdump");
-	UIAction<> mon_next = UIAction<>(ActionType::monitor, "next");
-	UIAction<> mon_prev = UIAction<>(ActionType::monitor, "prev");
-	UIAction<> mon_ripper = UIAction<>(ActionType::monitor, "rip");
-	UIAction<> mon_help = UIAction<>(ActionType::monitor, "help");
-	UIAction<> mon_cpu = UIAction<>(ActionType::monitor, "cpu");
-	UIAction<> mon_exit = UIAction<>(ActionType::monitor, "exit");
+	TAction<> mon_switch_dump = TAction<>(ActionType::monitor, "switchdump");
+	TAction<> mon_next = TAction<>(ActionType::monitor, "next");
+	TAction<> mon_prev = TAction<>(ActionType::monitor, "prev");
+	TAction<> mon_ripper = TAction<>(ActionType::monitor, "rip");
+	TAction<> mon_help = TAction<>(ActionType::monitor, "help");
+	TAction<> mon_cpu = TAction<>(ActionType::monitor, "cpu");
+	TAction<> mon_exit = TAction<>(ActionType::monitor, "exit");
 
-	UIAction<> mon_poke_dialog = UIAction<>(ActionType::monitor, "pokedialog");
-	UIAction<> mon_tape_browser = UIAction<>(ActionType::monitor, "tapebrowser");
-	UIAction<> mon_reset = UIAction<>(ActionType::monitor, "reset");
-	UIAction<> mon_reset128 = UIAction<>(ActionType::monitor, "reset128");
-	UIAction<> mon_reset_sys = UIAction<>(ActionType::monitor, "resetsys");
-	UIAction<> mon_reset48 = UIAction<>(ActionType::monitor, "reset48");
-	UIAction<> mon_reset_basic = UIAction<>(ActionType::monitor, "resetbasic");
-	UIAction<> mon_reset_dos = UIAction<>(ActionType::monitor, "resetdos");
-	UIAction<> mon_reset_cache = UIAction<>(ActionType::monitor, "resetcache");
-	UIAction<> mon_set_watch = UIAction<>(ActionType::monitor, "setwatch");
-	UIAction<> mon_screenshot = UIAction<>(ActionType::monitor, "scrshot");
-	UIAction<> mon_switch_ay = UIAction<>(ActionType::monitor, "switchay");
+	TAction<> mon_poke_dialog = TAction<>(ActionType::monitor, "pokedialog");
+	TAction<> mon_tape_browser = TAction<>(ActionType::monitor, "tapebrowser");
+	TAction<> mon_reset = TAction<>(ActionType::monitor, "reset");
+	TAction<> mon_reset128 = TAction<>(ActionType::monitor, "reset128");
+	TAction<> mon_reset_sys = TAction<>(ActionType::monitor, "resetsys");
+	TAction<> mon_reset48 = TAction<>(ActionType::monitor, "reset48");
+	TAction<> mon_reset_basic = TAction<>(ActionType::monitor, "resetbasic");
+	TAction<> mon_reset_dos = TAction<>(ActionType::monitor, "resetdos");
+	TAction<> mon_reset_cache = TAction<>(ActionType::monitor, "resetcache");
+	TAction<> mon_set_watch = TAction<>(ActionType::monitor, "setwatch");
+	TAction<> mon_screenshot = TAction<>(ActionType::monitor, "scrshot");
+	TAction<> mon_switch_ay = TAction<>(ActionType::monitor, "switchay");
 
-	UIAction<> mon_nmi = UIAction<>(ActionType::monitor, "nmi");
-	UIAction<> mon_nmi_dos = UIAction<>(ActionType::monitor, "nmidos");
-	UIAction<> mon_nmi_cache = UIAction<>(ActionType::monitor, "nmicache");
-	UIAction<> mon_save_snap = UIAction<>(ActionType::monitor, "save");
-	UIAction<> mon_load_snap = UIAction<>(ActionType::monitor, "load");
-	UIAction<> mon_save_sound = UIAction<>(ActionType::monitor, "savesound");
-	UIAction<> mon_qsave1 = UIAction<>(ActionType::monitor, "qsave1");
-	UIAction<> mon_qsave2 = UIAction<>(ActionType::monitor, "qsave2");
-	UIAction<> mon_qsave3 = UIAction<>(ActionType::monitor, "qsave3");
-	UIAction<> mon_qload1 = UIAction<>(ActionType::monitor, "qload1");
-	UIAction<> mon_qload2 = UIAction<>(ActionType::monitor, "qload2");
-	UIAction<> mon_qload3 = UIAction<>(ActionType::monitor, "qload3");
-	UIAction<> mon_labels = UIAction<>(ActionType::monitor, "labels");
-	UIAction<> mon_set_bank = UIAction<>(ActionType::monitor, "setbank");
-	UIAction<> mon_mem_search = UIAction<>(ActionType::monitor, "memsearch");
-	UIAction<> mon_set_himem = UIAction<>(ActionType::monitor, "sethimem");
+	TAction<> mon_nmi = TAction<>(ActionType::monitor, "nmi");
+	TAction<> mon_nmi_dos = TAction<>(ActionType::monitor, "nmidos");
+	TAction<> mon_nmi_cache = TAction<>(ActionType::monitor, "nmicache");
+	TAction<> mon_save_snap = TAction<>(ActionType::monitor, "save");
+	TAction<> mon_load_snap = TAction<>(ActionType::monitor, "load");
+	TAction<> mon_save_sound = TAction<>(ActionType::monitor, "savesound");
+	TAction<> mon_qsave1 = TAction<>(ActionType::monitor, "qsave1");
+	TAction<> mon_qsave2 = TAction<>(ActionType::monitor, "qsave2");
+	TAction<> mon_qsave3 = TAction<>(ActionType::monitor, "qsave3");
+	TAction<> mon_qload1 = TAction<>(ActionType::monitor, "qload1");
+	TAction<> mon_qload2 = TAction<>(ActionType::monitor, "qload2");
+	TAction<> mon_qload3 = TAction<>(ActionType::monitor, "qload3");
+	TAction<> mon_labels = TAction<>(ActionType::monitor, "labels");
+	TAction<> mon_set_bank = TAction<>(ActionType::monitor, "setbank");
+	TAction<> mon_mem_search = TAction<>(ActionType::monitor, "memsearch");
+	TAction<> mon_set_himem = TAction<>(ActionType::monitor, "sethimem");
 
-	UIAction<> main_exit = UIAction<>(ActionType::main, "exit");
-	UIAction<> main_monitor = UIAction<>(ActionType::main, "monitor");
-	UIAction<> main_fullsceen = UIAction<>(ActionType::main, "fullscreen");
-	UIAction<> main_pause = UIAction<>(ActionType::main, "pause");
-	UIAction<> main_select_fix = UIAction<>(ActionType::main, "selectfix");
-	UIAction<> main_select_snd = UIAction<>(ActionType::main, "selectsnd");
-	UIAction<> main_inc_fix = UIAction<>(ActionType::main, "incfix");
-	UIAction<> main_dec_fix = UIAction<>(ActionType::main, "decfix");
-	UIAction<> main_inc_fix10 = UIAction<>(ActionType::main, "incfix10");
-	UIAction<> main_dec_fix10 = UIAction<>(ActionType::main, "decfix10");
+	TAction<> main_exit = TAction<>(ActionType::main, "exit");
+	TAction<> main_monitor = TAction<>(ActionType::main, "monitor");
+	TAction<> main_fullsceen = TAction<>(ActionType::main, "fullscreen");
+	TAction<> main_pause = TAction<>(ActionType::main, "pause");
+	TAction<> main_select_fix = TAction<>(ActionType::main, "selectfix");
+	TAction<> main_select_snd = TAction<>(ActionType::main, "selectsnd");
+	TAction<> main_inc_fix = TAction<>(ActionType::main, "incfix");
+	TAction<> main_dec_fix = TAction<>(ActionType::main, "decfix");
+	TAction<> main_inc_fix10 = TAction<>(ActionType::main, "incfix10");
+	TAction<> main_dec_fix10 = TAction<>(ActionType::main, "decfix10");
 
-	UIAction<> main_leds = UIAction<>(ActionType::main, "leds");
-	UIAction<> main_status = UIAction<>(ActionType::main, "status");
-	UIAction<> main_max_speed = UIAction<>(ActionType::main, "maxspeed");
-	UIAction<> main_select_filter = UIAction<>(ActionType::main, "selectfilter");
-	UIAction<> main_select_driver = UIAction<>(ActionType::main, "selectdriver");
-	UIAction<> main_poke_dialog = UIAction<>(ActionType::main, "pokedialog");
-	UIAction<> main_start_tape = UIAction<>(ActionType::main, "starttape");
-	UIAction<> main_screenshoot = UIAction<>(ActionType::main, "screenshot");
-	UIAction<> main_save_video = UIAction<>(ActionType::main, "savevideo");
+	TAction<> main_leds = TAction<>(ActionType::main, "leds");
+	TAction<> main_status = TAction<>(ActionType::main, "status");
+	TAction<> main_max_speed = TAction<>(ActionType::main, "maxspeed");
+	TAction<> main_select_filter = TAction<>(ActionType::main, "selectfilter");
+	TAction<> main_select_driver = TAction<>(ActionType::main, "selectdriver");
+	TAction<> main_poke_dialog = TAction<>(ActionType::main, "pokedialog");
+	TAction<> main_start_tape = TAction<>(ActionType::main, "starttape");
+	TAction<> main_screenshoot = TAction<>(ActionType::main, "screenshot");
+	TAction<> main_save_video = TAction<>(ActionType::main, "savevideo");
 
-	UIAction<> main_reset = UIAction<>(ActionType::main, "reset");
-	UIAction<> main_reset128 = UIAction<>(ActionType::main, "reset128");
-	UIAction<> main_reset_sys = UIAction<>(ActionType::main, "resetsys");
-	UIAction<> main_reset48 = UIAction<>(ActionType::main, "reset48");
-	UIAction<> main_reset_basic = UIAction<>(ActionType::main, "resetbasic");
-	UIAction<> main_reset_dos = UIAction<>(ActionType::main, "resetdos");
-	UIAction<> main_reset_cache = UIAction<>(ActionType::main, "resetcache");
+	TAction<> main_reset = TAction<>(ActionType::main, "reset");
+	TAction<> main_reset128 = TAction<>(ActionType::main, "reset128");
+	TAction<> main_reset_sys = TAction<>(ActionType::main, "resetsys");
+	TAction<> main_reset48 = TAction<>(ActionType::main, "reset48");
+	TAction<> main_reset_basic = TAction<>(ActionType::main, "resetbasic");
+	TAction<> main_reset_dos = TAction<>(ActionType::main, "resetdos");
+	TAction<> main_reset_cache = TAction<>(ActionType::main, "resetcache");
 
-	UIAction<> main_nmi = UIAction<>(ActionType::main, "nmi");
-	UIAction<> main_nmi_dos = UIAction<>(ActionType::main, "nmidos");
-	UIAction<> main_nmi_cache = UIAction<>(ActionType::main, "nmicache");
+	TAction<> main_nmi = TAction<>(ActionType::main, "nmi");
+	TAction<> main_nmi_dos = TAction<>(ActionType::main, "nmidos");
+	TAction<> main_nmi_cache = TAction<>(ActionType::main, "nmicache");
 
-	UIAction<> main_tape_browser = UIAction<>(ActionType::main, "tapebrowser");
-	UIAction<> main_settings = UIAction<>(ActionType::main, "settings");
-	UIAction<> main_save_snap = UIAction<>(ActionType::main, "save");
-	UIAction<> main_load_snap = UIAction<>(ActionType::main, "load");
-	UIAction<> main_save_sound = UIAction<>(ActionType::main, "savesound");
-	UIAction<> main_qsave1 = UIAction<>(ActionType::main, "qsave1");
-	UIAction<> main_qsave2 = UIAction<>(ActionType::main, "qsave2");
-	UIAction<> main_qsave3 = UIAction<>(ActionType::main, "qsave3");
-	UIAction<> main_qload1 = UIAction<>(ActionType::main, "qload1");
-	UIAction<> main_qload2 = UIAction<>(ActionType::main, "qload2");
-	UIAction<> main_qload3 = UIAction<>(ActionType::main, "qload3");
+	TAction<> main_tape_browser = TAction<>(ActionType::main, "tapebrowser");
+	TAction<> main_settings = TAction<>(ActionType::main, "settings");
+	TAction<> main_save_snap = TAction<>(ActionType::main, "save");
+	TAction<> main_load_snap = TAction<>(ActionType::main, "load");
+	TAction<> main_save_sound = TAction<>(ActionType::main, "savesound");
+	TAction<> main_qsave1 = TAction<>(ActionType::main, "qsave1");
+	TAction<> main_qsave2 = TAction<>(ActionType::main, "qsave2");
+	TAction<> main_qsave3 = TAction<>(ActionType::main, "qsave3");
+	TAction<> main_qload1 = TAction<>(ActionType::main, "qload1");
+	TAction<> main_qload2 = TAction<>(ActionType::main, "qload2");
+	TAction<> main_qload3 = TAction<>(ActionType::main, "qload3");
 
-	UIAction<> main_key_stick = UIAction<>(ActionType::main, "keystick");
-	UIAction<> main_auto_fire = UIAction<>(ActionType::main, "autofire");
-	UIAction<> main_save_ram = UIAction<>(ActionType::main, "saveram");
-	UIAction<> main_save_all = UIAction<>(ActionType::main, "saveall");
-	UIAction<> main_lock_mouse = UIAction<>(ActionType::main, "lockmouse");
-	UIAction<> main_atm_keyboard = UIAction<>(ActionType::main, "xtkbd");
-	UIAction<> main_paste_text = UIAction<>(ActionType::main, "pastetext");
-	UIAction<> main_size1 = UIAction<>(ActionType::main, "size1");
-	UIAction<> main_size2 = UIAction<>(ActionType::main, "size2");
-	UIAction<> main_size_max = UIAction<>(ActionType::main, "sizem");
-	UIAction<> main_mem_search = UIAction<>(ActionType::main, "memsearch");
-	UIAction<> main_help = UIAction<>(ActionType::main, "help");
-	UIAction<> main_tsu_toggle = UIAction<>(ActionType::main, "tsutoggle");
-	UIAction<> main_flic_toggle = UIAction<>(ActionType::main, "flictoggle");
+	TAction<> main_key_stick = TAction<>(ActionType::main, "keystick");
+	TAction<> main_auto_fire = TAction<>(ActionType::main, "autofire");
+	TAction<> main_save_ram = TAction<>(ActionType::main, "saveram");
+	TAction<> main_save_all = TAction<>(ActionType::main, "saveall");
+	TAction<> main_lock_mouse = TAction<>(ActionType::main, "lockmouse");
+	TAction<> main_atm_keyboard = TAction<>(ActionType::main, "xtkbd");
+	TAction<> main_paste_text = TAction<>(ActionType::main, "pastetext");
+	TAction<> main_size1 = TAction<>(ActionType::main, "size1");
+	TAction<> main_size2 = TAction<>(ActionType::main, "size2");
+	TAction<> main_size_max = TAction<>(ActionType::main, "sizem");
+	TAction<> main_mem_search = TAction<>(ActionType::main, "memsearch");
+	TAction<> main_help = TAction<>(ActionType::main, "help");
+	TAction<> main_tsu_toggle = TAction<>(ActionType::main, "tsutoggle");
+	TAction<> main_flic_toggle = TAction<>(ActionType::main, "flictoggle");
 
-	UIAction<> atm_keyboard = UIAction<>(ActionType::xt, "xtkbd");
+	TAction<> atm_keyboard = TAction<>(ActionType::xt, "xtkbd");
 
-	UIAction<> banks_up = UIAction<>(ActionType::banks, "up");
-	UIAction<> banks_down = UIAction<>(ActionType::banks, "down ");
-	UIAction<> banks_edit = UIAction<>(ActionType::banks, "edit");
+	TAction<> banks_up = TAction<>(ActionType::banks, "up");
+	TAction<> banks_down = TAction<>(ActionType::banks, "down ");
+	TAction<> banks_edit = TAction<>(ActionType::banks, "edit");
 
-	UIAction<> mem_left = UIAction<>(ActionType::memory, "left");
-	UIAction<> mem_right = UIAction<>(ActionType::memory, "right");
-	UIAction<> mem_up = UIAction<>(ActionType::memory, "up");
-	UIAction<> mem_down = UIAction<>(ActionType::memory, "down");
-	UIAction<> mem_pg_up = UIAction<>(ActionType::memory, "pgup");
-	UIAction<> mem_pg_down = UIAction<>(ActionType::memory, "pgdn");
+	TAction<> mem_left = TAction<>(ActionType::memory, "left");
+	TAction<> mem_right = TAction<>(ActionType::memory, "right");
+	TAction<> mem_up = TAction<>(ActionType::memory, "up");
+	TAction<> mem_down = TAction<>(ActionType::memory, "down");
+	TAction<> mem_pg_up = TAction<>(ActionType::memory, "pgup");
+	TAction<> mem_pg_down = TAction<>(ActionType::memory, "pgdn");
 
-	UIAction<> mem_switch = UIAction<>(ActionType::memory, "switch");
-	UIAction<> mem_start_line = UIAction<>(ActionType::memory, "stline");
-	UIAction<> mem_end_line = UIAction<>(ActionType::memory, "endline");
-	UIAction<> mem_find_text = UIAction<>(ActionType::memory, "findtext");
-	UIAction<> mem_find_code = UIAction<>(ActionType::memory, "findcode");
+	TAction<> mem_switch = TAction<>(ActionType::memory, "switch");
+	TAction<> mem_start_line = TAction<>(ActionType::memory, "stline");
+	TAction<> mem_end_line = TAction<>(ActionType::memory, "endline");
+	TAction<> mem_find_text = TAction<>(ActionType::memory, "findtext");
+	TAction<> mem_find_code = TAction<>(ActionType::memory, "findcode");
 
-	UIAction<> mem_goto = UIAction<>(ActionType::memory, "goto");
-	UIAction<> mem_view = UIAction<>(ActionType::memory, "mem");
-	UIAction<> mem_disk_phys = UIAction<>(ActionType::memory, "diskphys");
-	UIAction<> mem_disk_log = UIAction<>(ActionType::memory, "disklog");
-	UIAction<> mem_disk_go = UIAction<>(ActionType::memory, "diskgo");
+	TAction<> mem_goto = TAction<>(ActionType::memory, "goto");
+	TAction<> mem_view = TAction<>(ActionType::memory, "mem");
+	TAction<> mem_disk_phys = TAction<>(ActionType::memory, "diskphys");
+	TAction<> mem_disk_log = TAction<>(ActionType::memory, "disklog");
+	TAction<> mem_disk_go = TAction<>(ActionType::memory, "diskgo");
 
-	UIAction<> mem_view_pc = UIAction<>(ActionType::memory, "pc");
-	UIAction<> mem_view_sp = UIAction<>(ActionType::memory, "sp");
-	UIAction<> mem_view_bc = UIAction<>(ActionType::memory, "bc");
-	UIAction<> mem_view_de = UIAction<>(ActionType::memory, "de");
-	UIAction<> mem_view_hl = UIAction<>(ActionType::memory, "hl");
-	UIAction<> mem_view_ix = UIAction<>(ActionType::memory, "ix");
-	UIAction<> mem_view_iy = UIAction<>(ActionType::memory, "iy");
+	TAction<> mem_view_pc = TAction<>(ActionType::memory, "pc");
+	TAction<> mem_view_sp = TAction<>(ActionType::memory, "sp");
+	TAction<> mem_view_bc = TAction<>(ActionType::memory, "bc");
+	TAction<> mem_view_de = TAction<>(ActionType::memory, "de");
+	TAction<> mem_view_hl = TAction<>(ActionType::memory, "hl");
+	TAction<> mem_view_ix = TAction<>(ActionType::memory, "ix");
+	TAction<> mem_view_iy = TAction<>(ActionType::memory, "iy");
 
-	UIAction<> reg_left = UIAction<>(ActionType::reg, "left");
-	UIAction<> reg_right = UIAction<>(ActionType::reg, "right");
-	UIAction<> reg_up = UIAction<>(ActionType::reg, "up");
-	UIAction<> reg_down = UIAction<>(ActionType::reg, "down");
-	UIAction<> reg_edit = UIAction<>(ActionType::reg, "edit");
+	TAction<> reg_left = TAction<>(ActionType::reg, "left");
+	TAction<> reg_right = TAction<>(ActionType::reg, "right");
+	TAction<> reg_up = TAction<>(ActionType::reg, "up");
+	TAction<> reg_down = TAction<>(ActionType::reg, "down");
+	TAction<> reg_edit = TAction<>(ActionType::reg, "edit");
 
-	UIAction<> reg_a = UIAction<>(ActionType::reg, "a");
-	UIAction<> reg_f = UIAction<>(ActionType::reg, "f");
-	UIAction<> reg_bc = UIAction<>(ActionType::reg, "bc");
-	UIAction<> reg_de = UIAction<>(ActionType::reg, "de");
-	UIAction<> reg_hl = UIAction<>(ActionType::reg, "hl");
-	UIAction<> reg_pc = UIAction<>(ActionType::reg, "pc");
-	UIAction<> reg_sp = UIAction<>(ActionType::reg, "sp");
-	UIAction<> reg_ix = UIAction<>(ActionType::reg, "ix");
-	UIAction<> reg_iy = UIAction<>(ActionType::reg, "iy");
-	UIAction<> reg_i = UIAction<>(ActionType::reg, "i");
-	UIAction<> reg_r = UIAction<>(ActionType::reg, "r");
+	TAction<> reg_a = TAction<>(ActionType::reg, "a");
+	TAction<> reg_f = TAction<>(ActionType::reg, "f");
+	TAction<> reg_bc = TAction<>(ActionType::reg, "bc");
+	TAction<> reg_de = TAction<>(ActionType::reg, "de");
+	TAction<> reg_hl = TAction<>(ActionType::reg, "hl");
+	TAction<> reg_pc = TAction<>(ActionType::reg, "pc");
+	TAction<> reg_sp = TAction<>(ActionType::reg, "sp");
+	TAction<> reg_ix = TAction<>(ActionType::reg, "ix");
+	TAction<> reg_iy = TAction<>(ActionType::reg, "iy");
+	TAction<> reg_i = TAction<>(ActionType::reg, "i");
+	TAction<> reg_r = TAction<>(ActionType::reg, "r");
 
-	UIAction<> reg_im = UIAction<>(ActionType::reg, "im");
-	UIAction<> reg_iff1 = UIAction<>(ActionType::reg, "iff1");
-	UIAction<> reg_iff2 = UIAction<>(ActionType::reg, "iff2");
+	TAction<> reg_im = TAction<>(ActionType::reg, "im");
+	TAction<> reg_iff1 = TAction<>(ActionType::reg, "iff1");
+	TAction<> reg_iff2 = TAction<>(ActionType::reg, "iff2");
 
-	UIAction<> reg_sf = UIAction<>(ActionType::reg, "SF");
-	UIAction<> reg_zf = UIAction<>(ActionType::reg, "ZF");
-	UIAction<> reg_f5 = UIAction<>(ActionType::reg, "F5");
-	UIAction<> reg_hf = UIAction<>(ActionType::reg, "HF");
-	UIAction<> reg_f3 = UIAction<>(ActionType::reg, "F3");
-	UIAction<> reg_pf = UIAction<>(ActionType::reg, "PF");
-	UIAction<> reg_nf = UIAction<>(ActionType::reg, "NF");
-	UIAction<> reg_cf = UIAction<>(ActionType::reg, "CF");
+	TAction<> reg_sf = TAction<>(ActionType::reg, "SF");
+	TAction<> reg_zf = TAction<>(ActionType::reg, "ZF");
+	TAction<> reg_f5 = TAction<>(ActionType::reg, "F5");
+	TAction<> reg_hf = TAction<>(ActionType::reg, "HF");
+	TAction<> reg_f3 = TAction<>(ActionType::reg, "F3");
+	TAction<> reg_pf = TAction<>(ActionType::reg, "PF");
+	TAction<> reg_nf = TAction<>(ActionType::reg, "NF");
+	TAction<> reg_cf = TAction<>(ActionType::reg, "CF");
 
-	UIAction<> reg_code_jump = UIAction<>(ActionType::reg, "codejump");
-	UIAction<> reg_data_jump = UIAction<>(ActionType::reg, "datajump");
+	TAction<> reg_code_jump = TAction<>(ActionType::reg, "codejump");
+	TAction<> reg_data_jump = TAction<>(ActionType::reg, "datajump");
 
-	UIAction<> trace_find_pc = UIAction<>(ActionType::trace, "findpc");
-	UIAction<> trace_here = UIAction<>(ActionType::trace, "here");
-	UIAction<> trace_find_text = UIAction<>(ActionType::trace, "findtext");
-	UIAction<> trace_find_code = UIAction<>(ActionType::trace, "findcode");
-	UIAction<> trace_goto = UIAction<>(ActionType::trace, "goto");
-	UIAction<> trace_bpx = UIAction<>(ActionType::trace, "bpx");
-	UIAction<> trace_asm = UIAction<>(ActionType::trace, "asm");
-	UIAction<> trace_set_pc = UIAction<>(ActionType::trace, "setpc");
+	TAction<> trace_find_pc = TAction<>(ActionType::trace, "findpc");
+	TAction<> trace_here = TAction<>(ActionType::trace, "here");
+	TAction<> trace_find_text = TAction<>(ActionType::trace, "findtext");
+	TAction<> trace_find_code = TAction<>(ActionType::trace, "findcode");
+	TAction<> trace_goto = TAction<>(ActionType::trace, "goto");
+	TAction<> trace_bpx = TAction<>(ActionType::trace, "bpx");
+	TAction<> trace_asm = TAction<>(ActionType::trace, "asm");
+	TAction<> trace_set_pc = TAction<>(ActionType::trace, "setpc");
 
-	UIAction<> trace_up = UIAction<>(ActionType::trace, "up");
-	UIAction<> trace_down = UIAction<>(ActionType::trace, "down");
-	UIAction<> trace_left = UIAction<>(ActionType::trace, "left");
-	UIAction<> trace_right = UIAction<>(ActionType::trace, "right");
-	UIAction<> trace_pg_up = UIAction<>(ActionType::trace, "pgdn");
-	UIAction<> trace_pg_down = UIAction<>(ActionType::trace, "pgup");
+	TAction<> trace_up = TAction<>(ActionType::trace, "up");
+	TAction<> trace_down = TAction<>(ActionType::trace, "down");
+	TAction<> trace_left = TAction<>(ActionType::trace, "left");
+	TAction<> trace_right = TAction<>(ActionType::trace, "right");
+	TAction<> trace_pg_up = TAction<>(ActionType::trace, "pgdn");
+	TAction<> trace_pg_down = TAction<>(ActionType::trace, "pgup");
 
-	UIAction<> trace_save1 = UIAction<>(ActionType::trace, "save1");
-	UIAction<> trace_save2 = UIAction<>(ActionType::trace, "save2");
-	UIAction<> trace_save3 = UIAction<>(ActionType::trace, "save3");
-	UIAction<> trace_save4 = UIAction<>(ActionType::trace, "save4");
-	UIAction<> trace_save5 = UIAction<>(ActionType::trace, "save5");
-	UIAction<> trace_save6 = UIAction<>(ActionType::trace, "save6");
-	UIAction<> trace_save7 = UIAction<>(ActionType::trace, "save7");
-	UIAction<> trace_save8 = UIAction<>(ActionType::trace, "save8");
+	TAction<> trace_save1 = TAction<>(ActionType::trace, "save1");
+	TAction<> trace_save2 = TAction<>(ActionType::trace, "save2");
+	TAction<> trace_save3 = TAction<>(ActionType::trace, "save3");
+	TAction<> trace_save4 = TAction<>(ActionType::trace, "save4");
+	TAction<> trace_save5 = TAction<>(ActionType::trace, "save5");
+	TAction<> trace_save6 = TAction<>(ActionType::trace, "save6");
+	TAction<> trace_save7 = TAction<>(ActionType::trace, "save7");
+	TAction<> trace_save8 = TAction<>(ActionType::trace, "save8");
 
-	UIAction<> trace_restore1 = UIAction<>(ActionType::trace, "crest1");
-	UIAction<> trace_restore2 = UIAction<>(ActionType::trace, "crest2");
-	UIAction<> trace_restore3 = UIAction<>(ActionType::trace, "crest3");
-	UIAction<> trace_restore4 = UIAction<>(ActionType::trace, "crest4");
-	UIAction<> trace_restore5 = UIAction<>(ActionType::trace, "crest5");
-	UIAction<> trace_restore6 = UIAction<>(ActionType::trace, "crest6");
-	UIAction<> trace_restore7 = UIAction<>(ActionType::trace, "crest7");
-	UIAction<> trace_restore8 = UIAction<>(ActionType::trace, "crest8");
+	TAction<> trace_restore1 = TAction<>(ActionType::trace, "crest1");
+	TAction<> trace_restore2 = TAction<>(ActionType::trace, "crest2");
+	TAction<> trace_restore3 = TAction<>(ActionType::trace, "crest3");
+	TAction<> trace_restore4 = TAction<>(ActionType::trace, "crest4");
+	TAction<> trace_restore5 = TAction<>(ActionType::trace, "crest5");
+	TAction<> trace_restore6 = TAction<>(ActionType::trace, "crest6");
+	TAction<> trace_restore7 = TAction<>(ActionType::trace, "crest7");
+	TAction<> trace_restore8 = TAction<>(ActionType::trace, "crest8");
 
-	UIAction<> trace_back = UIAction<>(ActionType::trace, "back");
-	UIAction<> trace_context = UIAction<>(ActionType::trace, "context");
-	UIAction<> trace_data_jump = UIAction<>(ActionType::trace, "datajump");
-	UIAction<> trace_labels = UIAction<>(ActionType::trace, "labels");
-	UIAction<> trace_import_labels = UIAction<>(ActionType::trace, "importl");
+	TAction<> trace_back = TAction<>(ActionType::trace, "back");
+	TAction<> trace_context = TAction<>(ActionType::trace, "context");
+	TAction<> trace_data_jump = TAction<>(ActionType::trace, "datajump");
+	TAction<> trace_labels = TAction<>(ActionType::trace, "labels");
+	TAction<> trace_import_labels = TAction<>(ActionType::trace, "importl");
 
-	UIAction<> mon_gs = UIAction<>(ActionType::monitor, "gs");
-	UIAction<> mon_osw = UIAction<>(ActionType::monitor, "osw");
-	UIAction<> mon_settings = UIAction<>(ActionType::monitor, "settings");
-	UIAction<> mon_bp_dialog = UIAction<>(ActionType::monitor, "bpdialog");
+	TAction<> mon_gs = TAction<>(ActionType::monitor, "gs");
+	TAction<> mon_osw = TAction<>(ActionType::monitor, "osw");
+	TAction<> mon_settings = TAction<>(ActionType::monitor, "settings");
+	TAction<> mon_bp_dialog = TAction<>(ActionType::monitor, "bpdialog");
 
-	UIAction<unsigned, unsigned> dialog_find1 = UIAction<unsigned, unsigned>(ActionType::sys, "");
-	UIAction<unsigned, unsigned> dialog_find2 = UIAction<unsigned, unsigned>(ActionType::sys, "");
+	TFunc<unsigned, unsigned> dialog_find1 = TFunc<unsigned, unsigned>(ActionType::sys, "");
+	TFunc<unsigned, unsigned> dialog_find2 = TFunc<unsigned, unsigned>(ActionType::sys, "");
 
-	UIAction<MenuDef&, char> handle_menu = UIAction<MenuDef&, char>(ActionType::sys, "");
-	UIAction<HWND> on_paint = UIAction<HWND>(ActionType::sys, "");
-	UIAction<dbgwnd> set_active_dbg = UIAction<dbgwnd>(ActionType::sys, "");
+	TFunc<char, MenuDef&> handle_menu = TFunc<char, MenuDef&>(ActionType::sys, "");
+	TAction<HWND> on_paint = TAction<HWND>(ActionType::sys, "");
+	TAction<dbgwnd> set_active_dbg = TAction<dbgwnd>(ActionType::sys, "");
 
 };
 
-auto get_actions(const std::vector<ActionType>& types)->std::vector<UIAction<>*>;
+auto get_actions(const std::vector<ActionType>& types)->std::vector<TAction<>*>;
 extern Actions actions;

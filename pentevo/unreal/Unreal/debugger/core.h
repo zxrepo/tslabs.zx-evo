@@ -107,14 +107,12 @@ public:
 	
 	static auto debug_cond_check(Z80 *cpu) -> void;
 	static auto debug_events(Z80 *cpu) -> void;
-
 	static auto get_instance()->DebugCore*;
-
 	static auto init_bpx(char* file) -> void;
 	static auto done_bpx() -> void;
 
 	auto debugscr() const -> void;
 	auto debug(Z80* cpu) -> void;
 	
-	auto handle_mouse() -> void;
+	auto handle_mouse() const -> void;
 };

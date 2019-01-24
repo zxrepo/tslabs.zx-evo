@@ -241,7 +241,7 @@ char dispatch_more(ActionType type)
 	   if (kbd_vk[item->k1] & kbd_vk[item->k2] &
 		   kbd_vk[item->k3] & kbd_vk[item->k4] & 0x80)
 	   {
-		   item->invoke();
+		   (*item)();
 		   return 1;
 	   }
    }

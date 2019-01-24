@@ -651,6 +651,7 @@
     </ClInclude>
     <ClInclude Include="dxerrors.h" />
     <ClInclude Include="core\ui\actions.h" />
+    <ClInclude Include="debugger\debugger.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">
