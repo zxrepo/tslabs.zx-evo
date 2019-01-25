@@ -300,7 +300,15 @@ public:
 
 	TFunc<char, MenuDef&> handle_menu{};
 	TAction<HWND> on_paint{};
+	TAction<bool> show_debug_window{};
+
 	TAction<dbgwnd> set_active_dbg{};
+	TFunc<bool, dbgwnd> is_active_dbg{};
+
+	TAction<int> set_banks{};
+	TAction<bool> show_banks{};
+	
+	TAction<> debug_screen{};
 };
 
 auto get_actions(const std::vector<ActionType>& types)->std::vector<UIKey*>;

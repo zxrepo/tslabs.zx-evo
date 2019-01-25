@@ -40,6 +40,12 @@ enum class dbgwnd
 
 class DebugView final: IDebugView
 {
+	HWND wnd_{};
+	HMENU menu_{};
+
+	GDIBMP gdibmp_{};
+	dbgwnd activedbg = dbgwnd::trace;
+
 	u8 *gdibuf_{};
 	u8 *txtscr_{};
 	
@@ -54,13 +60,14 @@ class DebugView final: IDebugView
 	auto handle_menu(MenuDef& menu) -> char;
 	auto paint_items(MenuDef& menu) -> void;
 	auto on_paint(HWND hwnd) const ->void;
+	auto mon_nxt() -> void;
+	auto mon_prv() -> void;
+	auto mon_aux() -> void;
+
+	auto create_window()->HWND;
 
 public:
-	HWND wnd_{};
-	GDIBMP gdibmp_{};
-	dbgwnd activedbg = dbgwnd::trace;;
-
-	explicit DebugView(HWND wnd);
+	explicit DebugView();
 
 	
 	auto show_dialog(__in LPCSTR lpTemplateName, __in_opt DLGPROC lpDialogFunc) const -> void;

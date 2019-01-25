@@ -1,6 +1,5 @@
 #pragma once
 #include "sysdefs.h"
-#include "debugger/core.h"
 #include "debugger/libs/view.h"
 #include "debugger/views/mem.h"
 
@@ -20,7 +19,6 @@ extern const std::vector<TRegLayout> regs_layout;
 
 class RegView final
 {
-	DebugCore &core_;
 	DebugView &view_;
 	MemView& mem_;
 	
@@ -32,7 +30,7 @@ class RegView final
 public:
 	unsigned regs_curs{};
 
-	RegView(DebugCore& core, DebugView& view, MemView& mem);
+	RegView(DebugView& view, MemView& mem);
 
 	auto render() const -> void;
 	auto dispatch() const -> char;

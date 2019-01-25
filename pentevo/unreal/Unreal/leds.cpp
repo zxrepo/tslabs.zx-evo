@@ -9,6 +9,7 @@
 #include "util.h"
 #include "debugger/libs/dialogs.h"
 #include "debugger/libs/cpu_manager.h"
+#include "debugger/core.h"
 
 extern VCTR vid;
 extern CACHE_ALIGNED u32 vbuf[2][sizeof_vbuf];

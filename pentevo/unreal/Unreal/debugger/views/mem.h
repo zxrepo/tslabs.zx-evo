@@ -1,6 +1,5 @@
 #pragma once
 #include "sysdefs.h"
-#include "debugger/core.h"
 #include "wd93.h"
 #include "debugger/libs/view.h"
 
@@ -9,7 +8,6 @@ enum { ed_mem, ed_phys, ed_log, ed_cmos, ed_nvram, ed_max };
 class MemView final
 {
 	DebugView &view_;
-	DebugCore &core_;
 
 	unsigned mem_disk{};
 	unsigned mem_track{};
@@ -33,7 +31,7 @@ public:
 	u8 editor = ed_mem;
 	u8 mem_ascii{};
 
-	MemView(DebugCore& core, DebugView& view);
+	MemView(DebugView& view);
 
 	auto memadr(unsigned addr) const -> unsigned;
 	auto editrm(unsigned addr)->u8;

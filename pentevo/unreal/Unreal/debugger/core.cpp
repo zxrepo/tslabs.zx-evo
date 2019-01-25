@@ -34,68 +34,24 @@ namespace z80dbg
 
 }
 
-DebugCore::DebugCore() : ref_(*this)
+DebugCore::DebugCore()
 {
-	instance_ = &ref_;
-
-	const auto wnd = create_window();
-
-	view_ = new DebugView(wnd);
-	mem_ = new MemView(ref_, *view_);
+	view_ = new DebugView();
+	mem_ = new MemView(*view_);
 	dialogs_ = new Dialogs(*view_, *mem_);
-	regs_ = new RegView(ref_, *view_, *mem_);
-	watch_ = new WatchView(ref_, *view_);
+	regs_ = new RegView(*view_, *mem_);
 
-	stack_ = new StackView(ref_, *view_);
-	ay_ = new AyView(ref_, *view_);
-	banks_ = new BanksView(ref_, *view_);
-	ports_ = new PortsView(ref_, *view_);
-	dos_ = new DosView(ref_, *view_);
-	time_ = new TimeView(ref_, *view_);
-	trace_ = new TraceView(ref_, *view_, *mem_);
+	watch_ = new WatchView(*view_);
+	stack_ = new StackView(*view_);
+	ay_ = new AyView(*view_);
+	banks_ = new BanksView(*view_);
+	ports_ = new PortsView(*view_);
+	dos_ = new DosView(*view_);
+	time_ = new TimeView(*view_);
+	trace_ = new TraceView(*view_, *mem_);
 	tsconf_ = new TsconfView(*view_);
 
 	subscrible();
-}
-
-auto APIENTRY DebugCore::wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam) -> LRESULT
-{
-	if (uMessage == WM_CLOSE)
-	{
-		actions.mon_emul();
-		return 0;
-	}
-
-	if (uMessage == WM_PAINT)
-	{
-		actions.on_paint(hwnd);
-		return 0L;
-	}
-
-	if (uMessage == WM_COMMAND)
-	{
-		switch (wparam) {
-		case IDM_DEBUG_RUN: actions.mon_emul(); break;
-
-		case IDM_DEBUG_STEP: actions.mon_step(); break;
-		case IDM_DEBUG_STEPOVER: actions.mon_step_over(); break;
-		case IDM_DEBUG_TILLRETURN: actions.mon_exit_sub(); break;
-		case IDM_DEBUG_RUNTOCURSOR: actions.trace_here(); break;
-
-		case IDM_BREAKPOINT_TOGGLE: actions.trace_bpx(); break;
-		case IDM_BREAKPOINT_MANAGER: actions.mon_bp_dialog(); break;
-
-		case IDM_MON_LOADBLOCK: actions.mon_load_block(); break;
-		case IDM_MON_SAVEBLOCK: actions.mon_save_block(); break;
-		case IDM_MON_FILLBLOCK: actions.mon_fill_block(); break;
-
-		case IDM_MON_RIPPER: actions.mon_ripper(); break;
-		default:;
-		}
-		needclr = 1;
-	}
-
-	return DefWindowProc(hwnd, uMessage, wparam, lparam);
 }
 
 auto DebugCore::rw_err(const char* msg) -> void
@@ -105,6 +61,8 @@ auto DebugCore::rw_err(const char* msg) -> void
 
 auto DebugCore::subscrible() -> void
 {
+	actions.debug_screen += [this]() { debugscr(); };
+
 	actions.mon_emul += [this]() { mon_emul(); };
 	actions.mon_save_block += [this]() { mon_save(); };
 	actions.mon_load_block += [this]() { mon_load(); };
@@ -120,8 +78,6 @@ auto DebugCore::subscrible() -> void
 	};
 
 	actions.mon_switch_dump += [this]() { mon_switch_dump(); };
-	actions.mon_next += [this]() { mon_nxt(); };
-	actions.mon_prev += [this]() { mon_prv(); };
 	actions.mon_ripper += [this]() { mon_tool(); };
 	actions.mon_help += []() { showhelp("monitor_keys"); };
 	actions.mon_cpu += [this]() { mon_switch_cpu(); };
@@ -214,33 +170,6 @@ auto DebugCore::subscrible() -> void
 	actions.main_flic_toggle += []() {main_flictoggle(); };
 
 	actions.atm_keyboard += []() {main_atmkbd(); };
-}
-
-auto DebugCore::create_window() -> HWND
-{
-	WNDCLASS  wc{};
-	RECT cl_rect;
-	const DWORD dw_style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-
-	wc.lpfnWndProc = WNDPROC(wnd_proc);
-	wc.hInstance = hIn;
-	wc.lpszClassName = "DEBUG_WND";
-	wc.hIcon = LoadIcon(hIn, MAKEINTRESOURCE(IDI_MAIN));
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	RegisterClass(&wc);
-
-	menu_ = LoadMenu(hIn, MAKEINTRESOURCE(IDR_DEBUGMENU));
-
-	const auto wnd = CreateWindow("DEBUG_WND", "UnrealSpeccy debugger", dw_style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, nullptr, menu_, hIn, NULL);
-
-	cl_rect.left = 0;
-	cl_rect.top = 0;
-	cl_rect.right = DEBUG_WND_WIDTH - 1;
-	cl_rect.bottom = DEBUG_WND_HEIGHT - 1;
-	AdjustWindowRect(&cl_rect, dw_style, GetMenu(wnd) != nullptr);
-	SetWindowPos(wnd, nullptr, 0, 0, cl_rect.right - cl_rect.left + 1, cl_rect.bottom - cl_rect.top + 1, SWP_NOMOVE);
-
-	return wnd;
 }
 
 auto DebugCore::mon_emul() const -> void
@@ -399,32 +328,6 @@ auto DebugCore::mon_switch_cpu() const -> void
 	view_->flip();
 }
 
-auto DebugCore::mon_nxt() const -> void
-{
-	view_->activedbg = (view_->activedbg == dbgwnd::mem) ? dbgwnd::banks : dbgwnd(int(view_->activedbg) - 1);
-	mon_aux();
-}
-
-auto DebugCore::mon_aux() const -> void
-{
-	switch (view_->activedbg)
-	{
-	case dbgwnd::banks:
-		banks_->showbank = true;
-		break;
-
-	default:
-		banks_->showbank = false;
-		break;
-	}
-}
-
-auto DebugCore::mon_prv() const -> void
-{
-	view_->activedbg = (view_->activedbg == dbgwnd::banks) ? dbgwnd::mem : dbgwnd(int(view_->activedbg) + 1);
-	mon_aux();
-}
-
 auto DebugCore::mon_switch_dump() const -> void
 {
 	static const unsigned dump_modes[] = { ed_mem, ed_phys, ed_log, ed_cmos, ed_nvram };
@@ -542,7 +445,7 @@ auto DebugCore::mon_load() -> void
 	{
 		if (!query_file_addr(FDM_LOAD))
 			return;
-		const auto ff = fopen(fname, "rb");
+		const auto ff = fopen(fname_, "rb");
 		if (!ff)
 			return;
 		const auto sz = fread(bf, 1, sizeof(bf), ff);
@@ -593,7 +496,7 @@ auto DebugCore::mon_save() -> void
 	{
 		if (!query_file_addr(FDM_SAVE)) return;
 		read_mem(bf);
-		const auto ff = fopen(fname, "wb");
+		const auto ff = fopen(fname_, "wb");
 		if (!ff) return;
 		fwrite(bf, 1, end + 1 - addr, ff);
 		fclose(ff);
@@ -615,7 +518,7 @@ auto DebugCore::mon_save() -> void
 	case 3:
 	{
 		if (!query_file_addr(FDM_DISASM)) return;
-		const auto ff = fopen(fname, "wt");
+		const auto ff = fopen(fname_, "wt");
 		if (!ff) return;
 		for (auto a = addr; a <= end; ) {
 			//            char line[64]; //Alone Coder 0.36.7
@@ -718,7 +621,7 @@ auto DebugCore::wr_trdos_file(u8* memdata) -> char
 
 	char ln[64];
 
-	sprintf(ln, "file:  %-8s %s", trdname, trdext);
+	sprintf(ln, "file:  %-8s %s", trdname_, trdext_);
 	view_->tprint(file_dlg_x + 1, file_dlg_y + 3, ln, fframe_inside);
 
 	sprintf(ln, "start: %04X end: %04X", addr, end);
@@ -728,18 +631,18 @@ auto DebugCore::wr_trdos_file(u8* memdata) -> char
 	auto fdd = &comp.wd.fdd[rw_drive];
 	// if (fdd->sides != 2) { rw_err("single-side TR-DOS disks are not supported"); return 0; }
 
-	strcpy(str, trdname);
+	strcpy(str, trdname_);
 	if (!view_->inputhex(file_dlg_x + 8, file_dlg_y + 3, 8, false)) return 0;
 	view_->fillattr(file_dlg_x + 8, file_dlg_y + 3, 8);
-	strcpy(trdname, str);
-	for (int ptr = strlen(trdname); ptr < 8; trdname[ptr++] = ' ') {}
-	trdname[8] = 0;
+	strcpy(trdname_, str);
+	for (int ptr = strlen(trdname_); ptr < 8; trdname_[ptr++] = ' ') {}
+	trdname_[8] = 0;
 
-	strcpy(str, trdext);
+	strcpy(str, trdext_);
 	if (!view_->inputhex(file_dlg_x + 17, file_dlg_y + 3, 1, false)) return 0;
 	view_->fillattr(file_dlg_x + 17, file_dlg_y + 3, 1);
-	trdext[0] = str[0];
-	trdext[1] = 0;
+	trdext_[0] = str[0];
+	trdext_[1] = 0;
 
 	auto t = view_->input4(file_dlg_x + 8, file_dlg_y + 4, addr);
 	if (t == UINT_MAX) return 0; else addr = t;
@@ -756,8 +659,8 @@ auto DebugCore::wr_trdos_file(u8* memdata) -> char
 	read_mem(memdata);
 
 	u8 hdr[16];
-	memcpy(hdr, trdname, 8);
-	hdr[8] = *trdext;
+	memcpy(hdr, trdname_, 8);
+	hdr[8] = *trdext_;
 
 	const unsigned sz = end - addr + 1;
 	*reinterpret_cast<u16*>(hdr + 9) = addr;
@@ -780,7 +683,7 @@ auto DebugCore::query_file_addr(const FILEDLG_MODE mode) -> char
 	view_->tprint(file_dlg_x + 1, file_dlg_y + 2, "file:", fframe_inside);
 	sprintf(ln, (mode != FDM_LOAD) ? "start: %04X end: %04X" : "start: %04X", addr, end);
 	view_->tprint(file_dlg_x + 1, file_dlg_y + 3, ln, fframe_inside);
-	strcpy(str, fname);
+	strcpy(str, fname_);
 	for (;;)
 	{
 		if (!view_->inputhex(file_dlg_x + 7, file_dlg_y + 2, 16, false))
@@ -790,8 +693,8 @@ auto DebugCore::query_file_addr(const FILEDLG_MODE mode) -> char
 		if (GetFileAttributes(str) != INVALID_FILE_ATTRIBUTES)
 			break;
 	}
-	strcpy(fname, str);
-	sprintf(ln, "%-16s", fname);
+	strcpy(fname_, str);
+	sprintf(ln, "%-16s", fname_);
 	view_->fillattr(file_dlg_x + 7, file_dlg_y + 2, 16);
 	const unsigned a1 = view_->input4(file_dlg_x + 8, file_dlg_y + 3, addr);
 	if (a1 == UINT_MAX)
@@ -853,7 +756,7 @@ auto DebugCore::debug(Z80* cpu) const -> void
 	const auto oldrflags = temp.rflags;
 	temp.rflags = RF_MONITOR;
 
-	ShowWindow(view_->wnd_, SW_SHOW);
+	actions.show_debug_window(true);
 
 	TCpuMgr::set_current_cpu(cpu->GetIdx());
 	auto prevcpu = &TCpuMgr::prev_cpu(cpu->GetIdx());
@@ -897,14 +800,14 @@ auto DebugCore::debug(Z80* cpu) const -> void
 			Sleep(20);
 		}
 
-		if (view_->activedbg == dbgwnd::regs && dispatch_more(ActionType::reg) > 0) continue;
-		if (view_->activedbg == dbgwnd::trace && dispatch_more(ActionType::trace) > 0) continue;
-		if (view_->activedbg == dbgwnd::mem && dispatch_more(ActionType::memory) > 0) continue;
-		if (view_->activedbg == dbgwnd::banks && dispatch_more(ActionType::banks) > 0) continue;
-		if (view_->activedbg == dbgwnd::regs &&  regs_->dispatch()) continue;
-		if (view_->activedbg == dbgwnd::trace && trace_->dispatch_trace()) continue;
-		if (view_->activedbg == dbgwnd::mem && mem_->dispatch()) continue;
-		if (view_->activedbg == dbgwnd::banks && banks_->dispatch()) continue;
+		if (actions.is_active_dbg(dbgwnd::regs) && dispatch_more(ActionType::reg) > 0) continue;
+		if (actions.is_active_dbg(dbgwnd::trace) && dispatch_more(ActionType::trace) > 0) continue;
+		if (actions.is_active_dbg(dbgwnd::mem) && dispatch_more(ActionType::memory) > 0) continue;
+		if (actions.is_active_dbg(dbgwnd::banks) && dispatch_more(ActionType::banks) > 0) continue;
+		if (actions.is_active_dbg(dbgwnd::regs) &&  regs_->dispatch()) continue;
+		if (actions.is_active_dbg(dbgwnd::trace) && trace_->dispatch_trace()) continue;
+		if (actions.is_active_dbg(dbgwnd::mem) && mem_->dispatch()) continue;
+		if (actions.is_active_dbg(dbgwnd::banks) && banks_->dispatch()) continue;
 		
 		if (needclr)
 		{
@@ -922,7 +825,7 @@ leave_dbg:
 	//temp.rflags = RF_GDI; // facepalm.jpg
 	temp.rflags = oldrflags;
 	//apply_video();
-	ShowWindow(view_->wnd_, SW_HIDE);
+	actions.show_debug_window(false);
 	sound_play();
 	input.nokb = 20;
 }
@@ -973,7 +876,7 @@ auto DebugCore::handle_mouse() const -> void
 	if (my >= trace_y && my < trace_y + trace_size && mx >= trace_x && mx < trace_x + 32)
 	{
 		needclr++;
-		view_->activedbg = dbgwnd::trace;
+		actions.set_active_dbg(dbgwnd::trace);
 		cpu.trace_curs = cpu.trpc[my - trace_y];
 		if (mx - trace_x < trace_->cs[1][0]) cpu.trace_mode = 0;
 		else if (mx - trace_x < trace_->cs[2][0]) cpu.trace_mode = 1;
@@ -982,7 +885,7 @@ auto DebugCore::handle_mouse() const -> void
 	if (my >= mem_y && my < mem_y + mem_size && mx >= mem_x && mx < mem_x + 37)
 	{
 		needclr++;
-		view_->activedbg = dbgwnd::mem;
+		actions.set_active_dbg(dbgwnd::mem);
 		const auto dx = mx - mem_x;
 		if (mem_->mem_dump)
 		{
@@ -1000,7 +903,7 @@ auto DebugCore::handle_mouse() const -> void
 	}
 	if (mx >= regs_x && my >= regs_y && mx < regs_x + 32 && my < regs_y + 4) {
 		needclr++;
-		view_->activedbg = dbgwnd::regs;
+		actions.set_active_dbg(dbgwnd::regs);
 
 		for (unsigned i = 0; i < regs_layout.size(); i++) {
 			unsigned delta = 1;
@@ -1013,16 +916,16 @@ auto DebugCore::handle_mouse() const -> void
 	}
 	if (mx >= banks_x && my >= banks_y + 1 && mx < banks_x + 7 && my < banks_y + 5) {
 		needclr++;
-		view_->activedbg = dbgwnd::banks;
-		banks_->selbank = my - (banks_y + 1);
-		banks_->showbank = true;
+		actions.set_active_dbg(dbgwnd::banks);
+		actions.set_banks(my - (banks_y + 1));
+		actions.show_banks(true);
 	}
-	else banks_->showbank = false;
+	else actions.show_banks(false);
 
 	if (mousepos & 0x80000000) { // right-click
 		enum { idm_bpx = 1, idm_some_other };
 		const auto menu = CreatePopupMenu();
-		if (view_->activedbg == dbgwnd::trace) {
+		if (actions.is_active_dbg(dbgwnd::trace)) {
 			AppendMenu(menu, MF_STRING, idm_bpx, "breakpoint");
 		}
 		else {

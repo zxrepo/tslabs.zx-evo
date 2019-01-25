@@ -42,9 +42,6 @@ class DebugCore final
 {
 	static DebugCore * instance_;
 
-	DebugCore& ref_;
-	HMENU menu_{};
-
 	DebugView* view_ = nullptr;
 	MemView* mem_ = nullptr;
 	RegView* regs_ = nullptr;
@@ -67,7 +64,7 @@ class DebugCore final
 	unsigned rw_trk{};
 	unsigned rw_tsec{};
 
-	char fname[20] = "", trdname[9] = "12345678", trdext[2] = "C";
+	char fname_[20] = "", trdname_[9] = "12345678", trdext_[2] = "C";
 
 	DebugCore();
 
@@ -75,23 +72,19 @@ class DebugCore final
 	static auto rw_err(const char *msg) -> void;
 
 	auto subscrible() -> void;
-	auto create_window() -> HWND;
 
 	auto mon_emul() const -> void;
 	auto mon_exitsub() const -> void;
 	auto mon_step() const -> void;
 	auto mon_stepover() const -> void;
 	auto mon_switch_cpu() const -> void;
-	auto mon_nxt() const -> void;
-	auto mon_aux() const -> void;
-	auto mon_prv() const -> void;
 	auto mon_switch_dump() const -> void;
 	auto mon_tool() -> void;
 	auto mon_fill() -> void;
 	auto mon_load() -> void;
 	auto mon_save() -> void;
 
-	
+	auto debugscr() const -> void;
 
 	auto rw_trdos_sectors(FILEDLG_MODE mode, u8* memdata) -> char;
 	auto wr_trdos_file(u8* memdata) -> char;
@@ -111,7 +104,6 @@ public:
 	static auto init_bpx(char* file) -> void;
 	static auto done_bpx() -> void;
 
-	auto debugscr() const -> void;
 	auto debug(Z80* cpu) const -> void;
 	
 	auto handle_mouse() const -> void;

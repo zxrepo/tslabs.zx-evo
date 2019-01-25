@@ -4,7 +4,6 @@
 #include "util.h"
 #include "vars.h"
 #include "wd93crc.h"
-#include "debugger/core.h"
 #include "debugger/libs/cpu_manager.h"
 #include "core/ui/actions.h"
 
@@ -255,7 +254,7 @@ auto MemView::editrm(unsigned addr) -> u8
 	return ptr ? *ptr : 0;
 }
 
-MemView::MemView(DebugCore& core, DebugView& view) : view_(view), core_(core)
+MemView::MemView(DebugView& view) : view_(view)
 {
 	subscrible();
 }
@@ -322,7 +321,7 @@ auto MemView::render() -> void
 				sprintf(line, (ii == mem_size / 2) ?
 					"          track not found            " :
 					"                                     ");
-				view_.tprint(mem_x, mem_y + ii, line, (view_.activedbg == dbgwnd::mem) ? w_sel : w_norm);
+				view_.tprint(mem_x, mem_y + ii, line, actions.is_active_dbg(dbgwnd::mem) ? w_sel : w_norm);
 			}
 			mem_max = 0;
 			goto title;
@@ -373,9 +372,9 @@ redraw:
 		}
 
 		line[37] = 0;
-		view_.tprint(mem_x, mem_y + ii, line, (view_.activedbg == dbgwnd::mem) ? w_sel : w_norm);
+		view_.tprint(mem_x, mem_y + ii, line, actions.is_active_dbg(dbgwnd::mem) ? w_sel : w_norm);
 		cursor_found |= cx;
-		if (cx && (view_.activedbg == dbgwnd::mem))
+		if (cx && actions.is_active_dbg(dbgwnd::mem))
 			view_.set_scr((mem_y + ii) * debug_text_width + mem_x + cx + debug_text_width * debug_text_height, w_curs);
 	}
 

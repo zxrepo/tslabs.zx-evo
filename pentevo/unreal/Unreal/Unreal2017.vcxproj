@@ -32,11 +32,13 @@
     <ClCompile Include="atm.cpp" />
     <ClCompile Include="cheat.cpp" />
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="core\ioc.cpp" />
     <ClCompile Include="daa_tabs.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="debugger\core.cpp" />
+    <ClCompile Include="debugger\debugger.cpp" />
     <ClCompile Include="debugger\libs\cpu_manager.cpp" />
     <ClCompile Include="debugger\libs\dbglabls.cpp" />
     <ClCompile Include="debugger\views\dbgtsconf.cpp" />
@@ -163,6 +165,7 @@
     <ClInclude Include="bass.h" />
     <ClInclude Include="cheat.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="core\ioc.h" />
     <ClInclude Include="core\ui\actions.h" />
     <ClInclude Include="debugger\debugger.h" />
     <ClInclude Include="daa_tabs.h" />

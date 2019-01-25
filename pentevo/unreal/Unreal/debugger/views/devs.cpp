@@ -50,34 +50,34 @@ auto WatchView::subsrible() -> void
 	actions.mon_screenshot += [this]() { mon_scrshot(); };
 }
 
-WatchView::WatchView(DebugCore& core, DebugView& view): core_(core), view_(view)
+WatchView::WatchView(DebugView& view): view_(view)
 {
 	subsrible();
 }
 
 auto WatchView::mon_setwatch() -> void
 {
-	if (show_scrshot)
-		show_scrshot = 0;
+	if (show_scrshot_)
+		show_scrshot_ = 0;
 
 	for (unsigned i = 0; i < 3; i++) {
-		core_.debugscr();
-		const auto addr = view_.input4(wat_x, wat_y + wat_sz - 3 + i, user_watches[i]);
+		actions.debug_screen();
+		const auto addr = view_.input4(wat_x, wat_y + wat_sz - 3 + i, user_watches_[i]);
 		if (addr == UINT_MAX) return;
-		user_watches[i] = addr;
+		user_watches_[i] = addr;
 	}
 }
 
 auto WatchView::mon_scrshot() -> void
 {
-	show_scrshot++; 
-	if (show_scrshot == 3)
-		show_scrshot = 0;
+	show_scrshot_++; 
+	if (show_scrshot_ == 3)
+		show_scrshot_ = 0;
 }
 
 auto WatchView::render() -> void
 {
-	if (show_scrshot)
+	if (show_scrshot_)
 	{
 		for (unsigned y = 0; y < wat_sz; y++)
 			for (unsigned x = 0; x < 37; x++)
@@ -96,20 +96,20 @@ auto WatchView::render() -> void
 		view_.wtline("BC'", cpu.alt.bc, 7);
 		view_.wtline("DE'", cpu.alt.de, 8);
 		view_.wtline("HL'", cpu.alt.hl, 9);
-		view_.wtline(nullptr, user_watches[0], 10);
-		view_.wtline(nullptr, user_watches[1], 11);
-		view_.wtline(nullptr, user_watches[2], 12);
+		view_.wtline(nullptr, user_watches_[0], 10);
+		view_.wtline(nullptr, user_watches_[1], 11);
+		view_.wtline(nullptr, user_watches_[2], 12);
 	}
 	const char *text = "watches";
-	if (show_scrshot == 1) text = "screen memory";
-	if (show_scrshot == 2) text = "ray-painted";
+	if (show_scrshot_ == 1) text = "screen memory";
+	if (show_scrshot_ == 2) text = "ray-painted";
 	view_.tprint(wat_x, wat_y - 1, text, w_title);
 	if (comp.flags & CF_DOSPORTS)
 		view_.tprint(wat_x + 34, wat_y - 1, "DOS", w_dos);
 	view_.add_frame(wat_x, wat_y, 37, wat_sz, FRAME);
 }
 
-StackView::StackView(DebugCore& core, DebugView& view) : core_(core), view_(view)
+StackView::StackView(DebugView& view) : view_(view)
 {
 }
 
@@ -136,7 +136,7 @@ auto AyView::subscrible() -> void
 	actions.mon_switch_ay += []() { mon_switchay(); };
 }
 
-AyView::AyView(DebugCore& core, DebugView& view) : core_(core), view_(view)
+AyView::AyView(DebugView& view) : view_(view)
 {
 	subscrible();
 }
@@ -179,9 +179,11 @@ auto BanksView::subscrible() -> void
 
 	actions.banks_edit += [this]() { benter(); };
 	actions.mon_set_bank += [this]() { editbank(); };
+	actions.show_banks += [this](auto show) { showbank = show; };
+	actions.set_banks += [this](auto bank) { selbank = bank; };
 }
 
-BanksView::BanksView(DebugCore& core, DebugView& view) : core_(core), view_(view)
+BanksView::BanksView(DebugView& view) : view_(view)
 {
 	subscrible();
 }
@@ -200,7 +202,7 @@ auto BanksView::dispatch() const -> char
 auto BanksView::benter() const -> void
 {
 	auto& cpu = TCpuMgr::get_cpu();
-	core_.debugscr();
+	actions.debug_screen();
 	view_.flip();
 
 	char bankstr[64] = { 0 }; cpu.BankNames(selbank, bankstr);
@@ -234,11 +236,11 @@ auto BanksView::render() const -> void
 	for (unsigned i = 0; i < 4; i++)
 	{
 		char ln[64]; sprintf(ln, "%d:", i);
-		char attr = ((selbank == i) && (showbank) ? (w_otheroff & 0xF) | w_curs : w_otheroff | (view_.activedbg == dbgwnd::banks ? 0x10 : 0));
+		char attr = ((selbank == i) && (showbank) ? (w_otheroff & 0xF) | w_curs : w_otheroff | (actions.is_active_dbg(dbgwnd::banks) ? 0x10 : 0));
 		view_.tprint(banks_x, banks_y + i + 1, ln, attr);
 		strcpy(ln, "?????");
 		cpu.BankNames(i, ln);
-		attr = ((selbank == i) && (showbank) ? w_curs : ((bankr[i] != bankw[i] ? w_bankro : w_bank) | (view_.activedbg == dbgwnd::banks ? 0x10 : 0)));
+		attr = ((selbank == i) && (showbank) ? w_curs : ((bankr[i] != bankw[i] ? w_bankro : w_bank) | (actions.is_active_dbg(dbgwnd::banks) ? 0x10 : 0)));
 		view_.tprint(banks_x + 2, banks_y + i + 1, ln, attr);
 	}
 	view_.add_frame(banks_x, banks_y + 1, 7, 4, FRAME);
@@ -251,7 +253,7 @@ auto PortsView::subscrible() -> void
 	actions.mon_exit += []() {};
 }
 
-PortsView::PortsView(DebugCore& core, DebugView& view) : core_(core), view_(view)
+PortsView::PortsView(DebugView& view) : view_(view)
 {
 }
 
@@ -316,7 +318,7 @@ auto PortsView::render() -> void
 	view_.tprint(ports_x, ports_y - 1, "ports", w_title);
 }
 
-DosView::DosView(DebugCore& core, DebugView& view) : core_(core), view_(view)
+DosView::DosView(DebugView& view) : view_(view)
 {
 }
 
@@ -349,7 +351,7 @@ auto DosView::render() const -> void
 #endif
 }
 
-TimeView::TimeView(DebugCore& core, DebugView& view) : core_(core), view_(view)
+TimeView::TimeView(DebugView& view) : view_(view)
 {
 }
 

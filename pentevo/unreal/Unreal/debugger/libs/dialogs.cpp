@@ -9,6 +9,7 @@
 #include "cpu_manager.h"
 #include "funcs.h"
 #include "leds.h"
+#include "debugger/core.h"
 #include "core/ui/actions.h"
 
 static bool __cdecl get_dos_flag()

@@ -1,5 +1,4 @@
 #pragma once
-#include "debugger/core.h"
 #include "debugger/libs/view.h"
 #include "debugger/views/mem.h"
 
@@ -13,7 +12,6 @@ class DebugCore;
 
 class TraceView final
 {
-	DebugCore& core_;
 	DebugView& view_;
 	MemView& mem_;
 
@@ -36,7 +34,7 @@ public:
 	u8 trace_labels{};
 	unsigned asmii{};
 
-	TraceView(DebugCore& core, DebugView& view, MemView& mem);
+	TraceView(DebugView& view, MemView& mem);
 
 	auto disasm_line(unsigned addr, char *line) const -> int;
 

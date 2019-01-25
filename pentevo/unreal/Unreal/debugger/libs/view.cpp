@@ -1,14 +1,65 @@
 #include "std.h"
 #include "view.h"
 #include "font16.h"
-#include "cpu_manager.h"
 #include "util.h"
+#include "resource.h"
+
+#include "cpu_manager.h"
 #include "debugger/consts.h"
+
+
+auto APIENTRY wnd_proc(HWND hwnd, UINT uMessage, WPARAM wparam, LPARAM lparam) -> LRESULT
+{
+	if (uMessage == WM_CLOSE)
+	{
+		actions.mon_emul();
+		return 0;
+	}
+
+	if (uMessage == WM_PAINT)
+	{
+		actions.on_paint(hwnd);
+		return 0L;
+	}
+
+	if (uMessage == WM_COMMAND)
+	{
+		switch (wparam) {
+		case IDM_DEBUG_RUN: actions.mon_emul(); break;
+
+		case IDM_DEBUG_STEP: actions.mon_step(); break;
+		case IDM_DEBUG_STEPOVER: actions.mon_step_over(); break;
+		case IDM_DEBUG_TILLRETURN: actions.mon_exit_sub(); break;
+		case IDM_DEBUG_RUNTOCURSOR: actions.trace_here(); break;
+
+		case IDM_BREAKPOINT_TOGGLE: actions.trace_bpx(); break;
+		case IDM_BREAKPOINT_MANAGER: actions.mon_bp_dialog(); break;
+
+		case IDM_MON_LOADBLOCK: actions.mon_load_block(); break;
+		case IDM_MON_SAVEBLOCK: actions.mon_save_block(); break;
+		case IDM_MON_FILLBLOCK: actions.mon_fill_block(); break;
+
+		case IDM_MON_RIPPER: actions.mon_ripper(); break;
+		default:;
+		}
+		needclr = 1;
+	}
+
+	return DefWindowProc(hwnd, uMessage, wparam, lparam);
+}
+
+
 
 auto DebugView::subscrible() -> void
 {
 	actions.handle_menu += [this](auto menu) { return handle_menu(menu); };
 	actions.on_paint += [this](auto hwnd) { on_paint(hwnd); };
+	actions.set_active_dbg += [this](auto wnd) { activedbg = wnd; };
+
+	actions.mon_next += [this]() { mon_nxt(); };
+	actions.mon_prev += [this]() { mon_prv(); };
+	actions.show_debug_window += [this](auto show) { ShowWindow(wnd_, show ? SW_SHOW : SW_HIDE); };
+	actions.is_active_dbg += [this](auto wnd) { return activedbg == wnd; };
 }
 
 auto DebugView::format_item(char* dst, const unsigned width, const char* text, const MenuItem::flags_t flags) -> void
@@ -59,7 +110,7 @@ auto DebugView::paint_items(MenuDef &menu) -> void
 	}
 }
 
-DebugView::DebugView(HWND wnd) : wnd_(wnd)
+DebugView::DebugView() : wnd_(create_window())
 {
 	gdibuf_ = static_cast<u8*>(malloc(dbg_gdibuf_size));
 	gdibmp_ = { { { sizeof(BITMAPINFOHEADER), DEBUG_WND_WIDTH, -DEBUG_WND_HEIGHT, 1, 8, BI_RGB, 0 } } };
@@ -88,6 +139,59 @@ auto DebugView::on_paint(HWND hwnd) const -> void
 	const auto hdc = BeginPaint(hwnd, &ps);
 	SetDIBitsToDevice(hdc, 0, 0, DEBUG_WND_WIDTH, DEBUG_WND_HEIGHT, 0, 0, 0, DEBUG_WND_HEIGHT, bptr, &gdibmp_.header, DIB_RGB_COLORS);
 	EndPaint(hwnd, &ps);
+}
+
+auto DebugView::mon_nxt() -> void
+{
+	activedbg = (activedbg == dbgwnd::mem) ? dbgwnd::banks : dbgwnd(int(activedbg) - 1);
+	mon_aux();
+}
+
+auto DebugView::mon_prv() -> void
+{
+	activedbg = (activedbg == dbgwnd::banks) ? dbgwnd::mem : dbgwnd(int(activedbg) + 1);
+	mon_aux();
+}
+
+auto DebugView::mon_aux() -> void
+{
+	switch (activedbg)
+	{
+	case dbgwnd::banks:
+		actions.show_banks(true);
+		break;
+
+	default:
+		actions.show_banks(false);
+		break;
+	}
+}
+
+auto DebugView::create_window() -> HWND
+{
+	WNDCLASS  wc{};
+	RECT cl_rect;
+	const DWORD dw_style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+
+	wc.lpfnWndProc = WNDPROC(wnd_proc);
+	wc.hInstance = hIn;
+	wc.lpszClassName = "DEBUG_WND";
+	wc.hIcon = LoadIcon(hIn, MAKEINTRESOURCE(IDI_MAIN));
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	RegisterClass(&wc);
+
+	menu_ = LoadMenu(hIn, MAKEINTRESOURCE(IDR_DEBUGMENU));
+
+	const auto wnd = CreateWindow("DEBUG_WND", "UnrealSpeccy debugger", dw_style, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, nullptr, menu_, hIn, NULL);
+
+	cl_rect.left = 0;
+	cl_rect.top = 0;
+	cl_rect.right = DEBUG_WND_WIDTH - 1;
+	cl_rect.bottom = DEBUG_WND_HEIGHT - 1;
+	AdjustWindowRect(&cl_rect, dw_style, GetMenu(wnd) != nullptr);
+	SetWindowPos(wnd, nullptr, 0, 0, cl_rect.right - cl_rect.left + 1, cl_rect.bottom - cl_rect.top + 1, SWP_NOMOVE);
+
+	return wnd;
 }
 
 auto DebugView::show_dialog(LPCSTR lpTemplateName, DLGPROC lpDialogFunc) const -> void
