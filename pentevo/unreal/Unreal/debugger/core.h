@@ -82,9 +82,9 @@ class DebugCore final
 	auto mon_step() const -> void;
 	auto mon_stepover() const -> void;
 	auto mon_switch_cpu() const -> void;
-	auto mon_nxt() -> void;
+	auto mon_nxt() const -> void;
 	auto mon_aux() const -> void;
-	auto mon_prv() -> void;
+	auto mon_prv() const -> void;
 	auto mon_switch_dump() const -> void;
 	auto mon_tool() -> void;
 	auto mon_fill() -> void;
@@ -112,7 +112,7 @@ public:
 	static auto done_bpx() -> void;
 
 	auto debugscr() const -> void;
-	auto debug(Z80* cpu) -> void;
+	auto debug(Z80* cpu) const -> void;
 	
 	auto handle_mouse() const -> void;
 };

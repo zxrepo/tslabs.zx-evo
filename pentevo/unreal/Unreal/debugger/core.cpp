@@ -105,8 +105,7 @@ auto DebugCore::rw_err(const char* msg) -> void
 
 auto DebugCore::subscrible() -> void
 {
-	auto r = [this]() { mon_emul(); };
-	actions.mon_emul += r;
+	actions.mon_emul += [this]() { mon_emul(); };
 	actions.mon_save_block += [this]() { mon_save(); };
 	actions.mon_load_block += [this]() { mon_load(); };
 	actions.mon_load_block += [this]() { mon_fill(); };
@@ -400,7 +399,7 @@ auto DebugCore::mon_switch_cpu() const -> void
 	view_->flip();
 }
 
-auto DebugCore::mon_nxt() -> void
+auto DebugCore::mon_nxt() const -> void
 {
 	view_->activedbg = (view_->activedbg == dbgwnd::mem) ? dbgwnd::banks : dbgwnd(int(view_->activedbg) - 1);
 	mon_aux();
@@ -420,7 +419,7 @@ auto DebugCore::mon_aux() const -> void
 	}
 }
 
-auto DebugCore::mon_prv() -> void
+auto DebugCore::mon_prv() const -> void
 {
 	view_->activedbg = (view_->activedbg == dbgwnd::banks) ? dbgwnd::mem : dbgwnd(int(view_->activedbg) + 1);
 	mon_aux();
@@ -494,7 +493,7 @@ auto DebugCore::mon_fill() -> void
 	static char fillpattern[10] = "00";
 
 	u8 pattern[4];
-	unsigned fillsize = 0;
+	unsigned fillsize;
 
 	strcpy(str, fillpattern);
 	if (!view_->inputhex(22, 12, 8, true)) return;
@@ -843,7 +842,7 @@ auto DebugCore::rw_select_drive() -> char
 	}
 }
 
-auto DebugCore::debug(Z80* cpu) -> void
+auto DebugCore::debug(Z80* cpu) const -> void
 {
 	sound_stop();
 	temp.mon_scale = temp.scale;
