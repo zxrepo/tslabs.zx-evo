@@ -50,7 +50,7 @@ auto WatchView::subsrible() -> void
 	actions.mon_screenshot += [this]() { mon_scrshot(); };
 }
 
-WatchView::WatchView(DebugView& view): view_(view)
+WatchView::WatchView(): view_(*serviceLocator->Locate<IDebugView>())
 {
 	subsrible();
 }
@@ -109,7 +109,7 @@ auto WatchView::render() -> void
 	view_.add_frame(wat_x, wat_y, 37, wat_sz, FRAME);
 }
 
-StackView::StackView(DebugView& view) : view_(view)
+StackView::StackView() : view_(*serviceLocator->Locate<IDebugView>())
 {
 }
 
@@ -136,7 +136,7 @@ auto AyView::subscrible() -> void
 	actions.mon_switch_ay += []() { mon_switchay(); };
 }
 
-AyView::AyView(DebugView& view) : view_(view)
+AyView::AyView() : view_(*serviceLocator->Locate<IDebugView>())
 {
 	subscrible();
 }
@@ -183,7 +183,7 @@ auto BanksView::subscrible() -> void
 	actions.set_banks += [this](auto bank) { selbank = bank; };
 }
 
-BanksView::BanksView(DebugView& view) : view_(view)
+BanksView::BanksView() : view_(*serviceLocator->Locate<IDebugView>())
 {
 	subscrible();
 }
@@ -253,7 +253,7 @@ auto PortsView::subscrible() -> void
 	actions.mon_exit += []() {};
 }
 
-PortsView::PortsView(DebugView& view) : view_(view)
+PortsView::PortsView() : view_(*serviceLocator->Locate<IDebugView>())
 {
 }
 
@@ -318,7 +318,7 @@ auto PortsView::render() -> void
 	view_.tprint(ports_x, ports_y - 1, "ports", w_title);
 }
 
-DosView::DosView(DebugView& view) : view_(view)
+DosView::DosView() : view_(*serviceLocator->Locate<IDebugView>())
 {
 }
 
@@ -351,7 +351,7 @@ auto DosView::render() const -> void
 #endif
 }
 
-TimeView::TimeView(DebugView& view) : view_(view)
+TimeView::TimeView() : view_(*serviceLocator->Locate<IDebugView>())
 {
 }
 

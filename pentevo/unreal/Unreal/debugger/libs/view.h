@@ -38,7 +38,7 @@ enum class dbgwnd
 	banks
 };
 
-class DebugView final: IDebugView
+class DebugView final: public IDebugView
 {
 	HWND wnd_{};
 	HMENU menu_{};

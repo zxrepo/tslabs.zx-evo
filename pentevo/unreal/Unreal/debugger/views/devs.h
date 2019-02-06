@@ -1,17 +1,17 @@
 #pragma once
-#include "debugger/libs/view.h"
+#include "debugger/debugger.h"
 
 void __cdecl BankNames(int i, char *name);
 
 class WatchView final
 {
-	DebugView& view_;
+	IDebugView& view_;
 	unsigned show_scrshot_{};
 	unsigned user_watches_[3] = { 0x4000, 0x8000, 0xC000 };
 
 	auto subsrible() -> void;
 public:
-	WatchView(DebugView& view);
+	WatchView();
 
 	auto mon_setwatch() -> void;
 	auto mon_scrshot() -> void;
@@ -20,21 +20,21 @@ public:
 
 class StackView final
 {
-	DebugView& view_;
+	IDebugView& view_;
 
 public:
-	StackView(DebugView& view);
+	StackView();
 
 	auto render() const -> void;
 };
 
 class AyView final
 {
-	DebugView& view_;
+	IDebugView& view_;
 
 	static auto subscrible() -> void;
 public:
-	AyView(DebugView& view);
+	AyView();
 
 	static auto mon_switchay() -> void;
 	auto render() const -> void;
@@ -45,13 +45,13 @@ class BanksView final
 	unsigned selbank = 0;
 	bool showbank = false;
 
-	DebugView& view_;
+	IDebugView& view_;
 
 	auto subscrible() -> void;
 	auto benter() const -> void;
 public:
 	
-	BanksView(DebugView& view);
+	BanksView();
 
 	auto editbank() const -> void;
 
@@ -61,14 +61,14 @@ public:
 
 class PortsView final
 {
-	DebugView& view_;
+	IDebugView& view_;
 
 	unsigned dbg_extport{};
 	u8 dgb_extval{}; // extended memory port like 1FFD or DFFD
 
 	auto subscrible() -> void;
 public:
-	PortsView(DebugView& view);
+	PortsView();
 
 	auto editextbank() const -> void;
 	auto render() -> void;
@@ -76,20 +76,20 @@ public:
 
 class DosView final
 {
-	DebugView& view_;
+	IDebugView& view_;
 
 public:
-	DosView(DebugView& view);
+	DosView();
 
 	auto render() const -> void;
 };
 
 class TimeView final
 {
-	DebugView& view_;
+	IDebugView& view_;
 
 public:
-	TimeView(DebugView& view);
+	TimeView();
 
 	auto render() const -> void;
 };

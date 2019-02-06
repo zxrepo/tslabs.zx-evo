@@ -1,5 +1,4 @@
 #pragma once
-#include "debugger/libs/view.h"
 #include "debugger/views/mem.h"
 
 #define TWF_BRANCH  0x010000
@@ -12,7 +11,7 @@ class DebugCore;
 
 class TraceView final
 {
-	DebugView& view_;
+	IDebugView& view_;
 	MemView& mem_;
 
 	unsigned save_pos[8] = { UINT_MAX };
@@ -34,7 +33,7 @@ public:
 	u8 trace_labels{};
 	unsigned asmii{};
 
-	TraceView(DebugView& view, MemView& mem);
+	TraceView(MemView& mem);
 
 	auto disasm_line(unsigned addr, char *line) const -> int;
 

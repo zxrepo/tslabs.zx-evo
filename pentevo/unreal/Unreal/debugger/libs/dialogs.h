@@ -6,7 +6,7 @@ unsigned calc(const Z80 *cpu, unsigned *script);
 
 class Dialogs final
 {
-	DebugView& view_;
+	IDebugView& view_;
 	MemView& mem_;
 
 	auto subscrible() -> void;
@@ -18,7 +18,7 @@ class Dialogs final
 public:
 	static auto mon_setup_dlg() -> void;
 
-	explicit Dialogs(DebugView& view, MemView& mem);
+	explicit Dialogs(MemView& mem);
 
 	auto find1dlg(unsigned start) const -> unsigned;
 	auto find2dlg(unsigned start) const -> unsigned;

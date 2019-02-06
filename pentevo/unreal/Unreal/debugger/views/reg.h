@@ -1,11 +1,9 @@
 #pragma once
 #include "sysdefs.h"
-#include "debugger/libs/view.h"
 #include "debugger/views/mem.h"
 
 class DebugCore;
 class MemView;
-class DebugView;
 
 struct TRegLayout final
 {
@@ -19,7 +17,7 @@ extern const std::vector<TRegLayout> regs_layout;
 
 class RegView final
 {
-	DebugView &view_;
+	IDebugView &view_;
 	MemView& mem_;
 	
 	auto subscrible() -> void;
@@ -30,7 +28,7 @@ class RegView final
 public:
 	unsigned regs_curs{};
 
-	RegView(DebugView& view, MemView& mem);
+	RegView(MemView& mem);
 
 	auto render() const -> void;
 	auto dispatch() const -> char;

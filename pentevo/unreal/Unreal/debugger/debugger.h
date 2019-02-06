@@ -49,3 +49,5 @@ public:
 
 extern std::vector<IDebugViewPart*> debug_parts;
 extern IServiceLocator *serviceLocator;
+
+auto init_debugger() -> void;

@@ -353,9 +353,9 @@ auto TsconfView::init() const -> void
 	col_2.add_item(new intmask_control());
 }
 
-TsconfView::TsconfView(DebugView& view)
+TsconfView::TsconfView()
 {
-	canvas_ = new DbgCanvas(view, 81, 0);
+	canvas_ = new DbgCanvas(81, 0);
 	init();
 }
 

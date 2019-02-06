@@ -2,7 +2,6 @@
 #include "defs.h"
 
 class DebugCore;
-class DebugView;
 class MemView;
 class RegView;
 class WatchView;
@@ -42,7 +41,8 @@ class DebugCore final
 {
 	static DebugCore * instance_;
 
-	DebugView* view_ = nullptr;
+	IDebugView& view_;
+
 	MemView* mem_ = nullptr;
 	RegView* regs_ = nullptr;
 	WatchView* watch_ = nullptr;

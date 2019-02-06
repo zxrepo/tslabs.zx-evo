@@ -1,6 +1,5 @@
 #pragma once
 #include "debugger/libs/dbgwidgets.h"
-#include "debugger/libs/view.h"
 
 class TsconfView
 {
@@ -8,7 +7,7 @@ class TsconfView
 
 	auto init() const -> void;
 public:
-	TsconfView(DebugView& view);
+	TsconfView();
 
 	auto render() const -> void;
 };

@@ -1,13 +1,13 @@
 #include "std.h"
 #include "debugger.h"
-#include "views/mem.h"
+#include "libs/view.h"
 
 IServiceLocator *serviceLocator = new ServiceLocator();
 std::vector<IDebugViewPart*> debug_parts{};
 
-auto init_debugger()
+auto init_debugger() -> void
 {
-	
+	serviceLocator->RegisterService<IDebugView>(new DebugView());
 }
 
 /*

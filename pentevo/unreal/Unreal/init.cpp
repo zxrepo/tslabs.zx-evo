@@ -89,6 +89,7 @@ void init_all(int argc, char **argv)
 
    init_z80tables();
    init_ie_help();
+   init_debugger();
    DebugCore::get_instance();
    load_config(config);
    //make_samples();

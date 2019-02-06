@@ -207,7 +207,7 @@ auto RegView::subscrible() -> void
 	actions.reg_data_jump += [this]() { rdatajump(); };
 }
 
-RegView::RegView(DebugView& view, MemView& mem) : view_(view), mem_(mem)
+RegView::RegView(MemView& mem) : view_(*serviceLocator->Locate<IDebugView>()), mem_(mem)
 {
 	subscrible();
 }

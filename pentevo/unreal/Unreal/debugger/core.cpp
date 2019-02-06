@@ -34,22 +34,21 @@ namespace z80dbg
 
 }
 
-DebugCore::DebugCore()
+DebugCore::DebugCore(): view_(*serviceLocator->Locate<IDebugView>())
 {
-	view_ = new DebugView();
-	mem_ = new MemView(*view_);
-	dialogs_ = new Dialogs(*view_, *mem_);
-	regs_ = new RegView(*view_, *mem_);
+	mem_ = new MemView();
+	dialogs_ = new Dialogs(*mem_);
+	regs_ = new RegView(*mem_);
 
-	watch_ = new WatchView(*view_);
-	stack_ = new StackView(*view_);
-	ay_ = new AyView(*view_);
-	banks_ = new BanksView(*view_);
-	ports_ = new PortsView(*view_);
-	dos_ = new DosView(*view_);
-	time_ = new TimeView(*view_);
-	trace_ = new TraceView(*view_, *mem_);
-	tsconf_ = new TsconfView(*view_);
+	watch_ = new WatchView();
+	stack_ = new StackView();
+	ay_ = new AyView();
+	banks_ = new BanksView();
+	ports_ = new PortsView();
+	dos_ = new DosView();
+	time_ = new TimeView();
+	trace_ = new TraceView(*mem_);
+	tsconf_ = new TsconfView();
 
 	subscrible();
 }
@@ -325,7 +324,7 @@ auto DebugCore::mon_switch_cpu() const -> void
 		cpu1.trace_mode = 0;
 
 	debugscr();
-	view_->flip();
+	view_.flip();
 }
 
 auto DebugCore::mon_switch_dump() const -> void
@@ -361,21 +360,21 @@ auto DebugCore::mon_tool() -> void
 		ripper = 0;
 	}
 	else {
-		view_->filledframe(tool_x, tool_y, 17, 6);
-		view_->tprint(tool_x, tool_y, "  ripper's tool  ", frm_header);
-		view_->tprint(tool_x + 1, tool_y + 2, "trace reads:", fframe_inside);
+		view_.filledframe(tool_x, tool_y, 17, 6);
+		view_.tprint(tool_x, tool_y, "  ripper's tool  ", frm_header);
+		view_.tprint(tool_x + 1, tool_y + 2, "trace reads:", fframe_inside);
 		*reinterpret_cast<unsigned*>(str) = 'Y';
-		if (!view_->inputhex(tool_x + 15, tool_y + 2, 1, false)) return;
-		view_->tprint(tool_x + 15, tool_y + 2, str, fframe_inside);
+		if (!view_.inputhex(tool_x + 15, tool_y + 2, 1, false)) return;
+		view_.tprint(tool_x + 15, tool_y + 2, str, fframe_inside);
 		if (*str == 'Y' || *str == 'y' || *str == '1') ripper |= MEMBITS_R;
 		*reinterpret_cast<unsigned*>(str) = 'N';
-		view_->tprint(tool_x + 1, tool_y + 3, "trace writes:", fframe_inside);
-		if (!view_->inputhex(tool_x + 15, tool_y + 3, 1, false)) { ripper = 0; return; }
-		view_->tprint(tool_x + 15, tool_y + 3, str, fframe_inside);
+		view_.tprint(tool_x + 1, tool_y + 3, "trace writes:", fframe_inside);
+		if (!view_.inputhex(tool_x + 15, tool_y + 3, 1, false)) { ripper = 0; return; }
+		view_.tprint(tool_x + 15, tool_y + 3, str, fframe_inside);
 		if (*str == 'Y' || *str == 'y' || *str == '1') ripper |= MEMBITS_W;
-		view_->tprint(tool_x + 1, tool_y + 4, "unref. byte:", fframe_inside);
+		view_.tprint(tool_x + 1, tool_y + 4, "unref. byte:", fframe_inside);
 		unsigned ub;
-		if ((ub = view_->input2(tool_x + 14, tool_y + 4, unref)) == UINT_MAX) { ripper = 0; return; }
+		if ((ub = view_.input2(tool_x + 14, tool_y + 4, unref)) == UINT_MAX) { ripper = 0; return; }
 		unref = u8(ub);
 		if (ripper)
 			for (unsigned i = 0; i < 0x10000; i++)
@@ -385,13 +384,13 @@ auto DebugCore::mon_tool() -> void
 
 auto DebugCore::mon_fill() -> void
 {
-	view_->filledframe(6, 10, 26, 5);
+	view_.filledframe(6, 10, 26, 5);
 	char ln[64];
 
 	sprintf(ln, "start: %04X end: %04X", addr, end);
-	view_->tprint(6, 10, "    fill memory block     ", frm_header);
-	view_->tprint(7, 12, "pattern (hex):", fframe_inside);
-	view_->tprint(7, 13, ln, fframe_inside);
+	view_.tprint(6, 10, "    fill memory block     ", frm_header);
+	view_.tprint(7, 12, "pattern (hex):", fframe_inside);
+	view_.tprint(7, 13, ln, fframe_inside);
 
 	static char fillpattern[10] = "00";
 
@@ -399,7 +398,7 @@ auto DebugCore::mon_fill() -> void
 	unsigned fillsize;
 
 	strcpy(str, fillpattern);
-	if (!view_->inputhex(22, 12, 8, true)) return;
+	if (!view_.inputhex(22, 12, 8, true)) return;
 	strcpy(fillpattern, str);
 
 	if (!fillpattern[0])
@@ -409,13 +408,13 @@ auto DebugCore::mon_fill() -> void
 		if (!fillpattern[2 * fillsize + 1]) fillpattern[2 * fillsize + 1] = '0', fillpattern[2 * fillsize + 2] = 0;
 		pattern[fillsize] = hex(fillpattern + 2 * fillsize);
 	}
-	view_->tprint(22, 12, "        ", fframe_inside);
-	view_->tprint(22, 12, fillpattern, fframe_inside);
+	view_.tprint(22, 12, "        ", fframe_inside);
+	view_.tprint(22, 12, fillpattern, fframe_inside);
 
-	auto a1 = view_->input4(14, 13, addr); if (a1 == UINT_MAX) return;
+	auto a1 = view_.input4(14, 13, addr); if (a1 == UINT_MAX) return;
 	addr = a1;
-	view_->tprint(14, 13, str, fframe_inside);
-	a1 = view_->input4(24, 13, end); if (a1 == UINT_MAX) return;
+	view_.tprint(14, 13, str, fframe_inside);
+	a1 = view_.input4(24, 13, end); if (a1 == UINT_MAX) return;
 	end = a1;
 
 	unsigned pos = 0;
@@ -540,40 +539,40 @@ auto DebugCore::mon_save() -> void
 
 auto DebugCore::rw_trdos_sectors(FILEDLG_MODE mode, u8* memdata) -> char
 {
-	view_->filledframe(file_dlg_x, file_dlg_y, file_dlg_dx, 7);
+	view_.filledframe(file_dlg_x, file_dlg_y, file_dlg_dx, 7);
 	const auto title = (mode == FDM_LOAD) ? " Read from TR-DOS sectors" : " Write to TR-DOS sectors ";
-	view_->tprint(file_dlg_x, file_dlg_y, title, frm_header);
+	view_.tprint(file_dlg_x, file_dlg_y, title, frm_header);
 
 	char ln[64];
 
 	sprintf(ln, "trk (00-9F): %02X", rw_trk);
-	view_->tprint(file_dlg_x + 1, file_dlg_y + 3, ln, fframe_inside);
+	view_.tprint(file_dlg_x + 1, file_dlg_y + 3, ln, fframe_inside);
 
 	sprintf(ln, "sec (00-0F): %02X", rw_tsec);
-	view_->tprint(file_dlg_x + 1, file_dlg_y + 4, ln, fframe_inside);
+	view_.tprint(file_dlg_x + 1, file_dlg_y + 4, ln, fframe_inside);
 
 	sprintf(ln, "start: %04X end: %04X", addr, end);
-	view_->tprint(file_dlg_x + 1, file_dlg_y + 5, ln, fframe_inside);
+	view_.tprint(file_dlg_x + 1, file_dlg_y + 5, ln, fframe_inside);
 
 	if (!rw_select_drive()) return 0;
 	FDD *fdd = &comp.wd.fdd[rw_drive];
 	// if (fdd->sides != 2) { rw_err("single-side TR-DOS disks are not supported"); return 0; }
 
-	unsigned t = view_->input2(file_dlg_x + 14, file_dlg_y + 3, rw_trk);
+	unsigned t = view_.input2(file_dlg_x + 14, file_dlg_y + 3, rw_trk);
 	if (t == UINT_MAX) return 0; else rw_trk = t;
-	view_->fillattr(file_dlg_x + 14, file_dlg_y + 3, 2);
+	view_.fillattr(file_dlg_x + 14, file_dlg_y + 3, 2);
 
-	t = view_->input2(file_dlg_x + 14, file_dlg_y + 4, rw_tsec);
+	t = view_.input2(file_dlg_x + 14, file_dlg_y + 4, rw_tsec);
 	if (t == UINT_MAX) return 0; else rw_tsec = t;
-	view_->fillattr(file_dlg_x + 14, file_dlg_y + 4, 2);
+	view_.fillattr(file_dlg_x + 14, file_dlg_y + 4, 2);
 
-	t = view_->input4(file_dlg_x + 8, file_dlg_y + 5, addr);
+	t = view_.input4(file_dlg_x + 8, file_dlg_y + 5, addr);
 	if (t == UINT_MAX) return 0; else addr = t;
-	view_->fillattr(file_dlg_x + 8, file_dlg_y + 5, 4);
+	view_.fillattr(file_dlg_x + 8, file_dlg_y + 5, 4);
 
 	for (;;) {
-		t = view_->input4(file_dlg_x + 18, file_dlg_y + 5, end);
-		view_->fillattr(file_dlg_x + 18, file_dlg_y + 5, 4);
+		t = view_.input4(file_dlg_x + 18, file_dlg_y + 5, end);
+		view_.fillattr(file_dlg_x + 18, file_dlg_y + 5, 4);
 		if (t == UINT_MAX) return 0;
 		if (t < addr) continue;
 		end = t; break;
@@ -615,42 +614,42 @@ auto DebugCore::rw_trdos_sectors(FILEDLG_MODE mode, u8* memdata) -> char
 
 auto DebugCore::wr_trdos_file(u8* memdata) -> char
 {
-	view_->filledframe(file_dlg_x, file_dlg_y, file_dlg_dx, 6);
+	view_.filledframe(file_dlg_x, file_dlg_y, file_dlg_dx, 6);
 	const auto title = " Write to TR-DOS file    ";
-	view_->tprint(file_dlg_x, file_dlg_y, title, frm_header);
+	view_.tprint(file_dlg_x, file_dlg_y, title, frm_header);
 
 	char ln[64];
 
 	sprintf(ln, "file:  %-8s %s", trdname_, trdext_);
-	view_->tprint(file_dlg_x + 1, file_dlg_y + 3, ln, fframe_inside);
+	view_.tprint(file_dlg_x + 1, file_dlg_y + 3, ln, fframe_inside);
 
 	sprintf(ln, "start: %04X end: %04X", addr, end);
-	view_->tprint(file_dlg_x + 1, file_dlg_y + 4, ln, fframe_inside);
+	view_.tprint(file_dlg_x + 1, file_dlg_y + 4, ln, fframe_inside);
 
 	if (!rw_select_drive()) return 0;
 	auto fdd = &comp.wd.fdd[rw_drive];
 	// if (fdd->sides != 2) { rw_err("single-side TR-DOS disks are not supported"); return 0; }
 
 	strcpy(str, trdname_);
-	if (!view_->inputhex(file_dlg_x + 8, file_dlg_y + 3, 8, false)) return 0;
-	view_->fillattr(file_dlg_x + 8, file_dlg_y + 3, 8);
+	if (!view_.inputhex(file_dlg_x + 8, file_dlg_y + 3, 8, false)) return 0;
+	view_.fillattr(file_dlg_x + 8, file_dlg_y + 3, 8);
 	strcpy(trdname_, str);
 	for (int ptr = strlen(trdname_); ptr < 8; trdname_[ptr++] = ' ') {}
 	trdname_[8] = 0;
 
 	strcpy(str, trdext_);
-	if (!view_->inputhex(file_dlg_x + 17, file_dlg_y + 3, 1, false)) return 0;
-	view_->fillattr(file_dlg_x + 17, file_dlg_y + 3, 1);
+	if (!view_.inputhex(file_dlg_x + 17, file_dlg_y + 3, 1, false)) return 0;
+	view_.fillattr(file_dlg_x + 17, file_dlg_y + 3, 1);
 	trdext_[0] = str[0];
 	trdext_[1] = 0;
 
-	auto t = view_->input4(file_dlg_x + 8, file_dlg_y + 4, addr);
+	auto t = view_.input4(file_dlg_x + 8, file_dlg_y + 4, addr);
 	if (t == UINT_MAX) return 0; else addr = t;
-	view_->fillattr(file_dlg_x + 8, file_dlg_y + 4, 4);
+	view_.fillattr(file_dlg_x + 8, file_dlg_y + 4, 4);
 
 	for (;;) {
-		t = view_->input4(file_dlg_x + 18, file_dlg_y + 4, end);
-		view_->fillattr(file_dlg_x + 18, file_dlg_y + 4, 4);
+		t = view_.input4(file_dlg_x + 18, file_dlg_y + 4, end);
+		view_.fillattr(file_dlg_x + 18, file_dlg_y + 4, 4);
 		if (t == UINT_MAX) return 0;
 		if (t < addr) continue;
 		end = t; break;
@@ -674,19 +673,19 @@ auto DebugCore::wr_trdos_file(u8* memdata) -> char
 
 auto DebugCore::query_file_addr(const FILEDLG_MODE mode) -> char
 {
-	view_->filledframe(file_dlg_x, file_dlg_y, file_dlg_dx, 5);
+	view_.filledframe(file_dlg_x, file_dlg_y, file_dlg_dx, 5);
 	char ln[64];
 	static const char *titles[] = { " Read from binary file   ",
 									" Write to binary file    ",
 									" Disasm to text file     " };
-	view_->tprint(file_dlg_x, file_dlg_y, titles[mode], frm_header);
-	view_->tprint(file_dlg_x + 1, file_dlg_y + 2, "file:", fframe_inside);
+	view_.tprint(file_dlg_x, file_dlg_y, titles[mode], frm_header);
+	view_.tprint(file_dlg_x + 1, file_dlg_y + 2, "file:", fframe_inside);
 	sprintf(ln, (mode != FDM_LOAD) ? "start: %04X end: %04X" : "start: %04X", addr, end);
-	view_->tprint(file_dlg_x + 1, file_dlg_y + 3, ln, fframe_inside);
+	view_.tprint(file_dlg_x + 1, file_dlg_y + 3, ln, fframe_inside);
 	strcpy(str, fname_);
 	for (;;)
 	{
-		if (!view_->inputhex(file_dlg_x + 7, file_dlg_y + 2, 16, false))
+		if (!view_.inputhex(file_dlg_x + 7, file_dlg_y + 2, 16, false))
 			return 0;
 		if (mode != FDM_LOAD)
 			break;
@@ -695,17 +694,17 @@ auto DebugCore::query_file_addr(const FILEDLG_MODE mode) -> char
 	}
 	strcpy(fname_, str);
 	sprintf(ln, "%-16s", fname_);
-	view_->fillattr(file_dlg_x + 7, file_dlg_y + 2, 16);
-	const unsigned a1 = view_->input4(file_dlg_x + 8, file_dlg_y + 3, addr);
+	view_.fillattr(file_dlg_x + 7, file_dlg_y + 2, 16);
+	const unsigned a1 = view_.input4(file_dlg_x + 8, file_dlg_y + 3, addr);
 	if (a1 == UINT_MAX)
 		return 0;
 	addr = a1;
-	view_->fillattr(file_dlg_x + 8, file_dlg_y + 3, 4);
+	view_.fillattr(file_dlg_x + 8, file_dlg_y + 3, 4);
 	if (mode == FDM_LOAD)
 		return 1;
 	for (;;)
 	{
-		const unsigned e1 = view_->input4(file_dlg_x + 18, file_dlg_y + 3, end);
+		const unsigned e1 = view_.input4(file_dlg_x + 18, file_dlg_y + 3, end);
 		if (e1 == UINT_MAX)
 			return 0;
 		if (e1 < addr)
@@ -733,11 +732,11 @@ auto DebugCore::read_mem(u8* memdata) const -> void
 
 auto DebugCore::rw_select_drive() -> char
 {
-	view_->tprint(file_dlg_x + 1, file_dlg_y + 2, "drive:", fframe_inside);
+	view_.tprint(file_dlg_x + 1, file_dlg_y + 2, "drive:", fframe_inside);
 	for (;;) {
 		*reinterpret_cast<unsigned*>(str) = 'A' + rw_drive;
-		if (!view_->inputhex(file_dlg_x + 8, file_dlg_y + 2, 1, true)) return 0;
-		view_->fillattr(file_dlg_x + 8, file_dlg_y + 2, 1);
+		if (!view_.inputhex(file_dlg_x + 8, file_dlg_y + 2, 1, true)) return 0;
+		view_.fillattr(file_dlg_x + 8, file_dlg_y + 2, 1);
 		const unsigned disk = *str - 'A';
 		if (disk > 3) continue;
 		if (!comp.wd.fdd[disk].rawdata) continue;
@@ -783,7 +782,7 @@ auto DebugCore::debug(Z80* cpu) const -> void
 			debugscr();
 		}
 
-		view_->flip();
+		view_.flip();
 
 	sleep:
 		while (!dispatch(ActionType::empty))
@@ -1055,7 +1054,7 @@ auto DebugCore::done_bpx() -> void
 
 auto DebugCore::debugscr() const -> void
 {
-	view_->clear_canvas();
+	view_.clear_canvas();
 
 	regs_->render();
 	trace_->show_trace();

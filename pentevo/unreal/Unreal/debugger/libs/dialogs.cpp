@@ -81,7 +81,7 @@ enum
 
 static char str[80];
 
-Dialogs::Dialogs(DebugView& view, MemView& mem): view_(view), mem_(mem)
+Dialogs::Dialogs(MemView& mem): view_(*serviceLocator->Locate<IDebugView>()), mem_(mem)
 {
 	subscrible();
 }
