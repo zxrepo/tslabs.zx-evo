@@ -254,7 +254,7 @@ auto MemView::editrm(unsigned addr) -> u8
 	return ptr ? *ptr : 0;
 }
 
-MemView::MemView() : view_(*serviceLocator->Locate<IDebugView>())
+MemView::MemView() : view_(*service_locator->Locate<IDebugView>())
 {
 	subscrible();
 }

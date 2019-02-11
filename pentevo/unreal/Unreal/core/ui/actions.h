@@ -309,6 +309,7 @@ public:
 	TAction<bool> show_banks{};
 	
 	TAction<> debug_screen{};
+	TAction<> update_config{};
 };
 
 auto get_actions(const std::vector<ActionType>& types)->std::vector<UIKey*>;

@@ -1,13 +1,29 @@
 #include "std.h"
 #include "debugger.h"
 #include "libs/view.h"
+#include "views/devs.h"
 
-IServiceLocator *serviceLocator = new ServiceLocator();
+IServiceLocator *service_locator = new ServiceLocator();
 std::vector<IDebugViewPart*> debug_parts{};
+
+auto init_parts() -> void
+{
+	debug_parts.push_back(new WatchView());
+	debug_parts.push_back(new StackView());
+	debug_parts.push_back(new AyView());
+	debug_parts.push_back(new BanksView());
+	debug_parts.push_back(new PortsView());
+	debug_parts.push_back(new DosView());
+	debug_parts.push_back(new TimeView());
+
+	for(auto& item: debug_parts)
+		item->subscrible();
+}
 
 auto init_debugger() -> void
 {
-	serviceLocator->RegisterService<IDebugView>(new DebugView());
+	service_locator->RegisterService<IDebugView>(new DebugView());
+	init_parts();
 }
 
 /*

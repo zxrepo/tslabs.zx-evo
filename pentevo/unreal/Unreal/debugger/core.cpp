@@ -34,12 +34,13 @@ namespace z80dbg
 
 }
 
-DebugCore::DebugCore(): view_(*serviceLocator->Locate<IDebugView>())
+DebugCore::DebugCore(): view_(*service_locator->Locate<IDebugView>())
 {
 	mem_ = new MemView();
 	dialogs_ = new Dialogs(*mem_);
 	regs_ = new RegView(*mem_);
 
+	/*
 	watch_ = new WatchView();
 	stack_ = new StackView();
 	ay_ = new AyView();
@@ -47,6 +48,8 @@ DebugCore::DebugCore(): view_(*serviceLocator->Locate<IDebugView>())
 	ports_ = new PortsView();
 	dos_ = new DosView();
 	time_ = new TimeView();
+	*/
+
 	trace_ = new TraceView(*mem_);
 	tsconf_ = new TsconfView();
 
@@ -806,8 +809,20 @@ auto DebugCore::debug(Z80* cpu) const -> void
 		if (actions.is_active_dbg(dbgwnd::regs) &&  regs_->dispatch()) continue;
 		if (actions.is_active_dbg(dbgwnd::trace) && trace_->dispatch_trace()) continue;
 		if (actions.is_active_dbg(dbgwnd::mem) && mem_->dispatch()) continue;
-		if (actions.is_active_dbg(dbgwnd::banks) && banks_->dispatch()) continue;
+
+		auto is_dispatched = false;
 		
+		for(auto& item : debug_parts)
+		{
+			if (item->dispatch())
+			{
+				is_dispatched = true;
+				break;
+			}
+		}
+
+		if (is_dispatched) continue;
+
 		if (needclr)
 		{
 			needclr--;
@@ -1059,15 +1074,11 @@ auto DebugCore::debugscr() const -> void
 	regs_->render();
 	trace_->show_trace();
 	mem_->render();
-	watch_->render();
-	stack_->render();
-	ay_->render();
-	banks_->render();
-	ports_->render();
-	dos_->render();
-	tsconf_->render();
 
-	time_->render();
+	for (auto& item : debug_parts)
+		item->render();
+	
+	tsconf_->render();
 }
 
 auto DebugCore::correct_exit() -> void

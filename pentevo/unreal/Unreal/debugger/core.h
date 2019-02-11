@@ -45,13 +45,13 @@ class DebugCore final
 
 	MemView* mem_ = nullptr;
 	RegView* regs_ = nullptr;
-	WatchView* watch_ = nullptr;
-	StackView* stack_ = nullptr;
-	AyView* ay_ = nullptr;
-	BanksView* banks_ = nullptr;
-	PortsView* ports_ = nullptr;
-	DosView* dos_ = nullptr;
-	TimeView* time_ = nullptr;
+	//WatchView* watch_ = nullptr;
+	//StackView* stack_ = nullptr;
+	//AyView* ay_ = nullptr;
+	//BanksView* banks_ = nullptr;
+	//PortsView* ports_ = nullptr;
+	//DosView* dos_ = nullptr;
+	//TimeView* time_ = nullptr;
 	TraceView* trace_ = nullptr;
 	TsconfView* tsconf_ = nullptr;
 

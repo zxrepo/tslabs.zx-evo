@@ -33,21 +33,24 @@ public:
 	virtual auto input2(unsigned x, unsigned y, unsigned val) -> unsigned = 0;
 };
 
+class IDebugViewPart;
+
+extern std::vector<IDebugViewPart*> debug_parts;
+extern IServiceLocator *service_locator;
+
 class IDebugViewPart
 {
 protected:
-	IDebugView &view_;
-	virtual auto subscrible() -> void = 0;
+	IDebugView &view_;	
 public:
-	IDebugViewPart(IDebugView& view): view_(view) {};
+	IDebugViewPart() : view_(*service_locator->Locate<IDebugView>()) { };
 
 	virtual ~IDebugViewPart() = default;
 
-	virtual auto dispatch() const -> char = 0;
 	virtual auto render() const -> void = 0;
-};
 
-extern std::vector<IDebugViewPart*> debug_parts;
-extern IServiceLocator *serviceLocator;
+	virtual auto subscrible() -> void { }
+	virtual auto dispatch() const -> char { return 0; }
+};
 
 auto init_debugger() -> void;

@@ -356,7 +356,7 @@ void DbgCanvas::print_dbg(char* line, int color)
 	last_len_ = strlen(line);
 }
 
-DbgCanvas::DbgCanvas(int base_x, int base_y) : view_(*serviceLocator->Locate<IDebugView>()), base_x_(base_x), base_y_(base_y)
+DbgCanvas::DbgCanvas(int base_x, int base_y) : view_(*service_locator->Locate<IDebugView>()), base_x_(base_x), base_y_(base_y)
 { }
 
 DbgCanvas::~DbgCanvas()

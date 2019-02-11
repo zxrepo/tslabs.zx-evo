@@ -313,7 +313,7 @@ auto TraceView::disasm_line(unsigned addr, char* line) const -> int
 	return len;
 }
 
-TraceView::TraceView(MemView& mem): view_(*serviceLocator->Locate<IDebugView>()), mem_(mem)
+TraceView::TraceView(MemView& mem): view_(*service_locator->Locate<IDebugView>()), mem_(mem)
 {
 }
 

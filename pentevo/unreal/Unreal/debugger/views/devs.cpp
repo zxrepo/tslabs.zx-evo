@@ -44,15 +44,10 @@ void __cdecl BankNames(int i, char *name)
 		strcpy(name, "CACH1");
 }
 
-auto WatchView::subsrible() -> void
+auto WatchView::subscrible() -> void
 {
 	actions.mon_set_watch += [this]() { mon_setwatch(); };
 	actions.mon_screenshot += [this]() { mon_scrshot(); };
-}
-
-WatchView::WatchView(): view_(*serviceLocator->Locate<IDebugView>())
-{
-	subsrible();
 }
 
 auto WatchView::mon_setwatch() -> void
@@ -75,7 +70,7 @@ auto WatchView::mon_scrshot() -> void
 		show_scrshot_ = 0;
 }
 
-auto WatchView::render() -> void
+auto WatchView::render() const -> void
 {
 	if (show_scrshot_)
 	{
@@ -109,10 +104,6 @@ auto WatchView::render() -> void
 	view_.add_frame(wat_x, wat_y, 37, wat_sz, FRAME);
 }
 
-StackView::StackView() : view_(*serviceLocator->Locate<IDebugView>())
-{
-}
-
 auto StackView::render() const -> void
 {
 	Z80 &cpu = TCpuMgr::get_cpu();
@@ -134,11 +125,6 @@ auto StackView::render() const -> void
 auto AyView::subscrible() -> void
 {
 	actions.mon_switch_ay += []() { mon_switchay(); };
-}
-
-AyView::AyView() : view_(*serviceLocator->Locate<IDebugView>())
-{
-	subscrible();
 }
 
 auto AyView::mon_switchay() -> void
@@ -167,30 +153,27 @@ auto BanksView::subscrible() -> void
 {
 	actions.banks_up += [this]()
 	{
-		selbank--;
-		selbank &= 3;
+		selbank_--;
+		selbank_ &= 3;
 	};
 
 	actions.banks_down += [this]()
 	{
-		selbank++;
-		selbank &= 3;
+		selbank_++;
+		selbank_ &= 3;
 	};
 
 	actions.banks_edit += [this]() { benter(); };
 	actions.mon_set_bank += [this]() { editbank(); };
-	actions.show_banks += [this](auto show) { showbank = show; };
-	actions.set_banks += [this](auto bank) { selbank = bank; };
-}
-
-BanksView::BanksView() : view_(*serviceLocator->Locate<IDebugView>())
-{
-	subscrible();
+	actions.show_banks += [this](auto show) { showbank_ = show; };
+	actions.set_banks += [this](auto bank) { selbank_ = bank; };
 }
 
 auto BanksView::dispatch() const -> char
 {
-	if ((conf.mem_model == MM_TSL) && (selbank != UINT_MAX) &&
+	if (!actions.is_active_dbg(dbgwnd::banks)) return 0;
+
+	if ((conf.mem_model == MM_TSL) && (selbank_ != UINT_MAX) &&
 		((input.lastkey >= '0' && input.lastkey <= '9') || (input.lastkey >= 'A' && input.lastkey <= 'F')))
 	{
 		benter();
@@ -205,17 +188,17 @@ auto BanksView::benter() const -> void
 	actions.debug_screen();
 	view_.flip();
 
-	char bankstr[64] = { 0 }; cpu.BankNames(selbank, bankstr);
+	char bankstr[64] = { 0 }; cpu.BankNames(selbank_, bankstr);
 	unsigned val;
 	sscanf(&bankstr[3], "%x", &val);
 
 	if ((input.lastkey >= '0' && input.lastkey <= '9') || (input.lastkey >= 'A' && input.lastkey <= 'F'))
 		PostThreadMessage(GetCurrentThreadId(), WM_KEYDOWN, input.lastkey, 1);
 
-	val = view_.input2(banks_x + 5, banks_y + selbank + 1, val);
+	val = view_.input2(banks_x + 5, banks_y + selbank_ + 1, val);
 	if (val != UINT_MAX) {
 		// set new bank
-		comp.ts.page[selbank] = val;
+		comp.ts.page[selbank_] = val;
 		set_banks();
 	}
 }
@@ -236,11 +219,11 @@ auto BanksView::render() const -> void
 	for (unsigned i = 0; i < 4; i++)
 	{
 		char ln[64]; sprintf(ln, "%d:", i);
-		char attr = ((selbank == i) && (showbank) ? (w_otheroff & 0xF) | w_curs : w_otheroff | (actions.is_active_dbg(dbgwnd::banks) ? 0x10 : 0));
+		char attr = ((selbank_ == i) && (showbank_) ? (w_otheroff & 0xF) | w_curs : w_otheroff | (actions.is_active_dbg(dbgwnd::banks) ? 0x10 : 0));
 		view_.tprint(banks_x, banks_y + i + 1, ln, attr);
 		strcpy(ln, "?????");
 		cpu.BankNames(i, ln);
-		attr = ((selbank == i) && (showbank) ? w_curs : ((bankr[i] != bankw[i] ? w_bankro : w_bank) | (actions.is_active_dbg(dbgwnd::banks) ? 0x10 : 0)));
+		attr = ((selbank_ == i) && (showbank_) ? w_curs : ((bankr[i] != bankw[i] ? w_bankro : w_bank) | (actions.is_active_dbg(dbgwnd::banks) ? 0x10 : 0)));
 		view_.tprint(banks_x + 2, banks_y + i + 1, ln, attr);
 	}
 	view_.add_frame(banks_x, banks_y + 1, 7, 4, FRAME);
@@ -251,22 +234,52 @@ auto PortsView::subscrible() -> void
 {
 	actions.mon_set_himem += [this]() { editextbank(); };
 	actions.mon_exit += []() {};
-}
-
-PortsView::PortsView() : view_(*serviceLocator->Locate<IDebugView>())
-{
+	actions.update_config +=[this]()
+	{
+		switch (conf.mem_model)
+		{
+		case MM_KAY:
+		case MM_SCORP:
+		case MM_PROFSCORP:
+		case MM_GMX:
+		case MM_PLUS3:
+		case MM_PHOENIX:
+			dbg_extport_ = 0x1FFD;
+			dgb_extval_ = &comp.p1FFD;
+			break;
+		case MM_PROFI:
+			dbg_extport_ = 0xDFFD;
+			dgb_extval_ = &comp.pDFFD;
+			break;
+		case MM_ATM450:
+			dbg_extport_ = 0xFDFD;
+			dgb_extval_ = &comp.pFDFD;
+			break;
+		case MM_ATM710:
+		case MM_ATM3:
+			dbg_extport_ = (comp.aFF77 & 0xFFFF);
+			dgb_extval_ = &comp.pFF77;
+			break;
+		case MM_QUORUM:
+			dbg_extport_ = 0x0000;
+			dgb_extval_ = &comp.p00;
+			break;
+		default:
+			dbg_extport_ = 0xffff;
+		}
+	};
 }
 
 auto PortsView::editextbank() const -> void
 {
-	if (dbg_extport == UINT_MAX)
+	if (dbg_extport_ == 0xffff)
 		return;
-	const auto x = view_.input2(ports_x + 5, ports_y + 2, dgb_extval);
+	const auto x = view_.input2(ports_x + 5, ports_y + 2, *dgb_extval_);
 	if (x != UINT_MAX)
-		out(dbg_extport, u8(x));
+		out(dbg_extport_, u8(x));
 }
 
-auto PortsView::render() -> void
+auto PortsView::render() const -> void
 {
 	char ln[64];
 	sprintf(ln, "  FE:%02X", comp.pFE);
@@ -276,38 +289,8 @@ auto PortsView::render() -> void
 		!((conf.mem_model == MM_PENTAGON && conf.ramsize == 1024) ||
 		(conf.mem_model == MM_PROFI && (comp.pDFFD & 0x10))) ? w_48_k : w_other);
 
-	switch (conf.mem_model)
-	{
-	case MM_KAY:
-	case MM_SCORP:
-	case MM_PROFSCORP:
-	case MM_GMX:
-	case MM_PLUS3:
-	case MM_PHOENIX:
-		dbg_extport = 0x1FFD;
-		dgb_extval = comp.p1FFD;
-		break;
-	case MM_PROFI:
-		dbg_extport = 0xDFFD;
-		dgb_extval = comp.pDFFD;
-		break;
-	case MM_ATM450:
-		dbg_extport = 0xFDFD;
-		dgb_extval = comp.pFDFD;
-		break;
-	case MM_ATM710:
-	case MM_ATM3:
-		dbg_extport = (comp.aFF77 & 0xFFFF);
-		dgb_extval = comp.pFF77;
-		break;
-	case MM_QUORUM:
-		dbg_extport = 0x0000; dgb_extval = comp.p00;
-		break;
-	default:
-		dbg_extport = -1;
-	}
-	if (dbg_extport != UINT_MAX)
-		sprintf(ln, "%04X:%02X", dbg_extport, dgb_extval);
+	if (dbg_extport_ != 0xffff)
+		sprintf(ln, "%04X:%02X", dbg_extport_, *dgb_extval_);
 	else
 		sprintf(ln, "cmos:%02X", comp.cmos_addr);
 	view_.tprint(ports_x, ports_y + 2, ln, w_other);
@@ -316,10 +299,6 @@ auto PortsView::render() -> void
 	view_.tprint(ports_x, ports_y + 3, ln, w_other);
 	view_.add_frame(ports_x, ports_y, 7, 4, FRAME);
 	view_.tprint(ports_x, ports_y - 1, "ports", w_title);
-}
-
-DosView::DosView() : view_(*serviceLocator->Locate<IDebugView>())
-{
 }
 
 auto DosView::render() const -> void
@@ -349,10 +328,6 @@ auto DosView::render() const -> void
 	sprintf(ln, "%X-%X %d", comp.wd.state, comp.wd.state2, comp.wd.seldrive->track);
 	tprint(dos_x, dos_y - 1, ln, atr);
 #endif
-}
-
-TimeView::TimeView() : view_(*serviceLocator->Locate<IDebugView>())
-{
 }
 
 auto TimeView::render() const -> void

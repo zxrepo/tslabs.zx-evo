@@ -3,93 +3,64 @@
 
 void __cdecl BankNames(int i, char *name);
 
-class WatchView final
+class WatchView final: public IDebugViewPart
 {
-	IDebugView& view_;
 	unsigned show_scrshot_{};
 	unsigned user_watches_[3] = { 0x4000, 0x8000, 0xC000 };
 
-	auto subsrible() -> void;
 public:
-	WatchView();
-
 	auto mon_setwatch() -> void;
 	auto mon_scrshot() -> void;
-	auto render() -> void;
+
+	auto subscrible() -> void override;
+	auto render() const -> void override;
 };
 
-class StackView final
+struct StackView final: IDebugViewPart
 {
-	IDebugView& view_;
-
-public:
-	StackView();
-
-	auto render() const -> void;
+	auto render() const -> void override;
 };
 
-class AyView final
+struct AyView final: IDebugViewPart
 {
-	IDebugView& view_;
-
-	static auto subscrible() -> void;
-public:
-	AyView();
-
 	static auto mon_switchay() -> void;
-	auto render() const -> void;
+
+	auto subscrible() -> void override;
+	auto render() const -> void override;
 };
 
-class BanksView final
+class BanksView final: public IDebugViewPart
 {
-	unsigned selbank = 0;
-	bool showbank = false;
+	unsigned selbank_ = 0;
+	bool showbank_ = false;
 
-	IDebugView& view_;
-
-	auto subscrible() -> void;
 	auto benter() const -> void;
 public:
-	
-	BanksView();
 
 	auto editbank() const -> void;
 
-	auto dispatch() const -> char;
-	auto render() const -> void;
+	auto subscrible() -> void override;
+	auto dispatch() const -> char override;
+	auto render() const -> void override;
 };
 
-class PortsView final
+class PortsView final: public IDebugViewPart
 {
-	IDebugView& view_;
-
-	unsigned dbg_extport{};
-	u8 dgb_extval{}; // extended memory port like 1FFD or DFFD
-
-	auto subscrible() -> void;
+	u16 dbg_extport_{};
+	u8* dgb_extval_{}; // extended memory port like 1FFD or DFFD
 public:
-	PortsView();
-
 	auto editextbank() const -> void;
-	auto render() -> void;
+
+	auto subscrible() -> void override;
+	auto render() const -> void override;
 };
 
-class DosView final
+struct DosView final: IDebugViewPart
 {
-	IDebugView& view_;
-
-public:
-	DosView();
-
-	auto render() const -> void;
+	auto render() const -> void override;
 };
 
-class TimeView final
+struct TimeView final: IDebugViewPart
 {
-	IDebugView& view_;
-
-public:
-	TimeView();
-
-	auto render() const -> void;
+	auto render() const -> void override;
 };

@@ -1535,6 +1535,7 @@ void setup_dlg()
                temp.scale = 1;
            conf = c1;
            frametime = conf.frame; //Alone Coder 0.36.5
+		   actions.update_config();
    };
 
    eat();

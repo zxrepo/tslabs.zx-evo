@@ -829,6 +829,8 @@ void load_config(const char *fname)
    loadkeys(ActionType::banks);
 
    temp.scale = GetPrivateProfileInt(video, "winscale", 1, ininame);
+
+   actions.update_config();
 }
 
 void autoload()
