@@ -8,6 +8,7 @@
 #include "z80.h"
 #include "util.h"
 #include "sndcounter.h"
+#include "core/unreal_config.h"
 #include "sound/ayx32.h"
 
 namespace z80fast
@@ -213,6 +214,8 @@ u8 dbgbreak = 0;
 
 
 CONFIG conf;
+unreal_config new_conf;
+ 
 COMPUTER comp;
 TEMP temp;
 ATA_PORT hdd;   // not in `comp' - not cleared in reset()

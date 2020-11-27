@@ -364,6 +364,8 @@
     <ClCompile Include="debugger\debug.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
+    <ClCompile Include="core\unreal_config.cpp" />
+    <ClCompile Include="portable\pystring.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="atm.h">
@@ -678,6 +680,9 @@
     <ClInclude Include="debugger\debug.h">
       <Filter>debugger</Filter>
     </ClInclude>
+    <ClInclude Include="portable\iniparser.h" />
+    <ClInclude Include="core\unreal_config.h" />
+    <ClInclude Include="portable\pystring.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

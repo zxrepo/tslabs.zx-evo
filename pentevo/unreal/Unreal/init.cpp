@@ -65,7 +65,7 @@ void cpu_info()
 #endif
 }
 
-void init_all(int argc, char **argv)
+void init_all(int argc, char **argv, char* appname)
 {
    cpu_info();
 
@@ -90,6 +90,7 @@ void init_all(int argc, char **argv)
    init_z80tables();
    init_ie_help();
    load_config(config);
+   new_conf.load(config, appname);
    //make_samples();
    #ifdef MOD_GS
    init_gs();

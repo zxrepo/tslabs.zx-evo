@@ -40,6 +40,7 @@
     <ClCompile Include="atm.cpp" />
     <ClCompile Include="cheat.cpp" />
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="core\unreal_config.cpp" />
     <ClCompile Include="daa_tabs.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -133,6 +134,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="portable\pystring.cpp" />
     <ClCompile Include="saa1099.cpp" />
     <ClCompile Include="savesnd.cpp" />
     <ClCompile Include="savevid.cpp" />
@@ -186,6 +188,7 @@
     <ClInclude Include="bass.h" />
     <ClInclude Include="cheat.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="core\unreal_config.h" />
     <ClInclude Include="daa_tabs.h" />
     <ClInclude Include="debugger\dbgbpx.h" />
     <ClInclude Include="debugger\dbgcmd.h" />
@@ -253,6 +256,8 @@
     <ClInclude Include="op_fd.h" />
     <ClInclude Include="op_noprefix.h" />
     <ClInclude Include="op_system.h" />
+    <ClInclude Include="portable\iniparser.h" />
+    <ClInclude Include="portable\pystring.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="saa1099.h" />
     <ClInclude Include="savesnd.h" />
@@ -384,6 +389,7 @@
       <ErrorReporting>Prompt</ErrorReporting>
       <PrecompiledHeaderFile>std.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>wtl</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -423,6 +429,7 @@ copy /y "$(ProjectDir)cfg\rom\*.*" "$(TargetDir)rom"
       <ErrorReporting>Prompt</ErrorReporting>
       <PrecompiledHeaderFile>std.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>wtl</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -468,6 +475,7 @@ copy /y "$(ProjectDir)cfg\rom\*.*" "$(TargetDir)rom"
       <StringPooling>true</StringPooling>
       <AdditionalIncludeDirectories>wtl</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -522,6 +530,7 @@ if exist "$(TargetDir)..\unreal.7z" del /q "$(TargetDir)..\unreal.7z"
       <StringPooling>true</StringPooling>
       <AdditionalIncludeDirectories>wtl</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>

@@ -1,6 +1,7 @@
 #pragma once
 #include "emul.h"
 #include "sndchip.h"
+#include "core/unreal_config.h"
 #include "sound/ayx32.h"
 #include "debugger/debug.h"
 
@@ -110,6 +111,8 @@ public:
 extern PALETTE_OPTIONS pals[32];
 
 extern CONFIG conf;
+extern unreal_config new_conf;
+
 extern COMPUTER comp;
 extern u8 memory[];
 

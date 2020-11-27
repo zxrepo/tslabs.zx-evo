@@ -1,4 +1,5 @@
 #pragma once
+#include "emul.h"
 #include "config.h"
 
 extern char load_errors;

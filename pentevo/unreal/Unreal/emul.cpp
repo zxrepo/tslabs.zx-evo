@@ -127,7 +127,7 @@ int main(int argc, char **argv)
    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
    rand_ram();
    load_spec_colors();
-   init_all(argc-1, argv+1);
+   init_all(argc-1, argv+1, *argv);
 //   applyconfig();
    sound_play();
    color();

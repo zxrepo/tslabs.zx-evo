@@ -1,5 +1,6 @@
 #pragma once
 #include "sysdefs.h"
+#include "emul.h"
 #include "ddraw.h"
 #include "dinput.h"
 
