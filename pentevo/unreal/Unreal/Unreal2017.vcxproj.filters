@@ -683,6 +683,7 @@
     <ClInclude Include="portable\iniparser.h" />
     <ClInclude Include="core\unreal_config.h" />
     <ClInclude Include="portable\pystring.h" />
+    <ClInclude Include="core\basic.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Unreal.rc">

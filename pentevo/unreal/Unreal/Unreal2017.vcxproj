@@ -188,6 +188,7 @@
     <ClInclude Include="bass.h" />
     <ClInclude Include="cheat.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="core\basic.h" />
     <ClInclude Include="core\unreal_config.h" />
     <ClInclude Include="daa_tabs.h" />
     <ClInclude Include="debugger\dbgbpx.h" />
